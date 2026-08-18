@@ -16,7 +16,9 @@ on; where they disagree, the choice below is the one to follow going forward.
 | `SECURITY.md` | when there is an attack surface | how to report a vulnerability, privately |
 | `docs/` | beyond a few screens | see below |
 
-Nothing else at the root that a reader has to skip past.
+Nothing else at the root that a reader has to skip past. The *directories* that
+belong there, and how crates are arranged inside them, are in
+[repository-layout.md](repository-layout.md).
 
 ## The README
 

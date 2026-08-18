@@ -18,6 +18,11 @@ A `colony.json` to copy is in [`manifests/examples/`](../manifests/examples/) �
 start from `minimal.json` unless your release assets cannot follow the naming
 convention.
 
+The directory tree these files land in — `crates/<prefix>-<role>/`, `assets/`,
+`packaging/`, `scripts/` — is in
+[design/repository-layout.md](../design/repository-layout.md). Lay the repository
+out first, then copy these in.
+
 ## Notes
 
 **`release-type`.** The template uses `"rust"`, which lets release-please bump

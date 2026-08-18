@@ -46,7 +46,7 @@ Colony shipped before the import; see [Guarantees](#guarantees).
 | `generated/i18n/labels.{fr,en}.json` | display strings, both locales |
 | `generated/palette.schema.json` | JSON Schema validating `tokens/families/*.toml` |
 | `generated/colony.schema.json` | JSON Schema validating a program's `colony.json` |
-| `design/*.md` | the conventions — navigation, settings, theming, type, i18n, releases, dependencies, docs |
+| `design/*.md` | the conventions — layout, navigation, settings, theming, type, i18n, releases, dependencies, docs |
 | `manifests/examples/*.json` | working `colony.json` files for each shape |
 | `templates/` | release workflow, release-please config, signing script |
 | `tools/colony-tokens/` | the generator and its tests |
@@ -158,8 +158,13 @@ Copy the workflow and configs from [`templates/`](templates/), a manifest from
 [`manifests/examples/`](manifests/examples/), and follow the checklist at the end
 of `design/releases.md`.
 
-Two rules apply to every repository in the organisation, program or not:
+Three rules apply to every repository in the organisation, program or not:
 
+- **[design/repository-layout.md](design/repository-layout.md) — crates and
+  directories are arranged the same way everywhere.** `crates/<prefix>-<role>/`
+  with role names that already mean something across the ecosystem, one version
+  for the whole workspace, a mandatory one-line `description` per crate, and a
+  `src/` where a directory earns its existence by holding more than one file.
 - **[design/dependencies.md](design/dependencies.md) — everything is on its
   latest release, always.** At creation, at every change, and on the weekly
   automated pass. Versions are pinned in full in the manifest so staleness shows
@@ -168,6 +173,10 @@ Two rules apply to every repository in the organisation, program or not:
   are laid out the same way everywhere.** `docs/` is sorted by *who is reading*
   — `guide/`, `internals/`, `project/` — behind a `docs/README.md` index, and
   the README answers what/why/how-to-get-it in that order.
+
+These three are what make an unfamiliar repository cheap to work in: most of the
+cost of changing code you did not write is finding what to change, and a layout
+you can predict removes that cost outright.
 
 `templates/program/` holds a README and a `docs/README.md` skeleton to start
 from.
