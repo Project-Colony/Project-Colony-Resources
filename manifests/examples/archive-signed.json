@@ -1,0 +1,15 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Project-Colony/Project-Colony-Resources/main/generated/colony.schema.json",
+  "name": "Example Packaged App",
+  "category": "development",
+  "signed": true,
+  "platforms": ["linux"],
+  "releaseFiles": {
+    "linux": {
+      "tag": "latest",
+      "filePattern": "example-app-*-linux-x86_64.tar.gz",
+      "binary": "example-app",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  }
+}

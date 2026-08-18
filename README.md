@@ -45,7 +45,10 @@ Colony shipped before the import; see [Guarantees](#guarantees).
 | `generated/css/colony-*.css` | one stylesheet per theme, plus a bundle |
 | `generated/i18n/labels.{fr,en}.json` | display strings, both locales |
 | `generated/palette.schema.json` | JSON Schema validating `tokens/families/*.toml` |
-| `design/*.md` | the UI conventions — navigation, settings, theming, type, i18n |
+| `generated/colony.schema.json` | JSON Schema validating a program's `colony.json` |
+| `design/*.md` | the conventions — navigation, settings, theming, type, i18n, releases |
+| `manifests/examples/*.json` | working `colony.json` files for each shape |
+| `templates/` | release workflow, release-please config, signing script |
 | `tools/colony-tokens/` | the generator and its tests |
 
 ## Consuming this repo
@@ -133,8 +136,43 @@ its own rules. Read [design/theming.md](design/theming.md) first.
 - **`generated/` matches `tokens/`.** The same check CI runs, so a forgotten
   `generate` fails locally first.
 
+## Shipping a program on Colony
+
+Publishing a program the launcher can list and install is a separate contract
+from the design tokens, and it is written down in
+[design/releases.md](design/releases.md): conventional commits feed release-please,
+release-please tags, the tag builds four platform assets whose **names** are what
+Colony auto-detects, and `colony.json` describes the rest.
+
+The short version, for a program whose assets follow the naming convention:
+
+```json
+{
+  "$schema": "https://raw.githubusercontent.com/Project-Colony/Project-Colony-Resources/main/generated/colony.schema.json",
+  "name": "Eidos",
+  "category": "system"
+}
+```
+
+Copy the workflow and configs from [`templates/`](templates/), a manifest from
+[`manifests/examples/`](manifests/examples/), and follow the checklist at the end
+of `design/releases.md`.
+
 ## Status
 
-Phase 1 — foundations. Tokens, generators and conventions are in place; no
-consumer has been rewired yet. Colony, SphereCord and the rest still ship their
-own copies until phase 2 lands `crates/colony-ui` and migrates them one by one.
+Phase 1 — foundations. Tokens, generators, conventions and the release contract
+are in place; no consumer has been rewired yet. Colony, SphereCord and the rest
+still ship their own copies until phase 2 lands `crates/colony-ui` and migrates
+them one by one.
+
+## Licence
+
+GPL-3.0-or-later, matching the rest of the Project Colony organisation. See
+[LICENSE](LICENSE).
+
+A consequence worth stating plainly: a program that links `colony-ui` will have
+to be GPL-3.0-or-later too. If that ever becomes the wrong trade for the shared
+*values* — the palettes and conventions in `tokens/`, `generated/` and `design/`,
+which are data rather than logic — relicensing those directories more permissively
+while keeping `tools/` and `crates/` copyleft is the change to make, and it is
+easier to make before there are outside contributors than after.

@@ -1,0 +1,129 @@
+# Colony Rust program — release workflow
+#
+# Copy to your repo as .github/workflows/release.yml and replace {{APP_NAME}}
+# with your binary name (lowercase, as it appears in Cargo.toml).
+#
+# Assets follow the Colony naming convention, so Colony auto-detects which
+# platforms you ship and your colony.json only needs a name and a category:
+#
+#   {{APP_NAME}}-linux  {{APP_NAME}}-windows.exe
+#   {{APP_NAME}}-macos  {{APP_NAME}}-macos-x86
+#
+# See design/releases.md in Project-Colony-Resources for the full contract.
+
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # Assembles a release PR from the conventional commits since the last release.
+  # Merging that PR is what creates the tag; everything below runs only then.
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          release-type: rust
+
+  build:
+    name: build ${{ matrix.asset }}
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            asset: "{{APP_NAME}}-linux"
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            asset: "{{APP_NAME}}-windows.exe"
+          # "macos" is Apple Silicon, "macos-x86" is Intel. Colony picks between
+          # them at runtime; shipping only one is a choice, not a bug.
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            asset: "{{APP_NAME}}-macos"
+          - target: x86_64-apple-darwin
+            os: macos-latest
+            asset: "{{APP_NAME}}-macos-x86"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+
+      # Uncomment if the program needs GTK/X11 at build time on Linux:
+      # - name: Install Linux dependencies
+      #   if: runner.os == 'Linux'
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install -y libgtk-3-dev libxdo-dev libdbus-1-dev
+
+      - name: Build
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Name the artifact (Unix)
+        if: runner.os != 'Windows'
+        run: cp target/${{ matrix.target }}/release/{{APP_NAME}} ${{ matrix.asset }}
+
+      - name: Name the artifact (Windows)
+        if: runner.os == 'Windows'
+        run: copy target\${{ matrix.target }}\release\{{APP_NAME}}.exe ${{ matrix.asset }}
+
+      # Signing is opt-in. Delete this step and the next unless colony.json sets
+      # "signed": true — a program that advertises signatures but ships none
+      # fails closed and cannot be installed at all.
+      #
+      # Requires the COLONY_SIGNING_KEY repository secret (the ed25519 private
+      # key, PEM). The key never lives in the repository.
+      - name: Sign the artifact
+        if: runner.os == 'Linux' || runner.os == 'macOS'
+        env:
+          SIGNING_KEY: ${{ secrets.COLONY_SIGNING_KEY }}
+        run: |
+          if [ -z "$SIGNING_KEY" ]; then
+            echo "::error::COLONY_SIGNING_KEY is not set but signing is enabled"
+            exit 1
+          fi
+          keyfile="$(mktemp)"
+          trap 'rm -f "$keyfile"' EXIT
+          printf '%s' "$SIGNING_KEY" > "$keyfile"
+          COLONY_SIGNING_KEY="$keyfile" \
+          COLONY_RELEASE_VERSION="${{ needs.release-please.outputs.tag_name }}" \
+            ./scripts/sign-release.sh "${{ matrix.asset }}"
+
+      - name: Upload to the GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.release-please.outputs.tag_name }}
+          files: |
+            ${{ matrix.asset }}
+            ${{ matrix.asset }}.sig
+            ${{ matrix.asset }}.meta
+            ${{ matrix.asset }}.meta.sig
+          fail_on_unmatched_files: false

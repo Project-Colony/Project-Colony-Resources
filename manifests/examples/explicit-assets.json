@@ -1,0 +1,28 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Project-Colony/Project-Colony-Resources/main/generated/colony.schema.json",
+  "name": "SAM - Colony Edition",
+  "category": "game",
+  "platforms": ["windows", "linux", "macos", "macos-x86"],
+  "releaseFiles": {
+    "windows": {
+      "tag": "latest",
+      "file": "sam-colony-edition-windows.exe",
+      "binary": "sam-colony-edition-windows.exe"
+    },
+    "linux": {
+      "tag": "latest",
+      "file": "sam-colony-edition-linux",
+      "binary": "sam-colony-edition-linux"
+    },
+    "macos": {
+      "tag": "latest",
+      "file": "sam-colony-edition-macos",
+      "binary": "sam-colony-edition-macos"
+    },
+    "macos-x86": {
+      "tag": "latest",
+      "file": "sam-colony-edition-macos-x86",
+      "binary": "sam-colony-edition-macos-x86"
+    }
+  }
+}

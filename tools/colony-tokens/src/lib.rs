@@ -7,6 +7,7 @@
 
 pub mod color;
 pub mod emit;
+pub mod manifest;
 pub mod model;
 
 use std::collections::BTreeSet;
@@ -56,6 +57,10 @@ pub fn plan(tokens: &Tokens) -> Result<Vec<Artifact>> {
     out.push(Artifact {
         path: PathBuf::from("generated/palette.schema.json"),
         contents: to_json(&emit::schema::render()),
+    });
+    out.push(Artifact {
+        path: PathBuf::from("generated/colony.schema.json"),
+        contents: to_json(&emit::manifest_schema::render()),
     });
 
     let locales = emit::i18n::render(tokens)?;
