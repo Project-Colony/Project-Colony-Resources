@@ -1,0 +1,223 @@
+# Ayu — Project Colony theme family
+#
+# Source of truth. Edit here, then run `cargo run -p colony-tokens -- generate`.
+# Never edit anything under generated/ by hand.
+
+key = "ayu"
+order = 12
+label_key = "settings_theme_ayu"
+icon = "f06c0"  # Nerd Font codepoint
+
+[label]
+fr = "Ayu"
+en = "Ayu"
+
+[[variants]]
+key = "dark"
+const = "AYU_DARK"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_dark_mode"
+mode = "dark"
+
+[variants.label]
+fr = "Mode sombre"
+en = "Dark mode"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#0b0e14"
+accent = "#e6b450"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#0b0e14"
+bg_sidebar = "#070a10"
+bg_card = "#1b2028"
+bg_card_hover = "#252b35"
+bg_card_pressed = "#303842"
+bg_selected = "#1b3a4b"
+bg_input = "#1b2028"
+bg_progress = "#070a10"
+
+# text
+text_primary = "#bfbdb6"
+text_secondary = "#a8a6a0"
+text_muted = "#8a8880"
+text_dim = "#7a786e"
+text_dimmer = "#626a73"
+text_dimmest = "#4a505a"
+text_placeholder = "#626a73"
+
+# accent
+accent_blue = "#e6b450"
+accent_icon = "#59c2ff"
+accent_progress = "#e6b450"
+
+# buttons
+btn_default = "#1b2028"
+btn_hover = "#252b35"
+btn_pressed = "#303842"
+
+# success
+success = "#aad94c"
+success_bg = "#0c1a10"
+btn_success = "#88b040"
+btn_success_hover = "#7ca436"
+btn_success_pressed = "#70982c"
+
+# warning
+warning = "#ffb454"
+warning_bg = "#1a1808"
+
+# error
+error = "#d95757"
+error_light = "#e87070"
+error_bg = "#1a0c0c"
+btn_danger_bg = "#1a0c0c"
+btn_danger_hover = "#2a1c1c"
+btn_trash_hover = "#d95757"
+btn_trash_pressed = "#b94848"
+
+# modal
+bg_modal_section = "#0b0e14"
+border_subtle = "#1b2028"
+divider = "#1b2028"
+
+[[variants]]
+key = "mirage"
+const = "AYU_MIRAGE"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_ayu_mirage"
+mode = "dark"
+
+[variants.label]
+fr = "Mirage"
+en = "Mirage"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#1f2430"
+accent = "#ffcc66"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#1f2430"
+bg_sidebar = "#1a1f2b"
+bg_card = "#2a303e"
+bg_card_hover = "#33415e"
+bg_card_pressed = "#3d4a68"
+bg_selected = "#33415e"
+bg_input = "#2a303e"
+bg_progress = "#1a1f2b"
+
+# text
+text_primary = "#cccac2"
+text_secondary = "#b4b2aa"
+text_muted = "#9a988e"
+text_dim = "#858380"
+text_dimmer = "#707a8c"
+text_dimmest = "#555d6e"
+text_placeholder = "#707a8c"
+
+# accent
+accent_blue = "#ffcc66"
+accent_icon = "#73d0ff"
+accent_progress = "#ffcc66"
+
+# buttons
+btn_default = "#2a303e"
+btn_hover = "#33415e"
+btn_pressed = "#3d4a68"
+
+# success
+success = "#bae67e"
+success_bg = "#1a2a1e"
+btn_success = "#98c066"
+btn_success_hover = "#8cb45a"
+btn_success_pressed = "#80a84e"
+
+# warning
+warning = "#ffd580"
+warning_bg = "#2a2818"
+
+# error
+error = "#f28779"
+error_light = "#ff9e90"
+error_bg = "#2a1e1e"
+btn_danger_bg = "#2a1e1e"
+btn_danger_hover = "#4a2e2e"
+btn_trash_hover = "#f28779"
+btn_trash_pressed = "#d27060"
+
+# modal
+bg_modal_section = "#1f2430"
+border_subtle = "#2a303e"
+divider = "#2a303e"
+
+[[variants]]
+key = "light"
+const = "AYU_LIGHT"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_light"
+mode = "light"
+
+[variants.label]
+fr = "Mode clair"
+en = "Light mode"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#fafafa"
+accent = "#ff9940"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#fafafa"
+bg_sidebar = "#f0eee4"
+bg_card = "#e8e6dc"
+bg_card_hover = "#dcd8cc"
+bg_card_pressed = "#d0ccc0"
+bg_selected = "#d1e4f4"
+bg_input = "#e8e6dc"
+bg_progress = "#f0eee4"
+
+# text
+text_primary = "#575f66"
+text_secondary = "#6b737a"
+text_muted = "#848c94"
+text_dim = "#9ca4ac"
+text_dimmer = "#abb0b6"
+text_dimmest = "#c0c4c8"
+text_placeholder = "#abb0b6"
+
+# accent
+accent_blue = "#ff9940"
+accent_icon = "#36a3d9"
+accent_progress = "#ff9940"
+
+# buttons
+btn_default = "#e8e6dc"
+btn_hover = "#dcd8cc"
+btn_pressed = "#d0ccc0"
+
+# success
+success = "#86b300"
+success_bg = "#d8e8c8"
+btn_success = "#86b300"
+btn_success_hover = "#78a400"
+btn_success_pressed = "#6a9600"
+
+# warning
+warning = "#f29718"
+warning_bg = "#ede0c0"
+
+# error
+error = "#f51818"
+error_light = "#f04040"
+error_bg = "#eec8c8"
+btn_danger_bg = "#eec8c8"
+btn_danger_hover = "#deb0b0"
+btn_trash_hover = "#f51818"
+btn_trash_pressed = "#d50e0e"
+
+# modal
+bg_modal_section = "#fafafa"
+border_subtle = "#dcd8cc"
+divider = "#dcd8cc"

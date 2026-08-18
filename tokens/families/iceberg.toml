@@ -1,0 +1,153 @@
+# Iceberg — Project Colony theme family
+#
+# Source of truth. Edit here, then run `cargo run -p colony-tokens -- generate`.
+# Never edit anything under generated/ by hand.
+
+key = "iceberg"
+order = 20
+label_key = "settings_theme_iceberg"
+icon = "f2dc"  # Nerd Font codepoint
+
+[label]
+fr = "Iceberg"
+en = "Iceberg"
+
+[[variants]]
+key = "dark"
+const = "ICEBERG_DARK"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_dark_mode"
+mode = "dark"
+
+[variants.label]
+fr = "Mode sombre"
+en = "Dark mode"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#161821"
+accent = "#84a0c6"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#161821"
+bg_sidebar = "#0f1117"
+bg_card = "#1e2132"
+bg_card_hover = "#2e313f"
+bg_card_pressed = "#3d425b"
+bg_selected = "#2e313f"
+bg_input = "#1e2132"
+bg_progress = "#0f1117"
+
+# text
+text_primary = "#c6c8d1"
+text_secondary = "#b0b4c0"
+text_muted = "#9498a8"
+text_dim = "#818596"
+text_dimmer = "#6b7089"
+text_dimmest = "#4e5268"
+text_placeholder = "#6b7089"
+
+# accent
+accent_blue = "#84a0c6"
+accent_icon = "#89b8c2"
+accent_progress = "#84a0c6"
+
+# buttons
+btn_default = "#1e2132"
+btn_hover = "#2e313f"
+btn_pressed = "#3d425b"
+
+# success
+success = "#b4be82"
+success_bg = "#141e18"
+btn_success = "#949e68"
+btn_success_hover = "#88925c"
+btn_success_pressed = "#7c8650"
+
+# warning
+warning = "#e2a478"
+warning_bg = "#201c14"
+
+# error
+error = "#e27878"
+error_light = "#f09090"
+error_bg = "#201418"
+btn_danger_bg = "#201418"
+btn_danger_hover = "#402428"
+btn_trash_hover = "#e27878"
+btn_trash_pressed = "#c26060"
+
+# modal
+bg_modal_section = "#161821"
+border_subtle = "#1e2132"
+divider = "#1e2132"
+
+[[variants]]
+key = "light"
+const = "ICEBERG_LIGHT"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_light"
+mode = "light"
+
+[variants.label]
+fr = "Mode clair"
+en = "Light mode"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#e8e9ec"
+accent = "#2d539e"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#e8e9ec"
+bg_sidebar = "#dcdfe7"
+bg_card = "#d0d4de"
+bg_card_hover = "#cad0de"
+bg_card_pressed = "#bec4d2"
+bg_selected = "#cad0de"
+bg_input = "#d0d4de"
+bg_progress = "#dcdfe7"
+
+# text
+text_primary = "#33374c"
+text_secondary = "#444862"
+text_muted = "#5c6080"
+text_dim = "#747896"
+text_dimmer = "#8b98b6"
+text_dimmest = "#a8b0c8"
+text_placeholder = "#8b98b6"
+
+# accent
+accent_blue = "#2d539e"
+accent_icon = "#33635c"
+accent_progress = "#2d539e"
+
+# buttons
+btn_default = "#d0d4de"
+btn_hover = "#cad0de"
+btn_pressed = "#bec4d2"
+
+# success
+success = "#668e3d"
+success_bg = "#d0e0c8"
+btn_success = "#668e3d"
+btn_success_hover = "#588032"
+btn_success_pressed = "#4a7228"
+
+# warning
+warning = "#c57339"
+warning_bg = "#e4d8c8"
+
+# error
+error = "#cc517a"
+error_light = "#dd6890"
+error_bg = "#e4c8d4"
+btn_danger_bg = "#e4c8d4"
+btn_danger_hover = "#d4b4c0"
+btn_trash_hover = "#cc517a"
+btn_trash_pressed = "#ac4068"
+
+# modal
+bg_modal_section = "#e8e9ec"
+border_subtle = "#cad0de"
+divider = "#cad0de"

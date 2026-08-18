@@ -1,0 +1,223 @@
+# Monokai Pro — Project Colony theme family
+#
+# Source of truth. Edit here, then run `cargo run -p colony-tokens -- generate`.
+# Never edit anything under generated/ by hand.
+
+key = "monokai"
+order = 11
+label_key = "settings_theme_monokai"
+icon = "f121"  # Nerd Font codepoint
+
+[label]
+fr = "Monokai Pro"
+en = "Monokai Pro"
+
+[[variants]]
+key = "pro"
+const = "MONOKAI_PRO"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_monokai_pro"
+mode = "dark"
+
+[variants.label]
+fr = "Pro"
+en = "Pro"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#2d2a2e"
+accent = "#78dce8"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#2d2a2e"
+bg_sidebar = "#221f22"
+bg_card = "#403e41"
+bg_card_hover = "#525052"
+bg_card_pressed = "#5b595c"
+bg_selected = "#403e41"
+bg_input = "#403e41"
+bg_progress = "#221f22"
+
+# text
+text_primary = "#fcfcfa"
+text_secondary = "#e0e0de"
+text_muted = "#c1c0c0"
+text_dim = "#939293"
+text_dimmer = "#727072"
+text_dimmest = "#5b595c"
+text_placeholder = "#727072"
+
+# accent
+accent_blue = "#78dce8"
+accent_icon = "#ab9df2"
+accent_progress = "#78dce8"
+
+# buttons
+btn_default = "#403e41"
+btn_hover = "#525052"
+btn_pressed = "#5b595c"
+
+# success
+success = "#a9dc76"
+success_bg = "#222820"
+btn_success = "#88b860"
+btn_success_hover = "#7cac54"
+btn_success_pressed = "#70a048"
+
+# warning
+warning = "#ffd866"
+warning_bg = "#302a20"
+
+# error
+error = "#ff6188"
+error_light = "#ff8098"
+error_bg = "#341e28"
+btn_danger_bg = "#341e28"
+btn_danger_hover = "#542e38"
+btn_trash_hover = "#ff6188"
+btn_trash_pressed = "#df5070"
+
+# modal
+bg_modal_section = "#2d2a2e"
+border_subtle = "#403e41"
+divider = "#403e41"
+
+[[variants]]
+key = "classic"
+const = "MONOKAI_CLASSIC"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_monokai_classic"
+mode = "dark"
+
+[variants.label]
+fr = "Classic"
+en = "Classic"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#272822"
+accent = "#66d9ef"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#272822"
+bg_sidebar = "#1a1a18"
+bg_card = "#49483e"
+bg_card_hover = "#5a5950"
+bg_card_pressed = "#6b6a62"
+bg_selected = "#49483e"
+bg_input = "#49483e"
+bg_progress = "#1a1a18"
+
+# text
+text_primary = "#f8f8f2"
+text_secondary = "#e0e0d8"
+text_muted = "#c1c0c0"
+text_dim = "#939293"
+text_dimmer = "#75715e"
+text_dimmest = "#5b595c"
+text_placeholder = "#75715e"
+
+# accent
+accent_blue = "#66d9ef"
+accent_icon = "#ae81ff"
+accent_progress = "#66d9ef"
+
+# buttons
+btn_default = "#49483e"
+btn_hover = "#5a5950"
+btn_pressed = "#6b6a62"
+
+# success
+success = "#a6e22e"
+success_bg = "#1e2e18"
+btn_success = "#86c020"
+btn_success_hover = "#7ab418"
+btn_success_pressed = "#6ea810"
+
+# warning
+warning = "#e6db74"
+warning_bg = "#302a18"
+
+# error
+error = "#f92672"
+error_light = "#ff5090"
+error_bg = "#341828"
+btn_danger_bg = "#341828"
+btn_danger_hover = "#542838"
+btn_trash_hover = "#f92672"
+btn_trash_pressed = "#d91860"
+
+# modal
+bg_modal_section = "#272822"
+border_subtle = "#49483e"
+divider = "#49483e"
+
+[[variants]]
+key = "spectrum"
+const = "MONOKAI_SPECTRUM"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_monokai_spectrum"
+mode = "dark"
+
+[variants.label]
+fr = "Spectrum"
+en = "Spectrum"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#222222"
+accent = "#5ad4e6"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#222222"
+bg_sidebar = "#191919"
+bg_card = "#363537"
+bg_card_hover = "#484749"
+bg_card_pressed = "#5a595b"
+bg_selected = "#363537"
+bg_input = "#363537"
+bg_progress = "#191919"
+
+# text
+text_primary = "#f7f1ff"
+text_secondary = "#e0dae8"
+text_muted = "#c0bac8"
+text_dim = "#938ea0"
+text_dimmer = "#69676c"
+text_dimmest = "#4a484c"
+text_placeholder = "#69676c"
+
+# accent
+accent_blue = "#5ad4e6"
+accent_icon = "#948ae3"
+accent_progress = "#5ad4e6"
+
+# buttons
+btn_default = "#363537"
+btn_hover = "#484749"
+btn_pressed = "#5a595b"
+
+# success
+success = "#7bd88f"
+success_bg = "#1a2820"
+btn_success = "#62b074"
+btn_success_hover = "#58a468"
+btn_success_pressed = "#4e985c"
+
+# warning
+warning = "#fce566"
+warning_bg = "#2e2a1a"
+
+# error
+error = "#fc618d"
+error_light = "#ff80a0"
+error_bg = "#2e1a22"
+btn_danger_bg = "#2e1a22"
+btn_danger_hover = "#4e2a32"
+btn_trash_hover = "#fc618d"
+btn_trash_pressed = "#dc5078"
+
+# modal
+bg_modal_section = "#222222"
+border_subtle = "#363537"
+divider = "#363537"

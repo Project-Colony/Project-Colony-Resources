@@ -1,0 +1,153 @@
+# Everforest — Project Colony theme family
+#
+# Source of truth. Edit here, then run `cargo run -p colony-tokens -- generate`.
+# Never edit anything under generated/ by hand.
+
+key = "everforest"
+order = 13
+label_key = "settings_theme_everforest"
+icon = "f1bb"  # Nerd Font codepoint
+
+[label]
+fr = "Everforest"
+en = "Everforest"
+
+[[variants]]
+key = "dark"
+const = "EVERFOREST_DARK"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_dark_mode"
+mode = "dark"
+
+[variants.label]
+fr = "Mode sombre"
+en = "Dark mode"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#2d353b"
+accent = "#7fbbb3"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#2d353b"
+bg_sidebar = "#232a2e"
+bg_card = "#343f44"
+bg_card_hover = "#3d484d"
+bg_card_pressed = "#475258"
+bg_selected = "#543a48"
+bg_input = "#343f44"
+bg_progress = "#232a2e"
+
+# text
+text_primary = "#d3c6aa"
+text_secondary = "#c0b498"
+text_muted = "#a09880"
+text_dim = "#859289"
+text_dimmer = "#7a8478"
+text_dimmest = "#5c6a62"
+text_placeholder = "#7a8478"
+
+# accent
+accent_blue = "#7fbbb3"
+accent_icon = "#a7c080"
+accent_progress = "#7fbbb3"
+
+# buttons
+btn_default = "#343f44"
+btn_hover = "#3d484d"
+btn_pressed = "#475258"
+
+# success
+success = "#a7c080"
+success_bg = "#1e2e24"
+btn_success = "#86a066"
+btn_success_hover = "#7a945a"
+btn_success_pressed = "#6e884e"
+
+# warning
+warning = "#dbbc7f"
+warning_bg = "#2e2a1e"
+
+# error
+error = "#e67e80"
+error_light = "#f09090"
+error_bg = "#2e2020"
+btn_danger_bg = "#2e2020"
+btn_danger_hover = "#4e3030"
+btn_trash_hover = "#e67e80"
+btn_trash_pressed = "#c66868"
+
+# modal
+bg_modal_section = "#2d353b"
+border_subtle = "#343f44"
+divider = "#343f44"
+
+[[variants]]
+key = "light"
+const = "EVERFOREST_LIGHT"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_light"
+mode = "light"
+
+[variants.label]
+fr = "Mode clair"
+en = "Light mode"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#fdf6e3"
+accent = "#3a94c5"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#fdf6e3"
+bg_sidebar = "#efecd4"
+bg_card = "#f4f0d9"
+bg_card_hover = "#e6e2cc"
+bg_card_pressed = "#e0dcc7"
+bg_selected = "#eaddc0"
+bg_input = "#f4f0d9"
+bg_progress = "#efecd4"
+
+# text
+text_primary = "#5c6a72"
+text_secondary = "#6e7a80"
+text_muted = "#829181"
+text_dim = "#939f91"
+text_dimmer = "#a6b0a0"
+text_dimmest = "#bcc5b8"
+text_placeholder = "#a6b0a0"
+
+# accent
+accent_blue = "#3a94c5"
+accent_icon = "#8da101"
+accent_progress = "#3a94c5"
+
+# buttons
+btn_default = "#f4f0d9"
+btn_hover = "#e6e2cc"
+btn_pressed = "#e0dcc7"
+
+# success
+success = "#8da101"
+success_bg = "#d0e0c4"
+btn_success = "#8da101"
+btn_success_hover = "#7e9200"
+btn_success_pressed = "#6f8300"
+
+# warning
+warning = "#dfa000"
+warning_bg = "#ece0b8"
+
+# error
+error = "#f85552"
+error_light = "#e86868"
+error_bg = "#ecc8c4"
+btn_danger_bg = "#ecc8c4"
+btn_danger_hover = "#dcb0ac"
+btn_trash_hover = "#f85552"
+btn_trash_pressed = "#d84040"
+
+# modal
+bg_modal_section = "#fdf6e3"
+border_subtle = "#e6e2cc"
+divider = "#e6e2cc"

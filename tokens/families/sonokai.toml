@@ -1,0 +1,83 @@
+# Sonokai — Project Colony theme family
+#
+# Source of truth. Edit here, then run `cargo run -p colony-tokens -- generate`.
+# Never edit anything under generated/ by hand.
+
+key = "sonokai"
+order = 17
+label_key = "settings_theme_sonokai"
+icon = ""  # no icon in the picker
+
+[label]
+fr = "Sonokai"
+en = "Sonokai"
+
+[[variants]]
+key = "default"
+const = "SONOKAI_DEFAULT"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_sonokai_default"
+mode = "dark"
+
+[variants.label]
+fr = "Défaut"
+en = "Default"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#2c2e34"
+accent = "#76cce0"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#2c2e34"
+bg_sidebar = "#242529"
+bg_card = "#33353f"
+bg_card_hover = "#3b3e48"
+bg_card_pressed = "#414550"
+bg_selected = "#3b3e48"
+bg_input = "#33353f"
+bg_progress = "#242529"
+
+# text
+text_primary = "#e2e2e3"
+text_secondary = "#ccccd0"
+text_muted = "#a8a8b0"
+text_dim = "#8c8c96"
+text_dimmer = "#7f8490"
+text_dimmest = "#585c68"
+text_placeholder = "#7f8490"
+
+# accent
+accent_blue = "#76cce0"
+accent_icon = "#b39df3"
+accent_progress = "#76cce0"
+
+# buttons
+btn_default = "#33353f"
+btn_hover = "#3b3e48"
+btn_pressed = "#414550"
+
+# success
+success = "#9ed072"
+success_bg = "#1e2e22"
+btn_success = "#7eaa5a"
+btn_success_hover = "#729e4e"
+btn_success_pressed = "#669242"
+
+# warning
+warning = "#e7c664"
+warning_bg = "#2e2a1a"
+
+# error
+error = "#fc5d7c"
+error_light = "#ff7890"
+error_bg = "#2e1a20"
+btn_danger_bg = "#2e1a20"
+btn_danger_hover = "#4e2a30"
+btn_trash_hover = "#fc5d7c"
+btn_trash_pressed = "#dc4c66"
+
+# modal
+bg_modal_section = "#2c2e34"
+border_subtle = "#33353f"
+divider = "#33353f"

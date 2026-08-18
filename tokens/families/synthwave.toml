@@ -1,0 +1,83 @@
+# Synthwave '84 — Project Colony theme family
+#
+# Source of truth. Edit here, then run `cargo run -p colony-tokens -- generate`.
+# Never edit anything under generated/ by hand.
+
+key = "synthwave"
+order = 23
+label_key = "settings_theme_synthwave"
+icon = "f001"  # Nerd Font codepoint
+
+[label]
+fr = "Synthwave '84"
+en = "Synthwave '84"
+
+[[variants]]
+key = "dark"
+const = "SYNTHWAVE_DARK"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_dark_mode"
+mode = "dark"
+
+[variants.label]
+fr = "Mode sombre"
+en = "Dark mode"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#262335"
+accent = "#ff7edb"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#262335"
+bg_sidebar = "#241b2f"
+bg_card = "#34294f"
+bg_card_hover = "#3e3460"
+bg_card_pressed = "#463465"
+bg_selected = "#463465"
+bg_input = "#2a2139"
+bg_progress = "#241b2f"
+
+# text
+text_primary = "#ffffff"
+text_secondary = "#e2e2e2"
+text_muted = "#c0bcd0"
+text_dim = "#a09cb4"
+text_dimmer = "#848bbd"
+text_dimmest = "#614d85"
+text_placeholder = "#848bbd"
+
+# accent
+accent_blue = "#ff7edb"
+accent_icon = "#36f9f6"
+accent_progress = "#ff7edb"
+
+# buttons
+btn_default = "#34294f"
+btn_hover = "#3e3460"
+btn_pressed = "#463465"
+
+# success
+success = "#72f1b8"
+success_bg = "#1a2828"
+btn_success = "#5cc898"
+btn_success_hover = "#50bc8c"
+btn_success_pressed = "#44b080"
+
+# warning
+warning = "#fede5d"
+warning_bg = "#2a281a"
+
+# error
+error = "#fe4450"
+error_light = "#ff6670"
+error_bg = "#2a1a1e"
+btn_danger_bg = "#2a1a1e"
+btn_danger_hover = "#4a2a2e"
+btn_trash_hover = "#fe4450"
+btn_trash_pressed = "#de3440"
+
+# modal
+bg_modal_section = "#262335"
+border_subtle = "#34294f"
+divider = "#34294f"

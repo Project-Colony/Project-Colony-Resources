@@ -1,0 +1,385 @@
+# Stellar Blade — Project Colony theme family
+#
+# Source of truth. Edit here, then run `cargo run -p colony-tokens -- generate`.
+# Never edit anything under generated/ by hand.
+
+key = "stellar_blade"
+order = 25
+label_key = "settings_theme_stellar_blade"
+icon = "f04e5"  # Nerd Font codepoint
+
+notes = """
+Fan-made and unofficial. No official colour codes exist for these
+characters; every hex is derived from screenshots the user provided (hair,
+suit, glow, material). Palettes are not copyrightable and no game art ships
+with this set. Adam and Roxanne are still pending reference images.
+"""
+
+[label]
+fr = "Stellar Blade"
+en = "Stellar Blade"
+
+[[variants]]
+key = "eve"
+const = "STELLAR_EVE"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_stellar_blade_eve"
+mode = "light"
+notes = """
+Green ink on white-grey ceramic — her Planet Diving Suit. A light theme on
+purpose: a dark theme can never say "white".
+"""
+
+[variants.label]
+fr = "EVE"
+en = "EVE"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#eceeec"
+accent = "#21a04d"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#eceeec"
+bg_sidebar = "#d3d7d3"
+bg_card = "#ffffff"
+bg_card_hover = "#e2e6e2"
+bg_card_pressed = "#d7dcd7"
+bg_selected = "#d9e4da"
+bg_input = "#e0e4e0"
+bg_progress = "#dee1de"
+
+# text
+text_primary = "#1a6b3b"
+text_secondary = "#2b7d4a"
+text_muted = "#4e8a63"
+text_dim = "#6fa082"
+text_dimmer = "#84ad94"
+text_dimmest = "#9abda7"
+text_placeholder = "#84ad94"
+
+# accent
+accent_blue = "#21a04d"
+accent_icon = "#21a04d"
+accent_progress = "#21a04d"
+
+# buttons
+btn_default = "#dfe3df"
+btn_hover = "#d2d8d3"
+btn_pressed = "#c5cdc7"
+
+# success
+success = "#2f9e5c"
+success_bg = "#d3ecd9"
+btn_success = "#2f9e5c"
+btn_success_hover = "#288b50"
+btn_success_pressed = "#227a46"
+
+# warning
+warning = "#c8861e"
+warning_bg = "#f0e6c8"
+
+# error
+error = "#d5493c"
+error_light = "#e05a4e"
+error_bg = "#f0cdc8"
+btn_danger_bg = "#f0cdc8"
+btn_danger_hover = "#e3b6b0"
+btn_trash_hover = "#c23a2e"
+btn_trash_pressed = "#a93227"
+
+# modal
+bg_modal_section = "#e7eae7"
+border_subtle = "#c0c8c1"
+divider = "#c0c8c1"
+
+[[variants]]
+key = "tachy"
+const = "STELLAR_TACHY"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_stellar_blade_tachy"
+mode = "dark"
+notes = """
+Amber text and an orange accent on carbon-navy, her three suit tones. The
+teal glints of her suit take the success role.
+"""
+
+[variants.label]
+fr = "Tachy"
+en = "Tachy"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#10121a"
+accent = "#ff7c1e"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#10121a"
+bg_sidebar = "#0a0b10"
+bg_card = "#171a24"
+bg_card_hover = "#1e2230"
+bg_card_pressed = "#252a3a"
+bg_selected = "#202536"
+bg_input = "#191c28"
+bg_progress = "#0d0e15"
+
+# text
+text_primary = "#f2bc4e"
+text_secondary = "#d9a133"
+text_muted = "#a58136"
+text_dim = "#75612f"
+text_dimmer = "#5c4d28"
+text_dimmest = "#453a20"
+text_placeholder = "#5c4d28"
+
+# accent
+accent_blue = "#ff7c1e"
+accent_icon = "#eaa72c"
+accent_progress = "#ff7c1e"
+
+# buttons
+btn_default = "#171a24"
+btn_hover = "#1e2230"
+btn_pressed = "#252a3a"
+
+# success
+success = "#3fbfa8"
+success_bg = "#0e2420"
+btn_success = "#2f9d8a"
+btn_success_hover = "#298c7b"
+btn_success_pressed = "#237b6c"
+
+# warning
+warning = "#eaa72c"
+warning_bg = "#2a2210"
+
+# error
+error = "#f0503c"
+error_light = "#ff6a55"
+error_bg = "#2a120e"
+btn_danger_bg = "#2a120e"
+btn_danger_hover = "#41201a"
+btn_trash_hover = "#b8402f"
+btn_trash_pressed = "#96331f"
+
+# modal
+bg_modal_section = "#141720"
+border_subtle = "#2b3040"
+divider = "#2b3040"
+
+[[variants]]
+key = "lily"
+const = "STELLAR_LILY"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_stellar_blade_lily"
+mode = "dark"
+notes = "Strict gold-on-black duotone. No brown tint — the gold must stay gold."
+
+[variants.label]
+fr = "Lily"
+en = "Lily"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#111010"
+accent = "#ffd23e"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#111010"
+bg_sidebar = "#0a0909"
+bg_card = "#191817"
+bg_card_hover = "#201e1c"
+bg_card_pressed = "#262421"
+bg_selected = "#232120"
+bg_input = "#1a1918"
+bg_progress = "#0d0c0c"
+
+# text
+text_primary = "#f6c832"
+text_secondary = "#d4a92c"
+text_muted = "#a5842a"
+text_dim = "#7a6526"
+text_dimmer = "#5f4f21"
+text_dimmest = "#483c1b"
+text_placeholder = "#5f4f21"
+
+# accent
+accent_blue = "#ffd23e"
+accent_icon = "#ffd23e"
+accent_progress = "#ffd23e"
+
+# buttons
+btn_default = "#191817"
+btn_hover = "#201e1c"
+btn_pressed = "#262421"
+
+# success
+success = "#5fb55a"
+success_bg = "#15200f"
+btn_success = "#4c9d48"
+btn_success_hover = "#428c3f"
+btn_success_pressed = "#397b36"
+
+# warning
+warning = "#e08a2a"
+warning_bg = "#261c0c"
+
+# error
+error = "#e0503c"
+error_light = "#f0654f"
+error_bg = "#26100c"
+btn_danger_bg = "#26100c"
+btn_danger_hover = "#3c1d16"
+btn_trash_hover = "#b8402f"
+btn_trash_pressed = "#96331f"
+
+# modal
+bg_modal_section = "#151413"
+border_subtle = "#2e2b26"
+divider = "#2e2b26"
+
+[[variants]]
+key = "enya"
+const = "STELLAR_ENYA"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_stellar_blade_enya"
+mode = "light"
+notes = "Light white ceramic with an ice-blue sheen for the accent."
+
+[variants.label]
+fr = "Enya"
+en = "Enya"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#eef0f3"
+accent = "#3e90c9"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#eef0f3"
+bg_sidebar = "#d5dae1"
+bg_card = "#ffffff"
+bg_card_hover = "#e4e8ee"
+bg_card_pressed = "#d9dfe7"
+bg_selected = "#dce3ec"
+bg_input = "#e2e6ec"
+bg_progress = "#dfe3ea"
+
+# text
+text_primary = "#171c23"
+text_secondary = "#3f4a58"
+text_muted = "#66727f"
+text_dim = "#8d97a3"
+text_dimmer = "#a3adb8"
+text_dimmest = "#bac2cc"
+text_placeholder = "#a3adb8"
+
+# accent
+accent_blue = "#3e90c9"
+accent_icon = "#3e90c9"
+accent_progress = "#3e90c9"
+
+# buttons
+btn_default = "#e1e5eb"
+btn_hover = "#d4dae2"
+btn_pressed = "#c8cfd9"
+
+# success
+success = "#2f9e5c"
+success_bg = "#d3ecd9"
+btn_success = "#2f9e5c"
+btn_success_hover = "#288b50"
+btn_success_pressed = "#227a46"
+
+# warning
+warning = "#c8861e"
+warning_bg = "#f0e6c8"
+
+# error
+error = "#d5493c"
+error_light = "#e05a4e"
+error_bg = "#f0cdc8"
+btn_danger_bg = "#f0cdc8"
+btn_danger_hover = "#e3b6b0"
+btn_trash_hover = "#c23a2e"
+btn_trash_pressed = "#a93227"
+
+# modal
+bg_modal_section = "#e9ecf0"
+border_subtle = "#c2cad4"
+divider = "#c2cad4"
+
+[[variants]]
+key = "kaya"
+const = "STELLAR_KAYA"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_stellar_blade_kaya"
+mode = "dark"
+notes = """
+Lavender ink on deep violet. Her khaki coat is demoted to the success role
+rather than becoming a second surface — two saturated materials side by side
+clashed and were rejected.
+"""
+
+[variants.label]
+fr = "Kaya"
+en = "Kaya"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#1a1622"
+accent = "#cfa8ff"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#1a1622"
+bg_sidebar = "#14111b"
+bg_card = "#221d2e"
+bg_card_hover = "#292338"
+bg_card_pressed = "#302a42"
+bg_selected = "#2c2540"
+bg_input = "#241f31"
+bg_progress = "#171320"
+
+# text
+text_primary = "#d9c8f0"
+text_secondary = "#b49ae0"
+text_muted = "#8d7bae"
+text_dim = "#6b5c88"
+text_dimmer = "#55486e"
+text_dimmest = "#423857"
+text_placeholder = "#55486e"
+
+# accent
+accent_blue = "#cfa8ff"
+accent_icon = "#cfa8ff"
+accent_progress = "#cfa8ff"
+
+# buttons
+btn_default = "#221d2e"
+btn_hover = "#292338"
+btn_pressed = "#302a42"
+
+# success
+success = "#8a9455"
+success_bg = "#1d2012"
+btn_success = "#767f48"
+btn_success_hover = "#68703f"
+btn_success_pressed = "#5a6136"
+
+# warning
+warning = "#d9a441"
+warning_bg = "#271f0e"
+
+# error
+error = "#e06a6a"
+error_light = "#ef8080"
+error_bg = "#291214"
+btn_danger_bg = "#291214"
+btn_danger_hover = "#3e1e21"
+btn_trash_hover = "#b84848"
+btn_trash_pressed = "#963a3a"
+
+# modal
+bg_modal_section = "#1e1928"
+border_subtle = "#382f4c"
+divider = "#382f4c"

@@ -1,0 +1,86 @@
+# Accent overrides — Project Colony
+#
+# Source of truth. Edit here, then run `cargo run -p colony-tokens -- generate`.
+# Never edit anything under generated/ by hand.
+#
+# These eight colours are palette-independent: they are what the user can pick in
+# Settings → Appearance → Colors to override the active theme's own accent.
+# "Auto" is not listed here — it is the absence of an override, i.e. fall back to
+# the theme's `accent_blue`.
+#
+# ORDER IS LOAD-BEARING. Colony derives each installed app's identity tint by
+# bucketing a hash of the app's NAME into this list. Reordering it, or inserting
+# an entry anywhere but the end, silently re-colours every app icon on every
+# user's machine. Append only.
+
+[[accents]]
+key = "red"
+label_key = "settings_accent_red"
+color = "#e05555"
+
+[accents.label]
+fr = "Rouge"
+en = "Red"
+
+[[accents]]
+key = "orange"
+label_key = "settings_accent_orange"
+color = "#e0855a"
+
+[accents.label]
+fr = "Orange"
+en = "Orange"
+
+[[accents]]
+key = "yellow"
+label_key = "settings_accent_yellow"
+color = "#c8a832"
+
+[accents.label]
+fr = "Jaune"
+en = "Yellow"
+
+[[accents]]
+key = "green"
+label_key = "settings_accent_green"
+color = "#55b87a"
+
+[accents.label]
+fr = "Vert"
+en = "Green"
+
+[[accents]]
+key = "blue"
+label_key = "settings_accent_blue"
+color = "#6b8bd6"
+
+[accents.label]
+fr = "Bleu"
+en = "Blue"
+
+[[accents]]
+key = "indigo"
+label_key = "settings_accent_indigo"
+color = "#7b6bd6"
+
+[accents.label]
+fr = "Indigo"
+en = "Indigo"
+
+[[accents]]
+key = "violet"
+label_key = "settings_accent_violet"
+color = "#b06bd6"
+
+[accents.label]
+fr = "Violet"
+en = "Violet"
+
+[[accents]]
+key = "amber"
+label_key = "settings_accent_amber"
+color = "#d4a030"
+
+[accents.label]
+fr = "Ambre"
+en = "Amber"

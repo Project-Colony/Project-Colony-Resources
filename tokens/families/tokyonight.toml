@@ -1,0 +1,153 @@
+# Tokyo Night — Project Colony theme family
+#
+# Source of truth. Edit here, then run `cargo run -p colony-tokens -- generate`.
+# Never edit anything under generated/ by hand.
+
+key = "tokyonight"
+order = 8
+label_key = "settings_theme_tokyonight"
+icon = "f0219"  # Nerd Font codepoint
+
+[label]
+fr = "Tokyo Night"
+en = "Tokyo Night"
+
+[[variants]]
+key = "night"
+const = "TOKYONIGHT_NIGHT"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_tokyonight_night"
+mode = "dark"
+
+[variants.label]
+fr = "Nuit"
+en = "Night"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#1a1b26"
+accent = "#7aa2f7"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#1a1b26"
+bg_sidebar = "#16161e"
+bg_card = "#292e42"
+bg_card_hover = "#3b4261"
+bg_card_pressed = "#414868"
+bg_selected = "#2d3f76"
+bg_input = "#292e42"
+bg_progress = "#16161e"
+
+# text
+text_primary = "#c0caf5"
+text_secondary = "#a9b1d6"
+text_muted = "#8890b0"
+text_dim = "#737aa2"
+text_dimmer = "#565f89"
+text_dimmest = "#414868"
+text_placeholder = "#565f89"
+
+# accent
+accent_blue = "#7aa2f7"
+accent_icon = "#7dcfff"
+accent_progress = "#7aa2f7"
+
+# buttons
+btn_default = "#292e42"
+btn_hover = "#3b4261"
+btn_pressed = "#414868"
+
+# success
+success = "#9ece6a"
+success_bg = "#202830"
+btn_success = "#7eaa50"
+btn_success_hover = "#709e44"
+btn_success_pressed = "#629238"
+
+# warning
+warning = "#e0af68"
+warning_bg = "#302820"
+
+# error
+error = "#f7768e"
+error_light = "#db4b4b"
+error_bg = "#302025"
+btn_danger_bg = "#302025"
+btn_danger_hover = "#503035"
+btn_trash_hover = "#f7768e"
+btn_trash_pressed = "#d75e76"
+
+# modal
+bg_modal_section = "#1a1b26"
+border_subtle = "#292e42"
+divider = "#292e42"
+
+[[variants]]
+key = "day"
+const = "TOKYONIGHT_DAY"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_tokyonight_day"
+mode = "light"
+
+[variants.label]
+fr = "Jour"
+en = "Day"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#e1e2e7"
+accent = "#2e7de9"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#e1e2e7"
+bg_sidebar = "#d0d5e3"
+bg_card = "#c4c8da"
+bg_card_hover = "#b7c1e3"
+bg_card_pressed = "#a8b4d4"
+bg_selected = "#b7c1e3"
+bg_input = "#c4c8da"
+bg_progress = "#d0d5e3"
+
+# text
+text_primary = "#3760bf"
+text_secondary = "#4a6ca8"
+text_muted = "#6172b0"
+text_dim = "#848cb5"
+text_dimmer = "#a1a6c5"
+text_dimmest = "#b4b5b9"
+text_placeholder = "#a1a6c5"
+
+# accent
+accent_blue = "#2e7de9"
+accent_icon = "#007197"
+accent_progress = "#2e7de9"
+
+# buttons
+btn_default = "#c4c8da"
+btn_hover = "#b7c1e3"
+btn_pressed = "#a8b4d4"
+
+# success
+success = "#587539"
+success_bg = "#c8dcc0"
+btn_success = "#587539"
+btn_success_hover = "#4c692e"
+btn_success_pressed = "#405d24"
+
+# warning
+warning = "#8c6c3e"
+warning_bg = "#dcd8c0"
+
+# error
+error = "#f52a65"
+error_light = "#c64343"
+error_bg = "#e8c0c8"
+btn_danger_bg = "#e8c0c8"
+btn_danger_hover = "#d8a8b4"
+btn_trash_hover = "#f52a65"
+btn_trash_pressed = "#d52050"
+
+# modal
+bg_modal_section = "#e1e2e7"
+border_subtle = "#c4c8da"
+divider = "#c4c8da"

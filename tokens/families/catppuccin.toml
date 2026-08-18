@@ -1,0 +1,293 @@
+# Catppuccin — Project Colony theme family
+#
+# Source of truth. Edit here, then run `cargo run -p colony-tokens -- generate`.
+# Never edit anything under generated/ by hand.
+
+key = "catppuccin"
+order = 1
+label_key = "settings_theme_catppuccin"
+icon = "f0f4"  # Nerd Font codepoint
+
+[label]
+fr = "Catppuccin"
+en = "Catppuccin"
+
+[[variants]]
+key = "latte"
+const = "CATPPUCCIN_LATTE"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_catppuccin_latte"
+mode = "light"
+
+[variants.label]
+fr = "Latte"
+en = "Latte"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#eff1f5"
+accent = "#1e66f5"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#eff1f5"
+bg_sidebar = "#e6e9ef"
+bg_card = "#e6e9ef"
+bg_card_hover = "#dce0e8"
+bg_card_pressed = "#ccd0da"
+bg_selected = "#ccd0da"
+bg_input = "#dce0e8"
+bg_progress = "#e6e9ef"
+
+# text
+text_primary = "#4c4f69"
+text_secondary = "#5c5f77"
+text_muted = "#6c6f85"
+text_dim = "#7c7f93"
+text_dimmer = "#8c8fa1"
+text_dimmest = "#9ca0b0"
+text_placeholder = "#8c8fa1"
+
+# accent
+accent_blue = "#1e66f5"
+accent_icon = "#7287fd"
+accent_progress = "#7287fd"
+
+# buttons
+btn_default = "#dce0e8"
+btn_hover = "#ccd0da"
+btn_pressed = "#bcc0cc"
+
+# success
+success = "#40a02b"
+success_bg = "#d5f0cd"
+btn_success = "#40a02b"
+btn_success_hover = "#369222"
+btn_success_pressed = "#2c8219"
+
+# warning
+warning = "#df8e1d"
+warning_bg = "#f5e6c8"
+
+# error
+error = "#d20f39"
+error_light = "#e64553"
+error_bg = "#f5d0d6"
+btn_danger_bg = "#f5d0d6"
+btn_danger_hover = "#eab0ba"
+btn_trash_hover = "#d20f39"
+btn_trash_pressed = "#b00c30"
+
+# modal
+bg_modal_section = "#e6e9ef"
+border_subtle = "#ccd0da"
+divider = "#ccd0da"
+
+[[variants]]
+key = "frappe"
+const = "CATPPUCCIN_FRAPPE"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_catppuccin_frappe"
+mode = "dark"
+
+[variants.label]
+fr = "Frappé"
+en = "Frappé"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#303446"
+accent = "#8caaee"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#303446"
+bg_sidebar = "#292c3c"
+bg_card = "#292c3c"
+bg_card_hover = "#414559"
+bg_card_pressed = "#51576d"
+bg_selected = "#51576d"
+bg_input = "#414559"
+bg_progress = "#292c3c"
+
+# text
+text_primary = "#c6d0f5"
+text_secondary = "#b5bfe2"
+text_muted = "#a5adce"
+text_dim = "#949cbb"
+text_dimmer = "#838ba7"
+text_dimmest = "#737994"
+text_placeholder = "#838ba7"
+
+# accent
+accent_blue = "#8caaee"
+accent_icon = "#babbf1"
+accent_progress = "#babbf1"
+
+# buttons
+btn_default = "#414559"
+btn_hover = "#51576d"
+btn_pressed = "#626880"
+
+# success
+success = "#a6d189"
+success_bg = "#2a3a28"
+btn_success = "#549444"
+btn_success_hover = "#468838"
+btn_success_pressed = "#387a2c"
+
+# warning
+warning = "#e5c890"
+warning_bg = "#3a3828"
+
+# error
+error = "#e78284"
+error_light = "#ea999c"
+error_bg = "#3a2628"
+btn_danger_bg = "#3a2628"
+btn_danger_hover = "#5a3638"
+btn_trash_hover = "#9a3234"
+btn_trash_pressed = "#7a2224"
+
+# modal
+bg_modal_section = "#292c3c"
+border_subtle = "#414559"
+divider = "#414559"
+
+[[variants]]
+key = "macchiato"
+const = "CATPPUCCIN_MACCHIATO"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_catppuccin_macchiato"
+mode = "dark"
+
+[variants.label]
+fr = "Macchiato"
+en = "Macchiato"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#24273a"
+accent = "#8aadf4"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#24273a"
+bg_sidebar = "#1e2030"
+bg_card = "#1e2030"
+bg_card_hover = "#363a4f"
+bg_card_pressed = "#494d64"
+bg_selected = "#494d64"
+bg_input = "#363a4f"
+bg_progress = "#1e2030"
+
+# text
+text_primary = "#cad3f5"
+text_secondary = "#b8c0e0"
+text_muted = "#a5adcb"
+text_dim = "#939ab7"
+text_dimmer = "#8087a2"
+text_dimmest = "#6e738d"
+text_placeholder = "#8087a2"
+
+# accent
+accent_blue = "#8aadf4"
+accent_icon = "#b7bdf8"
+accent_progress = "#b7bdf8"
+
+# buttons
+btn_default = "#363a4f"
+btn_hover = "#494d64"
+btn_pressed = "#5b6078"
+
+# success
+success = "#a6da95"
+success_bg = "#243826"
+btn_success = "#4e9240"
+btn_success_hover = "#408634"
+btn_success_pressed = "#327a28"
+
+# warning
+warning = "#eed49f"
+warning_bg = "#383428"
+
+# error
+error = "#ed8796"
+error_light = "#ee99a0"
+error_bg = "#382428"
+btn_danger_bg = "#382428"
+btn_danger_hover = "#583438"
+btn_trash_hover = "#983038"
+btn_trash_pressed = "#782028"
+
+# modal
+bg_modal_section = "#1e2030"
+border_subtle = "#363a4f"
+divider = "#363a4f"
+
+[[variants]]
+key = "mocha"
+const = "CATPPUCCIN_MOCHA"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_catppuccin_mocha"
+mode = "dark"
+
+[variants.label]
+fr = "Mocha"
+en = "Mocha"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#1e1e2e"
+accent = "#89b4fa"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#1e1e2e"
+bg_sidebar = "#181825"
+bg_card = "#181825"
+bg_card_hover = "#313244"
+bg_card_pressed = "#45475a"
+bg_selected = "#45475a"
+bg_input = "#313244"
+bg_progress = "#181825"
+
+# text
+text_primary = "#cdd6f4"
+text_secondary = "#bac2de"
+text_muted = "#a6adc8"
+text_dim = "#9399b2"
+text_dimmer = "#7f849c"
+text_dimmest = "#6c7086"
+text_placeholder = "#7f849c"
+
+# accent
+accent_blue = "#89b4fa"
+accent_icon = "#b4befe"
+accent_progress = "#b4befe"
+
+# buttons
+btn_default = "#313244"
+btn_hover = "#45475a"
+btn_pressed = "#585b70"
+
+# success
+success = "#a6e3a1"
+success_bg = "#1e3a1e"
+btn_success = "#48904a"
+btn_success_hover = "#3a843c"
+btn_success_pressed = "#2c782e"
+
+# warning
+warning = "#f9e2af"
+warning_bg = "#3a3420"
+
+# error
+error = "#f38ba8"
+error_light = "#f5a0b8"
+error_bg = "#3a1e28"
+btn_danger_bg = "#3a1e28"
+btn_danger_hover = "#5a2e38"
+btn_trash_hover = "#952e3a"
+btn_trash_pressed = "#751e2a"
+
+# modal
+bg_modal_section = "#181825"
+border_subtle = "#313244"
+divider = "#313244"

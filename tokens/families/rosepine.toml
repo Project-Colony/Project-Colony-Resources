@@ -1,0 +1,223 @@
+# Rosé Pine — Project Colony theme family
+#
+# Source of truth. Edit here, then run `cargo run -p colony-tokens -- generate`.
+# Never edit anything under generated/ by hand.
+
+key = "rosepine"
+order = 9
+label_key = "settings_theme_rosepine"
+icon = "f46d"  # Nerd Font codepoint
+
+[label]
+fr = "Rosé Pine"
+en = "Rosé Pine"
+
+[[variants]]
+key = "main"
+const = "ROSEPINE_MAIN"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_rosepine_main"
+mode = "dark"
+
+[variants.label]
+fr = "Principal"
+en = "Main"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#191724"
+accent = "#9ccfd8"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#191724"
+bg_sidebar = "#1f1d2e"
+bg_card = "#26233a"
+bg_card_hover = "#403d52"
+bg_card_pressed = "#524f67"
+bg_selected = "#403d52"
+bg_input = "#26233a"
+bg_progress = "#1f1d2e"
+
+# text
+text_primary = "#e0def4"
+text_secondary = "#cccadd"
+text_muted = "#908caa"
+text_dim = "#7e7a96"
+text_dimmer = "#6e6a86"
+text_dimmest = "#555168"
+text_placeholder = "#6e6a86"
+
+# accent
+accent_blue = "#9ccfd8"
+accent_icon = "#c4a7e7"
+accent_progress = "#9ccfd8"
+
+# buttons
+btn_default = "#26233a"
+btn_hover = "#403d52"
+btn_pressed = "#524f67"
+
+# success
+success = "#31748f"
+success_bg = "#1e2830"
+btn_success = "#2a6478"
+btn_success_hover = "#24586c"
+btn_success_pressed = "#1e4c60"
+
+# warning
+warning = "#f6c177"
+warning_bg = "#302820"
+
+# error
+error = "#eb6f92"
+error_light = "#f08098"
+error_bg = "#301828"
+btn_danger_bg = "#301828"
+btn_danger_hover = "#502838"
+btn_trash_hover = "#eb6f92"
+btn_trash_pressed = "#cb5878"
+
+# modal
+bg_modal_section = "#191724"
+border_subtle = "#26233a"
+divider = "#26233a"
+
+[[variants]]
+key = "moon"
+const = "ROSEPINE_MOON"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_rosepine_moon"
+mode = "dark"
+
+[variants.label]
+fr = "Lune"
+en = "Moon"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#232136"
+accent = "#9ccfd8"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#232136"
+bg_sidebar = "#2a273f"
+bg_card = "#393552"
+bg_card_hover = "#44415a"
+bg_card_pressed = "#56526e"
+bg_selected = "#44415a"
+bg_input = "#393552"
+bg_progress = "#2a273f"
+
+# text
+text_primary = "#e0def4"
+text_secondary = "#cccadd"
+text_muted = "#908caa"
+text_dim = "#7e7a96"
+text_dimmer = "#6e6a86"
+text_dimmest = "#555168"
+text_placeholder = "#6e6a86"
+
+# accent
+accent_blue = "#9ccfd8"
+accent_icon = "#c4a7e7"
+accent_progress = "#9ccfd8"
+
+# buttons
+btn_default = "#393552"
+btn_hover = "#44415a"
+btn_pressed = "#56526e"
+
+# success
+success = "#3e8fb0"
+success_bg = "#202830"
+btn_success = "#347a98"
+btn_success_hover = "#2c6e88"
+btn_success_pressed = "#246278"
+
+# warning
+warning = "#f6c177"
+warning_bg = "#382820"
+
+# error
+error = "#eb6f92"
+error_light = "#f08098"
+error_bg = "#381828"
+btn_danger_bg = "#381828"
+btn_danger_hover = "#582838"
+btn_trash_hover = "#eb6f92"
+btn_trash_pressed = "#cb5878"
+
+# modal
+bg_modal_section = "#232136"
+border_subtle = "#393552"
+divider = "#393552"
+
+[[variants]]
+key = "dawn"
+const = "ROSEPINE_DAWN"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_rosepine_dawn"
+mode = "light"
+
+[variants.label]
+fr = "Aurore"
+en = "Dawn"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#faf4ed"
+accent = "#56949f"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#faf4ed"
+bg_sidebar = "#f2e9e1"
+bg_card = "#f4ede8"
+bg_card_hover = "#dfdad9"
+bg_card_pressed = "#cecacd"
+bg_selected = "#dfdad9"
+bg_input = "#f4ede8"
+bg_progress = "#f2e9e1"
+
+# text
+text_primary = "#575279"
+text_secondary = "#6e6a86"
+text_muted = "#797593"
+text_dim = "#9893a5"
+text_dimmer = "#b0acc0"
+text_dimmest = "#c0bcc8"
+text_placeholder = "#b0acc0"
+
+# accent
+accent_blue = "#56949f"
+accent_icon = "#907aa9"
+accent_progress = "#56949f"
+
+# buttons
+btn_default = "#f4ede8"
+btn_hover = "#dfdad9"
+btn_pressed = "#cecacd"
+
+# success
+success = "#286983"
+success_bg = "#d0e0d8"
+btn_success = "#286983"
+btn_success_hover = "#205c74"
+btn_success_pressed = "#184f65"
+
+# warning
+warning = "#ea9d34"
+warning_bg = "#ece0c8"
+
+# error
+error = "#b4637a"
+error_light = "#c87890"
+error_bg = "#e8d0d4"
+btn_danger_bg = "#e8d0d4"
+btn_danger_hover = "#d8bcc4"
+btn_trash_hover = "#b4637a"
+btn_trash_pressed = "#965268"
+
+# modal
+bg_modal_section = "#faf4ed"
+border_subtle = "#dfdad9"
+divider = "#dfdad9"

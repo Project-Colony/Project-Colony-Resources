@@ -1,0 +1,153 @@
+# Dracula — Project Colony theme family
+#
+# Source of truth. Edit here, then run `cargo run -p colony-tokens -- generate`.
+# Never edit anything under generated/ by hand.
+
+key = "dracula"
+order = 6
+label_key = "settings_theme_dracula"
+icon = "f6e2"  # Nerd Font codepoint
+
+[label]
+fr = "Dracula"
+en = "Dracula"
+
+[[variants]]
+key = "dark"
+const = "DRACULA_DARK"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_dark_mode"
+mode = "dark"
+
+[variants.label]
+fr = "Mode sombre"
+en = "Dark mode"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#282a36"
+accent = "#bd93f9"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#282a36"
+bg_sidebar = "#21222c"
+bg_card = "#44475a"
+bg_card_hover = "#515470"
+bg_card_pressed = "#606382"
+bg_selected = "#44475a"
+bg_input = "#44475a"
+bg_progress = "#21222c"
+
+# text
+text_primary = "#f8f8f2"
+text_secondary = "#e8e8e0"
+text_muted = "#c8c8c0"
+text_dim = "#9898a0"
+text_dimmer = "#6272a4"
+text_dimmest = "#4c5478"
+text_placeholder = "#6272a4"
+
+# accent
+accent_blue = "#bd93f9"
+accent_icon = "#ff79c6"
+accent_progress = "#bd93f9"
+
+# buttons
+btn_default = "#44475a"
+btn_hover = "#515470"
+btn_pressed = "#606382"
+
+# success
+success = "#50fa7b"
+success_bg = "#1e3228"
+btn_success = "#40c862"
+btn_success_hover = "#38b858"
+btn_success_pressed = "#30a84e"
+
+# warning
+warning = "#f1fa8c"
+warning_bg = "#3a382a"
+
+# error
+error = "#ff5555"
+error_light = "#ff7777"
+error_bg = "#3c222a"
+btn_danger_bg = "#3c222a"
+btn_danger_hover = "#5c323a"
+btn_trash_hover = "#ff5555"
+btn_trash_pressed = "#dd4444"
+
+# modal
+bg_modal_section = "#282a36"
+border_subtle = "#44475a"
+divider = "#44475a"
+
+[[variants]]
+key = "light"
+const = "DRACULA_LIGHT"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_light"
+mode = "light"
+
+[variants.label]
+fr = "Mode clair"
+en = "Light mode"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#fffbeb"
+accent = "#7c5fc2"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#fffbeb"
+bg_sidebar = "#f4efd8"
+bg_card = "#e8e4cf"
+bg_card_hover = "#dcd8c0"
+bg_card_pressed = "#d0ccb8"
+bg_selected = "#dcd8c0"
+bg_input = "#e8e4cf"
+bg_progress = "#f4efd8"
+
+# text
+text_primary = "#1f1f1f"
+text_secondary = "#333333"
+text_muted = "#555555"
+text_dim = "#777777"
+text_dimmer = "#7970a9"
+text_dimmest = "#a09ca0"
+text_placeholder = "#7970a9"
+
+# accent
+accent_blue = "#7c5fc2"
+accent_icon = "#e04886"
+accent_progress = "#7c5fc2"
+
+# buttons
+btn_default = "#e8e4cf"
+btn_hover = "#dcd8c0"
+btn_pressed = "#d0ccb8"
+
+# success
+success = "#2ba479"
+success_bg = "#d0e8d8"
+btn_success = "#2ba479"
+btn_success_hover = "#24966c"
+btn_success_pressed = "#1d8860"
+
+# warning
+warning = "#d5a212"
+warning_bg = "#ede0c0"
+
+# error
+error = "#de3535"
+error_light = "#e85858"
+error_bg = "#eedcdc"
+btn_danger_bg = "#eedcdc"
+btn_danger_hover = "#dec8c8"
+btn_trash_hover = "#de3535"
+btn_trash_pressed = "#c02828"
+
+# modal
+bg_modal_section = "#fffbeb"
+border_subtle = "#dcd8c0"
+divider = "#dcd8c0"

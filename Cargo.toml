@@ -1,0 +1,20 @@
+[workspace]
+resolver = "2"
+members = ["tools/colony-tokens"]
+
+# `crates/colony-ui` (the shared iced widget + theme crate every Colony program
+# will depend on) joins this workspace in phase 2. Keeping the workspace here
+# from day one means adding it is a one-line change.
+
+[workspace.package]
+edition = "2021"
+license = "GPL-3.0-or-later"
+repository = "https://github.com/Project-Colony/Project-Colony-Resources"
+# Matches Colony's floor so anything published from here stays consumable by it.
+rust-version = "1.80"
+
+[workspace.dependencies]
+anyhow = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0", features = ["preserve_order"] }
+toml = "0.9"

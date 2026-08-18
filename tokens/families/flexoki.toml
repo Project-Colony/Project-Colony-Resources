@@ -1,0 +1,153 @@
+# Flexoki — Project Colony theme family
+#
+# Source of truth. Edit here, then run `cargo run -p colony-tokens -- generate`.
+# Never edit anything under generated/ by hand.
+
+key = "flexoki"
+order = 15
+label_key = "settings_theme_flexoki"
+icon = "f02d"  # Nerd Font codepoint
+
+[label]
+fr = "Flexoki"
+en = "Flexoki"
+
+[[variants]]
+key = "dark"
+const = "FLEXOKI_DARK"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_dark_mode"
+mode = "dark"
+
+[variants.label]
+fr = "Mode sombre"
+en = "Dark mode"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#100f0f"
+accent = "#4385be"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#100f0f"
+bg_sidebar = "#1c1b1a"
+bg_card = "#282726"
+bg_card_hover = "#343331"
+bg_card_pressed = "#403e3c"
+bg_selected = "#403e3c"
+bg_input = "#282726"
+bg_progress = "#1c1b1a"
+
+# text
+text_primary = "#cecdc3"
+text_secondary = "#b7b5ac"
+text_muted = "#9f9d96"
+text_dim = "#878580"
+text_dimmer = "#6f6e69"
+text_dimmest = "#575653"
+text_placeholder = "#6f6e69"
+
+# accent
+accent_blue = "#4385be"
+accent_icon = "#da702c"
+accent_progress = "#4385be"
+
+# buttons
+btn_default = "#282726"
+btn_hover = "#343331"
+btn_pressed = "#403e3c"
+
+# success
+success = "#879a39"
+success_bg = "#141a10"
+btn_success = "#6e8030"
+btn_success_hover = "#627428"
+btn_success_pressed = "#566820"
+
+# warning
+warning = "#d0a215"
+warning_bg = "#1e1a0c"
+
+# error
+error = "#d14d41"
+error_light = "#e06858"
+error_bg = "#1e100c"
+btn_danger_bg = "#1e100c"
+btn_danger_hover = "#3e201c"
+btn_trash_hover = "#d14d41"
+btn_trash_pressed = "#b13830"
+
+# modal
+bg_modal_section = "#100f0f"
+border_subtle = "#282726"
+divider = "#282726"
+
+[[variants]]
+key = "light"
+const = "FLEXOKI_LIGHT"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_light"
+mode = "light"
+
+[variants.label]
+fr = "Mode clair"
+en = "Light mode"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#fffcf0"
+accent = "#205ea6"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#fffcf0"
+bg_sidebar = "#f2f0e5"
+bg_card = "#e6e4d9"
+bg_card_hover = "#dad8ce"
+bg_card_pressed = "#cecdc3"
+bg_selected = "#e6e4d9"
+bg_input = "#e6e4d9"
+bg_progress = "#f2f0e5"
+
+# text
+text_primary = "#403e3c"
+text_secondary = "#575653"
+text_muted = "#6f6e69"
+text_dim = "#878580"
+text_dimmer = "#9f9d96"
+text_dimmest = "#b7b5ac"
+text_placeholder = "#9f9d96"
+
+# accent
+accent_blue = "#205ea6"
+accent_icon = "#bc5215"
+accent_progress = "#205ea6"
+
+# buttons
+btn_default = "#e6e4d9"
+btn_hover = "#dad8ce"
+btn_pressed = "#cecdc3"
+
+# success
+success = "#66800b"
+success_bg = "#d0e0c0"
+btn_success = "#66800b"
+btn_success_hover = "#587208"
+btn_success_pressed = "#4a6405"
+
+# warning
+warning = "#ad8301"
+warning_bg = "#e0dcc0"
+
+# error
+error = "#af3029"
+error_light = "#d14d41"
+error_bg = "#e0c8c0"
+btn_danger_bg = "#e0c8c0"
+btn_danger_hover = "#d0b4ac"
+btn_trash_hover = "#af3029"
+btn_trash_pressed = "#902420"
+
+# modal
+bg_modal_section = "#fffcf0"
+border_subtle = "#dad8ce"
+divider = "#dad8ce"

@@ -1,0 +1,153 @@
+# Nightfox — Project Colony theme family
+#
+# Source of truth. Edit here, then run `cargo run -p colony-tokens -- generate`.
+# Never edit anything under generated/ by hand.
+
+key = "nightfox"
+order = 16
+label_key = "settings_theme_nightfox"
+icon = "f0139"  # Nerd Font codepoint
+
+[label]
+fr = "Nightfox"
+en = "Nightfox"
+
+[[variants]]
+key = "nightfox"
+const = "NIGHTFOX"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_nightfox_nightfox"
+mode = "dark"
+
+[variants.label]
+fr = "Nightfox"
+en = "Nightfox"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#192330"
+accent = "#719cd6"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#192330"
+bg_sidebar = "#131a24"
+bg_card = "#2b3b51"
+bg_card_hover = "#3c5372"
+bg_card_pressed = "#39506d"
+bg_selected = "#2b3b51"
+bg_input = "#2b3b51"
+bg_progress = "#131a24"
+
+# text
+text_primary = "#cdcecf"
+text_secondary = "#aeafb0"
+text_muted = "#8e9098"
+text_dim = "#738091"
+text_dimmer = "#5c6a7c"
+text_dimmest = "#3e4e62"
+text_placeholder = "#5c6a7c"
+
+# accent
+accent_blue = "#719cd6"
+accent_icon = "#63cdcf"
+accent_progress = "#719cd6"
+
+# buttons
+btn_default = "#2b3b51"
+btn_hover = "#3c5372"
+btn_pressed = "#39506d"
+
+# success
+success = "#81b29a"
+success_bg = "#142820"
+btn_success = "#68907e"
+btn_success_hover = "#5c8472"
+btn_success_pressed = "#507866"
+
+# warning
+warning = "#dbc074"
+warning_bg = "#282418"
+
+# error
+error = "#c94f6d"
+error_light = "#d66880"
+error_bg = "#281820"
+btn_danger_bg = "#281820"
+btn_danger_hover = "#482830"
+btn_trash_hover = "#c94f6d"
+btn_trash_pressed = "#a9405c"
+
+# modal
+bg_modal_section = "#192330"
+border_subtle = "#2b3b51"
+divider = "#2b3b51"
+
+[[variants]]
+key = "dawnfox"
+const = "DAWNFOX"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_nightfox_dawnfox"
+mode = "light"
+
+[variants.label]
+fr = "Dawnfox"
+en = "Dawnfox"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#faf4ed"
+accent = "#286983"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#faf4ed"
+bg_sidebar = "#ebe5df"
+bg_card = "#ebd8ce"
+bg_card_hover = "#dacdc3"
+bg_card_pressed = "#c8beb4"
+bg_selected = "#ebd8ce"
+bg_input = "#ebd8ce"
+bg_progress = "#ebe5df"
+
+# text
+text_primary = "#575279"
+text_secondary = "#625c87"
+text_muted = "#6e6a86"
+text_dim = "#9893a5"
+text_dimmer = "#aea8b8"
+text_dimmest = "#c0bac8"
+text_placeholder = "#aea8b8"
+
+# accent
+accent_blue = "#286983"
+accent_icon = "#907aa9"
+accent_progress = "#286983"
+
+# buttons
+btn_default = "#ebd8ce"
+btn_hover = "#dacdc3"
+btn_pressed = "#c8beb4"
+
+# success
+success = "#618774"
+success_bg = "#d0e0d4"
+btn_success = "#618774"
+btn_success_hover = "#547a68"
+btn_success_pressed = "#476d5c"
+
+# warning
+warning = "#ea9d34"
+warning_bg = "#ece0c8"
+
+# error
+error = "#b4637a"
+error_light = "#c87890"
+error_bg = "#e8d0d4"
+btn_danger_bg = "#e8d0d4"
+btn_danger_hover = "#d8bcc4"
+btn_trash_hover = "#b4637a"
+btn_trash_pressed = "#965268"
+
+# modal
+bg_modal_section = "#faf4ed"
+border_subtle = "#dacdc3"
+divider = "#dacdc3"

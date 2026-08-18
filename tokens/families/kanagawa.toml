@@ -1,0 +1,228 @@
+# Kanagawa — Project Colony theme family
+#
+# Source of truth. Edit here, then run `cargo run -p colony-tokens -- generate`.
+# Never edit anything under generated/ by hand.
+
+key = "kanagawa"
+order = 4
+label_key = "settings_theme_kanagawa"
+icon = "f073e"  # Nerd Font codepoint
+
+[label]
+fr = "Kanagawa"
+en = "Kanagawa"
+
+[[variants]]
+key = "light"
+const = "KANAGAWA_LOTUS"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_light"
+mode = "light"
+
+[variants.label]
+fr = "Mode clair"
+en = "Light mode"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#f2ecbc"
+accent = "#4d699b"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#f2ecbc"
+bg_sidebar = "#e5ddb0"
+bg_card = "#e7dba0"
+bg_card_hover = "#d5cea3"
+bg_card_pressed = "#c8c093"
+bg_selected = "#d5cea3"
+bg_input = "#e4d794"
+bg_progress = "#e5ddb0"
+
+# text
+text_primary = "#545464"
+text_secondary = "#43436c"
+text_muted = "#716e61"
+text_dim = "#8a8980"
+text_dimmer = "#a09cac"
+text_dimmest = "#b0acb8"
+text_placeholder = "#8a8980"
+
+# accent
+accent_blue = "#4d699b"
+accent_icon = "#5d57a3"
+accent_progress = "#5d57a3"
+
+# buttons
+btn_default = "#e7dba0"
+btn_hover = "#d5cea3"
+btn_pressed = "#c8c093"
+
+# success
+success = "#6f894e"
+success_bg = "#b7d0ae"
+btn_success = "#6e915f"
+btn_success_hover = "#608554"
+btn_success_pressed = "#527949"
+
+# warning
+warning = "#de9800"
+warning_bg = "#f9d791"
+
+# error
+error = "#c84053"
+error_light = "#d7474b"
+error_bg = "#d9a594"
+btn_danger_bg = "#d9a594"
+btn_danger_hover = "#c89484"
+btn_trash_hover = "#c84053"
+btn_trash_pressed = "#a83043"
+
+# modal
+bg_modal_section = "#f2ecbc"
+border_subtle = "#d5cea3"
+divider = "#d5cea3"
+
+[[variants]]
+key = "dark"
+const = "KANAGAWA_WAVE"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_dark_mode"
+mode = "dark"
+
+[variants.label]
+fr = "Mode sombre"
+en = "Dark mode"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#1f1f28"
+accent = "#7e9cd8"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#1f1f28"
+bg_sidebar = "#181820"
+bg_card = "#2a2a37"
+bg_card_hover = "#363646"
+bg_card_pressed = "#54546d"
+bg_selected = "#363646"
+bg_input = "#2a2a37"
+bg_progress = "#223249"
+
+# text
+text_primary = "#dcd7ba"
+text_secondary = "#c8c093"
+text_muted = "#9cabca"
+text_dim = "#938aa9"
+text_dimmer = "#727169"
+text_dimmest = "#54546d"
+text_placeholder = "#727169"
+
+# accent
+accent_blue = "#7e9cd8"
+accent_icon = "#7fb4ca"
+accent_progress = "#7fb4ca"
+
+# buttons
+btn_default = "#2a2a37"
+btn_hover = "#363646"
+btn_pressed = "#54546d"
+
+# success
+success = "#98bb6c"
+success_bg = "#2b3328"
+btn_success = "#76946a"
+btn_success_hover = "#68885c"
+btn_success_pressed = "#5a7c4e"
+
+# warning
+warning = "#e6c384"
+warning_bg = "#49443c"
+
+# error
+error = "#e46876"
+error_light = "#ff5d62"
+error_bg = "#43242b"
+btn_danger_bg = "#43242b"
+btn_danger_hover = "#63343b"
+btn_trash_hover = "#c34043"
+btn_trash_pressed = "#a33033"
+
+# modal
+bg_modal_section = "#1f1f28"
+border_subtle = "#2a2a37"
+divider = "#2a2a37"
+
+[[variants]]
+key = "journal"
+const = "KANAGAWA_DRAGON"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_kanagawa_journal"
+mode = "light"
+notes = """
+Colony's own light take on Kanagawa Dragon: warm parchment surfaces, a
+slightly darker sidebar, dark brown text and a warm brown accent matched to
+the reference screenshot.
+"""
+
+[variants.label]
+fr = "Mode journal"
+en = "Journal mode"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#d5cea3"
+accent = "#7a6840"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#d5cea3"
+bg_sidebar = "#c8b98e"
+bg_card = "#c8b98e"
+bg_card_hover = "#bdae80"
+bg_card_pressed = "#b0a070"
+bg_selected = "#bdae80"
+bg_input = "#c8b98e"
+bg_progress = "#c8b98e"
+
+# text
+text_primary = "#43412e"
+text_secondary = "#5c5840"
+text_muted = "#736e55"
+text_dim = "#8a856c"
+text_dimmer = "#a09a80"
+text_dimmest = "#b5ae94"
+text_placeholder = "#8a856c"
+
+# accent
+accent_blue = "#7a6840"
+accent_icon = "#7a6840"
+accent_progress = "#7a6840"
+
+# buttons
+btn_default = "#c8b98e"
+btn_hover = "#bdae80"
+btn_pressed = "#b0a070"
+
+# success
+success = "#6f894e"
+success_bg = "#cbd8b8"
+btn_success = "#6e915f"
+btn_success_hover = "#608554"
+btn_success_pressed = "#527949"
+
+# warning
+warning = "#c49a20"
+warning_bg = "#e0d4a0"
+
+# error
+error = "#c84053"
+error_light = "#d7474b"
+error_bg = "#e0bfb0"
+btn_danger_bg = "#e0bfb0"
+btn_danger_hover = "#d0a898"
+btn_trash_hover = "#c84053"
+btn_trash_pressed = "#a83043"
+
+# modal
+bg_modal_section = "#d5cea3"
+border_subtle = "#b8a878"
+divider = "#b8a878"

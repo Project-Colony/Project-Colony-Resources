@@ -1,0 +1,223 @@
+# Material — Project Colony theme family
+#
+# Source of truth. Edit here, then run `cargo run -p colony-tokens -- generate`.
+# Never edit anything under generated/ by hand.
+
+key = "material"
+order = 14
+label_key = "settings_theme_material"
+icon = "f0509"  # Nerd Font codepoint
+
+[label]
+fr = "Material"
+en = "Material"
+
+[[variants]]
+key = "oceanic"
+const = "MATERIAL_OCEANIC"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_material_oceanic"
+mode = "dark"
+
+[variants.label]
+fr = "Oceanic"
+en = "Oceanic"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#263238"
+accent = "#89ddff"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#263238"
+bg_sidebar = "#1e272c"
+bg_card = "#2e3c42"
+bg_card_hover = "#3a4a52"
+bg_card_pressed = "#465862"
+bg_selected = "#546e7a"
+bg_input = "#2e3c42"
+bg_progress = "#1e272c"
+
+# text
+text_primary = "#b0bec5"
+text_secondary = "#9aaab2"
+text_muted = "#849aa4"
+text_dim = "#6e8490"
+text_dimmer = "#546e7a"
+text_dimmest = "#405a64"
+text_placeholder = "#546e7a"
+
+# accent
+accent_blue = "#89ddff"
+accent_icon = "#80cbc4"
+accent_progress = "#89ddff"
+
+# buttons
+btn_default = "#2e3c42"
+btn_hover = "#3a4a52"
+btn_pressed = "#465862"
+
+# success
+success = "#c3e88d"
+success_bg = "#1a3028"
+btn_success = "#a0c070"
+btn_success_hover = "#94b464"
+btn_success_pressed = "#88a858"
+
+# warning
+warning = "#ffcb6b"
+warning_bg = "#2e2e1e"
+
+# error
+error = "#ff5370"
+error_light = "#ff7088"
+error_bg = "#2e1e22"
+btn_danger_bg = "#2e1e22"
+btn_danger_hover = "#4e2e32"
+btn_trash_hover = "#ff5370"
+btn_trash_pressed = "#df4058"
+
+# modal
+bg_modal_section = "#263238"
+border_subtle = "#2e3c42"
+divider = "#2e3c42"
+
+[[variants]]
+key = "palenight"
+const = "MATERIAL_PALENIGHT"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_material_palenight"
+mode = "dark"
+
+[variants.label]
+fr = "Palenight"
+en = "Palenight"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#292d3e"
+accent = "#c792ea"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#292d3e"
+bg_sidebar = "#232838"
+bg_card = "#343a4e"
+bg_card_hover = "#414662"
+bg_card_pressed = "#515772"
+bg_selected = "#717cb4"
+bg_input = "#343a4e"
+bg_progress = "#232838"
+
+# text
+text_primary = "#a6accd"
+text_secondary = "#929abe"
+text_muted = "#7e86ae"
+text_dim = "#717cb4"
+text_dimmer = "#676e95"
+text_dimmest = "#515772"
+text_placeholder = "#676e95"
+
+# accent
+accent_blue = "#c792ea"
+accent_icon = "#82aaff"
+accent_progress = "#c792ea"
+
+# buttons
+btn_default = "#343a4e"
+btn_hover = "#414662"
+btn_pressed = "#515772"
+
+# success
+success = "#c3e88d"
+success_bg = "#202e28"
+btn_success = "#a0c070"
+btn_success_hover = "#94b464"
+btn_success_pressed = "#88a858"
+
+# warning
+warning = "#ffcb6b"
+warning_bg = "#2e2c1e"
+
+# error
+error = "#ff5370"
+error_light = "#ff7088"
+error_bg = "#2e1e22"
+btn_danger_bg = "#2e1e22"
+btn_danger_hover = "#4e2e32"
+btn_trash_hover = "#ff5370"
+btn_trash_pressed = "#df4058"
+
+# modal
+bg_modal_section = "#292d3e"
+border_subtle = "#343a4e"
+divider = "#343a4e"
+
+[[variants]]
+key = "deepocean"
+const = "MATERIAL_DEEPOCEAN"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_material_deepocean"
+mode = "dark"
+
+[variants.label]
+fr = "Deep Ocean"
+en = "Deep Ocean"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#0f111a"
+accent = "#84ffff"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#0f111a"
+bg_sidebar = "#090b10"
+bg_card = "#1a1c28"
+bg_card_hover = "#252836"
+bg_card_pressed = "#3b3f51"
+bg_selected = "#44475a"
+bg_input = "#1a1c28"
+bg_progress = "#090b10"
+
+# text
+text_primary = "#8f93a2"
+text_secondary = "#a0a4b4"
+text_muted = "#7880a0"
+text_dim = "#606888"
+text_dimmer = "#464b5d"
+text_dimmest = "#3b3f51"
+text_placeholder = "#464b5d"
+
+# accent
+accent_blue = "#84ffff"
+accent_icon = "#82aaff"
+accent_progress = "#84ffff"
+
+# buttons
+btn_default = "#1a1c28"
+btn_hover = "#252836"
+btn_pressed = "#3b3f51"
+
+# success
+success = "#c3e88d"
+success_bg = "#0c1a14"
+btn_success = "#a0c070"
+btn_success_hover = "#94b464"
+btn_success_pressed = "#88a858"
+
+# warning
+warning = "#ffcb6b"
+warning_bg = "#1a180c"
+
+# error
+error = "#ff5370"
+error_light = "#ff7088"
+error_bg = "#1a0c10"
+btn_danger_bg = "#1a0c10"
+btn_danger_hover = "#3a1c20"
+btn_trash_hover = "#ff5370"
+btn_trash_pressed = "#df4058"
+
+# modal
+bg_modal_section = "#0f111a"
+border_subtle = "#1a1c28"
+divider = "#1a1c28"

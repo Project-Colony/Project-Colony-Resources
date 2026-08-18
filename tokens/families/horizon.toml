@@ -1,0 +1,83 @@
+# Horizon — Project Colony theme family
+#
+# Source of truth. Edit here, then run `cargo run -p colony-tokens -- generate`.
+# Never edit anything under generated/ by hand.
+
+key = "horizon"
+order = 21
+label_key = "settings_theme_horizon"
+icon = "f06c0"  # Nerd Font codepoint
+
+[label]
+fr = "Horizon"
+en = "Horizon"
+
+[[variants]]
+key = "dark"
+const = "HORIZON_DARK"  # Rust const name, kept stable for Colony
+label_key = "settings_theme_dark_mode"
+mode = "dark"
+
+[variants.label]
+fr = "Mode sombre"
+en = "Dark mode"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#1c1e26"
+accent = "#26bbd9"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#1c1e26"
+bg_sidebar = "#16161c"
+bg_card = "#2e303e"
+bg_card_hover = "#3a3c4e"
+bg_card_pressed = "#484a60"
+bg_selected = "#2e303e"
+bg_input = "#2e303e"
+bg_progress = "#16161c"
+
+# text
+text_primary = "#d5d8da"
+text_secondary = "#bec0c4"
+text_muted = "#a0a2a8"
+text_dim = "#888a92"
+text_dimmer = "#6c6f93"
+text_dimmest = "#50526e"
+text_placeholder = "#6c6f93"
+
+# accent
+accent_blue = "#26bbd9"
+accent_icon = "#b877db"
+accent_progress = "#26bbd9"
+
+# buttons
+btn_default = "#2e303e"
+btn_hover = "#3a3c4e"
+btn_pressed = "#484a60"
+
+# success
+success = "#29d398"
+success_bg = "#141e1c"
+btn_success = "#22b480"
+btn_success_hover = "#1ca874"
+btn_success_pressed = "#169c68"
+
+# warning
+warning = "#fac29a"
+warning_bg = "#2a2218"
+
+# error
+error = "#e95678"
+error_light = "#f07090"
+error_bg = "#2a1620"
+btn_danger_bg = "#2a1620"
+btn_danger_hover = "#4a2630"
+btn_trash_hover = "#e95678"
+btn_trash_pressed = "#c94460"
+
+# modal
+bg_modal_section = "#1c1e26"
+border_subtle = "#2e303e"
+divider = "#2e303e"
