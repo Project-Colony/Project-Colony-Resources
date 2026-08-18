@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  tokens:
+    name: tokens and generated artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Formatting
+        run: cargo fmt --all --check
+
+      - name: Lints
+        run: cargo clippy --all-targets -- -D warnings
+
+      # Proves the palettes still round-trip against the snapshot of Colony's
+      # theme.rs, that both locales stay in step, and that text stays legible.
+      - name: Tests
+        run: cargo test --all
+
+      # Fails if someone edited generated/ by hand or forgot to regenerate.
+      - name: generated/ is in sync with tokens/
+        run: cargo run -p colony-tokens -- check
