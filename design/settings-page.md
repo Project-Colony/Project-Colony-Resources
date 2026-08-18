@@ -3,14 +3,17 @@
 Every Colony program's settings page has the same skeleton. A user who has
 configured one should not have to relearn anything to configure the next.
 
-Reference implementation: Colony's `src/ui/settings.rs`.
+Reference implementation: Colony's `src/ui/settings.rs`. Cross-checked against
+Digger (`src/ui.rs`) and Grape (`src/ui/app/preferences/`), which is where the
+per-program variations below come from. How the user *gets* here is in
+[navigation.md](navigation.md).
 
 ## Structure
 
 The settings page **replaces the content area** — it is not a modal, not a
-separate window, not a popover. The main sidebar stays where it is.
+separate window, not a popover. The program's own chrome stays where it is.
 
-Inside the content area:
+Inside the content area, drawn with Colony's categories:
 
 ```
 ┌──────────────────────────────────────────────────┐
@@ -27,28 +30,40 @@ Inside the content area:
 
 The header is the title at `sz(22)` bold `text_primary`, a spacer, then a close
 button at `sz(13)` `text_muted`, padding `[6, 14]`, radius 6. The close button
-sends the same toggle message as the app name in the sidebar.
+sends the same toggle message as the identity button that opened the page —
+there are two ways out and they are the same message.
 
 Category buttons follow the same selection rules as the main sidebar: selected
 gets an `accent` background with `text_primary`, hover gets `bg_card_hover`,
 padding `[8, 14]`, radius 8, full width.
 
-## The six categories
+## The categories
 
-In this order. Do not reorder them, and do not add a seventh without a reason
-that applies to the whole ecosystem.
+**The first three are fixed, and in this order:**
 
 | Category | Holds |
 |---|---|
-| **General** | startup, language, updates |
+| **General** | startup, updates, and anything that fits nowhere better |
 | **Appearance** | theme, colors, typography, effects, preview |
 | **Accessibility** | vision, motion, navigation, reading |
-| **Storage** | scan paths, install locations |
-| **About** | version, licence, credits |
-| **Shortcuts** | the keyboard reference |
 
-A program without storage to configure omits the Storage category rather than
-renaming it into something else. Omitting is fine; repurposing is not.
+After those come the program's own, and **About last** where it exists. That
+tail is genuinely per-program — what the three do today:
+
+| | Colony | Digger | Grape |
+|---|---|---|---|
+| 1–3 | General, Appearance, Accessibility | General, Appearance, Accessibility | General, Appearance, Accessibility |
+| then | Storage, Shortcuts | Language | Audio |
+| last | About | About | — |
+
+A program adds a category when it has a domain to configure that does not fit
+the first three — Grape has audio devices and an equalizer, Digger gives
+language its own tab rather than burying it in General as Colony does. It does
+not rename one of the first three into something else. Omitting is fine;
+repurposing is not.
+
+Do not reorder the first three. They are what a user hunting for a setting scans
+first, and they hold the same things in every program.
 
 ## Appearance, in detail
 

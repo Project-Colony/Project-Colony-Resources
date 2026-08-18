@@ -1,77 +1,69 @@
 # Navigation
 
-How a Colony program is laid out and how the user moves through it. Colony (the
-launcher) is the reference implementation; the specifics below were read from
-`src/ui/sidebar.rs` and `src/ui/settings.rs`.
+How a Colony program is laid out and how the user reaches its settings.
 
-## The shape
+Read from the three programs that implement it today — Colony's
+`src/ui/sidebar.rs`, Digger's `src/ui.rs`, Grape's `src/ui/app/view.rs`. They
+agree on the rule and differ on the chrome, so this page separates the two.
 
-A Colony window is two columns:
+## The rule: the program's identity is the way in
 
-```
-┌───────────────┬──────────────────────────────────┐
-│  Colony  ⚙    │                                  │
-│               │                                  │
-│  CATEGORIES   │           content area           │
-│  ▸ Games      │                                  │
-│  ▸ System     │   (replaced wholesale by the     │
-│  ▸ Utilities  │    settings page when open)      │
-│               │                                  │
-│  hint text    │                                  │
-└───────────────┴──────────────────────────────────┘
-```
+**The program's name in the top-left corner is what the user clicks to reach its
+settings.** Not a gear floating in a toolbar, not an entry buried in a list of
+sections, not a menu bar.
 
-The sidebar is persistent. The content area is what changes.
+That corner is the largest, most stable target in the window, and it is already
+where a user looks to answer "what am I in?". Making it also answer "how do I
+configure this?" costs no screen space and no extra chrome. All three programs
+do it, and a new Colony program that puts settings somewhere else is the one
+behaving oddly.
 
-## Settings live behind the app name
+Three things follow, and they are the actual requirements:
 
-**The program's name in the top-left corner is the settings button.** There is no
-separate gear button in a toolbar, no menu bar, no settings entry in the category
-list. The user clicks the word `Colony` and lands in settings.
+1. **The identity element is a button.** Whether that is a text label, a label
+   with a glyph, or a logo image plus the name.
+2. **It carries a visible open/closed state.** The user must be able to tell,
+   without clicking, whether they are already in settings.
+3. **The same control closes what it opened.** Toggling is symmetric.
 
-Concretely, in the sidebar header:
+## Two shapes, both correct
 
-- The app name, bold, at `sz(30)`.
-- A gear glyph immediately after it, at `sz(14)`. This is the affordance — it is
-  what tells the user the name is clickable. It is `text_primary` while settings
-  are open and `text_dimmer` otherwise, so it doubles as the open/closed
-  indicator.
-- Both sit inside **one** button, padding `[4, 8]`, corner radius 8, which
-  toggles settings.
-- That button's background is `bg_card_hover` on hover, `bg_selected` while
-  settings are open, and transparent otherwise.
+**Direct** — the click goes straight to the settings page. Colony and Digger.
+Right when settings is the only thing behind the name.
 
-Toggling is symmetric: the same control opens and closes. The settings page also
-carries its own close button (see [settings-page.md](settings-page.md)), so the
-user is never trapped, but the name in the corner always works.
+**Menu** — the click opens a small menu, and settings is one entry in it. Grape,
+whose logo menu also holds Library, Playlist and Queue. Right when the program
+has several top-level destinations that are not tabs.
 
-### Why it is done this way
+Do not add a menu with a single entry in it. If settings is the only thing
+behind the name, go direct.
 
-The name is the largest, most stable target in the window, and it is where a user
-looks to answer "what am I in?". Making it also answer "how do I configure this?"
-costs no screen space and no extra chrome. Colony has shipped it long enough that
-it is now what users of the ecosystem expect — a new Colony program that puts
-settings somewhere else is the one behaving oddly.
+## What the three actually do
 
-Port this convention as-is. If a program genuinely cannot (no sidebar, no
-persistent name), keep the rule that settings are reached from the program's
-identity, not from a floating gear icon.
+| | Colony | Digger | Grape |
+|---|---|---|---|
+| Chrome | vertical sidebar | horizontal tab bar | top bar |
+| The button | `Colony` at `sz(30)` bold + gear glyph `\u{f013}` at `sz(14)`, one button | `{ICON} Digger`, `button::text`, size 15, accent-coloured | logo image 28×28 + `Grape` at `size(20)` semibold |
+| Opens | the settings page | the settings page | a menu — Library / Playlist / Queue / Preferences / filters |
+| Open indicator | gear goes `text_dimmer` → `text_primary`; background `bg_selected` | label gains a trailing close glyph | the menu is visible |
+| Padding / radius | `[4, 8]`, radius 8 | `[2, 4]` | `[XS, MD]` |
 
-## Below the header
+The indicator mechanism is deliberately not standardised — a sidebar can afford a
+background change, a text-styled button in a tab bar cannot. Pick whatever reads
+clearly in your chrome. What is not optional is that *something* reads.
 
-In order:
+## The rest of the sidebar
 
-1. A `categories` label, `sz(13)`, `text_muted`. It names the list, it is not
-   clickable.
-2. The category buttons, one per section, each dispatching a "select section"
-   message carrying its index.
-3. A keyboard-shortcut hint, `sz(10)`, `text_dimmest`. Deliberately the quietest
-   text in the window — discoverable, never competing.
+For a program with a Colony-style sidebar, below the identity button, in order:
 
-The dimming ramp here is the point: `text_muted` for the list header,
-`text_dimmest` for the hint. Colony's palettes carry a six-step text ramp
-(`text_primary` → `text_dimmest`) precisely so this kind of hierarchy is
-expressible without inventing one-off greys.
+1. A section-list label — `sz(13)`, `text_muted`. Names the list; not clickable.
+2. The section buttons, each dispatching a select-section message with its index.
+3. A keyboard-shortcut hint — `sz(10)`, `text_dimmest`. Deliberately the quietest
+   text in the window: discoverable, never competing.
+
+The dimming ramp is the point. Colony's palettes carry a six-step text ramp
+(`text_primary` → `text_dimmest`) precisely so this hierarchy is expressible
+without inventing one-off greys.
 
 ## Selection state
 
@@ -81,10 +73,21 @@ A selected item is marked with **background**, not with a coloured label:
 - hovered → background `bg_card_hover`
 - neither → transparent background, text `text_muted`
 
-Corner radius 8, padding `[8, 14]`, full width. Keep hover and selected visually
-distinct; a hover state that looks like selection makes the list feel broken.
+Keep hover and selected visually distinct; a hover state that looks like
+selection makes a list feel broken.
 
 ## Animation
 
-The sidebar slide is 200 ms (`App::SIDEBAR_ANIM_MS`). Motion is a preference —
-Settings → Accessibility → Motion — and a program that animates must honour it.
+Colony's sidebar slide is 200 ms (`App::SIDEBAR_ANIM_MS`). Motion is a user
+preference — Settings → Accessibility → Motion — and a program that animates must
+honour it.
+
+## Known drift: "Settings" or "Preferences"?
+
+Colony and Digger say **Settings**. Grape says **Preferences**, and names its
+message `OpenPreferences`. Both are defensible in isolation; having both in one
+ecosystem is not, because it is the word the user searches for.
+
+Not resolved here — picking one is a call for the ecosystem's owner, and it
+costs a rename in whichever program loses. Recorded so the choice is made
+deliberately rather than by whichever program is written next.
