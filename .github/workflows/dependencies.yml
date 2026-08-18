@@ -1,0 +1,42 @@
+name: Dependencies
+
+# Deliberately NOT a pull-request gate. Checking currency on every PR would turn
+# any unrelated change red the moment a transitive dependency publishes a patch,
+# which trains everyone to ignore a red build — the opposite of the point.
+#
+# Weekly, plus on demand. Dependabot does the bumping; this is the alarm that
+# rings when its PRs are piling up unmerged.
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  currency:
+    name: everything on its latest release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Lockfile is current
+        run: |
+          cp Cargo.lock Cargo.lock.before
+          cargo update --quiet
+          if ! diff -q Cargo.lock.before Cargo.lock >/dev/null; then
+            echo "::error::Cargo.lock is behind. Run 'cargo update && cargo test'."
+            diff -u Cargo.lock.before Cargo.lock | head -60
+            exit 1
+          fi
+          echo "lockfile is current"
+
+      - name: Manifests are on the latest published release
+        run: |
+          cargo install cargo-outdated --locked
+          # --root: direct dependencies only. A transitive crate we do not
+          # declare is its owner's upgrade to make, not ours.
+          cargo outdated --root-deps-only --exit-code 1

@@ -6,9 +6,12 @@ placeholders, commit. The reasoning behind them is in
 
 | File | Copy to | Then |
 |---|---|---|
+| `program/README.md` | repo root | fill the placeholders — see [design/documentation.md](../design/documentation.md) |
+| `program/docs/README.md` | `docs/README.md` | delete the rows you do not have |
 | `release.yml` | `.github/workflows/release.yml` | replace `{{APP_NAME}}` with the binary name, lowercase |
 | `release-please-config.json` | repo root | usually nothing |
 | `.release-please-manifest.json` | repo root | set the starting version |
+| `dependabot.yml` | `.github/dependabot.yml` | nothing — then merge the PRs it opens |
 | `sign-release.sh` | `scripts/sign-release.sh` | keep it executable |
 
 A `colony.json` to copy is in [`manifests/examples/`](../manifests/examples/) —
@@ -41,3 +44,10 @@ than discovering the gap after a release.
 **`sign-release.sh`** is copied verbatim from Colony, which is where it is
 maintained today. It needs only `openssl`. It is reproduced here so a new program
 does not have to go read the launcher's source to find it.
+
+**Pin the actions.** `release.yml` ships with version tags (`@v4`) because a
+commit SHA has to be resolved against the real action repository at the moment
+you adopt it. A release workflow holds `contents: write` and can sign and
+publish, so pin its actions by SHA once you have copied it — Dependabot bumps
+the SHA and the trailing version comment together. See
+[design/dependencies.md](../design/dependencies.md).
