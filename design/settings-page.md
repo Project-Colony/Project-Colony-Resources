@@ -29,8 +29,9 @@ Inside the content area, drawn with Colony's categories:
 └──────────────┴───────────────────────────────────┘
 ```
 
-The page is titled **Preferences** — `Préférences` in French. Not "Settings":
-see [navigation.md](navigation.md).
+The page is titled **Preferences**, not "Settings" — see
+[navigation.md](navigation.md). (`Préférences` in the French locale; English is
+the canonical string.)
 
 The header is the title at `sz(22)` bold `text_primary`, a spacer, then a close
 button at `sz(13)` `text_muted`, padding `[6, 14]`, radius 6. The close button

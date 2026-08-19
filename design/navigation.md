@@ -84,9 +84,10 @@ honour it.
 
 ## The word the user sees is "Preferences"
 
-Colony's page title is `Préférences` in French and `Preferences` in English
-(`settings_title`), and Grape agrees — its menu entry is Preferences. That is
-settled: **the user-facing word is Preferences**, not Settings.
+Colony's `settings_title` is `Preferences` in English — the canonical string —
+and `Préférences` in the French locale. Grape agrees; its menu entry is
+Preferences. That is settled: **the user-facing word is Preferences**, not
+Settings.
 
 Only the *code* is inconsistent. Colony calls the message `ToggleSettings` and
 prefixes every key `settings_*`; Grape calls it `OpenPreferences`. That costs

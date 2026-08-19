@@ -76,10 +76,24 @@ Notes on each part:
   ecosystem, then the platform-native path, then source.
 - **`## Documentation`** links into `docs/`. It does not duplicate it.
 
-Write the README in the language of its audience. An end-user program written
-for a French-speaking audience has a French README; a library other developers
-consume has an English one. Do not machine-translate one into the other — pick
-one and write it properly.
+## Everything is written in English
+
+The base language of every Project Colony project is **English**: the README,
+`docs/`, source code, identifiers, code comments, and commit messages.
+
+French is not a second documentation language — it is one of the two **UI
+locales** a program ships, which is a different thing entirely and is covered in
+[i18n.md](i18n.md). A user reads French in the running program; anyone reading
+the repository reads English.
+
+This is not a preference about which language is better. It is that a repository
+with English source, English commits and a French README makes a reader switch
+languages to follow one thread, and that a public repository reaches people who
+read neither by default — English is the one that costs the fewest of them.
+
+Two repositories predate this and are the outliers: **Grape** and **VN-Moteur**
+have French READMEs, and VN-Moteur's `docs/` is French throughout. Translate
+them when either is next worked on; do not machine-translate, rewrite.
 
 ## `docs/`
 

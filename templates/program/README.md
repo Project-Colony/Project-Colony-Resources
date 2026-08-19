@@ -85,9 +85,9 @@ GPL-3.0-or-later. See [LICENSE](LICENSE).
 Placeholders: {{NAME}} display name, {{name}} lowercase binary name,
 {{CATEGORY}} the colony.json category, {{RUST_VERSION}} the rust-version floor.
 
-Write this in the language of its audience — French for an end-user program
-aimed at French speakers, English for a library other developers consume. Pick
-one and write it properly rather than translating.
+Write this in English. English is the base language of every Project Colony
+repository — README, docs, code, comments, commits. French is a UI locale the
+program ships, not a documentation language; see design/i18n.md.
 
 The conventions behind this skeleton are in design/documentation.md.
 -->
