@@ -1,10 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["tools/colony-tokens"]
-
-# `crates/colony-ui` (the shared iced widget + theme crate every Colony program
-# will depend on) joins this workspace in phase 2. Keeping the workspace here
-# from day one means adding it is a one-line change.
+members = ["crates/colony-ui", "tools/colony-tokens"]
 
 [workspace.package]
 edition = "2021"
@@ -21,3 +17,8 @@ anyhow = "1.0.104"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1.0.151", features = ["preserve_order"] }
 toml = "1.1.4"
+
+# The shared UI baseline. Declared here so every Colony program that depends on
+# colony-ui inherits the same iced, instead of each repo drifting on its own —
+# which is how D1Gg2r ended up on 0.13 while everything else moved to 0.14.
+iced = "0.14.0"
