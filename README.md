@@ -49,34 +49,54 @@ Colony shipped before the import; see [Guarantees](#guarantees).
 | `design/*.md` | the conventions — layout, navigation, settings, theming, type, i18n, releases, dependencies, docs |
 | `manifests/examples/*.json` | working `colony.json` files for each shape |
 | `templates/` | release workflow, release-please config, signing script |
+| `crates/colony-ui/` | the crate programs depend on — theme, labels, widgets |
 | `tools/colony-tokens/` | the generator and its tests |
 
 ## Consuming this repo
 
 ### Rust / iced programs
 
-The shared `colony-ui` crate is phase 2. Until it lands, a program can include
-the generated palettes directly from a checkout:
-
-```rust
-// The module doing this must already define `ThemePalette`, `hex()` and `Color`.
-include!("../../../Project-Colony-Resources/generated/rust/palettes.rs");
-```
-
-Once `colony-ui` exists, that becomes a git dependency and the `include!` goes
-away:
+One dependency:
 
 ```toml
 colony-ui = { git = "https://github.com/Project-Colony/Project-Colony-Resources" }
 ```
 
-The generated file defines:
+```rust
+use colony_ui::{i18n, theme, widgets, Typography};
 
-- `ThemePalette::<CONST>` — one per variant, e.g. `ThemePalette::GRUVBOX_DARK`
-- `THEME_FAMILIES` — the ordered catalog the Settings picker renders, replacing
-  the hand-maintained `theme_families` vec in `settings.rs`
-- `resolve(family, variant)` and `FALLBACK_PALETTE` — the config → palette lookup
-- `ACCENT_OVERRIDES` and `accent_key_to_color(key)`
+// At startup, from the user's config — two strings, nothing else:
+theme::set_active_theme("gruvbox", "dark");
+i18n::set_locale(i18n::Locale::from_tag(&user_language));
+
+// Then style anything from the active palette:
+let bg = theme::Palette::BG_PRIMARY();
+
+// And build the preferences page out of shared widgets:
+widgets::theme_picker(&typo, &family, &variant, |f, v| Message::SelectTheme(f, v))
+```
+
+`colony-ui` gives you:
+
+| | |
+|---|---|
+| `ThemePalette` + 57 consts | the palette shape and every theme, e.g. `ThemePalette::GRUVBOX_DARK` |
+| `set_active_theme` / `active_palette` / `Palette::*` | the active theme, and the screaming-case accessors Colony's widgets already use |
+| `THEME_FAMILIES` | the ordered picker catalog — glyph, labels, swatches, modes |
+| `resolve` / `FALLBACK_PALETTE` | config → palette, degrading instead of failing on an unknown theme |
+| `ACCENT_OVERRIDES` / `accent_key_to_color` / `set_active_accent` | the eight accents and the user override |
+| `set_high_contrast` / `with_high_contrast` | derived, so no theme ships a high-contrast twin |
+| `app_tint` / `contrast_on` / `ColorExt` | identity tints and the shared "is this light?" answer |
+| `i18n::t` | theme and accent labels, both locales, embedded |
+| `widgets::*` | collapsible section, functional toggle, theme picker, accent picker |
+
+**A new theme family reaches every program with zero code changes** — no match
+arm, no picker entry, no locale edit. Add the TOML, regenerate, bump the
+dependency.
+
+The crate needs to know how the host scales text, since it cannot reach the
+host's state — pass a [`Typography`] with the product of the user's font-size
+preferences.
 
 ### Everything else
 
@@ -183,10 +203,15 @@ from.
 
 ## Status
 
-Phase 1 — foundations. Tokens, generators, conventions and the release contract
-are in place; no consumer has been rewired yet. Colony, SphereCord and the rest
-still ship their own copies until phase 2 lands `crates/colony-ui` and migrates
-them one by one.
+Phase 2. `crates/colony-ui` exists and is tested — a program can depend on it
+today and get the palettes, the resolver, the accents, the labels and the shared
+widgets.
+
+**No consumer has been migrated yet.** Colony, SphereCord and the rest still
+ship their own copies. Migrating them is the next step, one at a time, starting
+with Colony: replacing its `src/ui/theme.rs` with this crate deletes roughly
+2900 lines from it, including the 100 KB of hand-maintained colour constants
+that another repository was downloading and regex-parsing.
 
 ## Licence
 
