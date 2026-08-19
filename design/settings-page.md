@@ -17,21 +17,48 @@ Inside the content area, drawn with Colony's categories:
 
 ```
 ┌──────────────────────────────────────────────────┐
-│  Settings                               [Close]  │
+│  Preferences                            [Close]  │
 ├──────────────┬───────────────────────────────────┤
-│ General      │                                   │
-│ Appearance   │   sections for the active         │
-│ Accessibility│   category, stacked vertically    │
+│ General      │  General settings                 │
+│ Appearance   │  Preferences are saved            │
+│ Accessibility│  automatically.                   │
 │ Storage      │                                   │
-│ About        │                                   │
-│ Shortcuts    │                                   │
+│ About        │    Startup                     ›  │
+│ Shortcuts    │    Language                    ›  │
+│              │    Updates                     ›  │
 └──────────────┴───────────────────────────────────┘
 ```
+
+The page is titled **Preferences** — `Préférences` in French. Not "Settings":
+see [navigation.md](navigation.md).
 
 The header is the title at `sz(22)` bold `text_primary`, a spacer, then a close
 button at `sz(13)` `text_muted`, padding `[6, 14]`, radius 6. The close button
 sends the same toggle message as the identity button that opened the page —
 there are two ways out and they are the same message.
+
+Each category opens with its own heading and a one-line description underneath,
+in `text_muted`. General's description carries the contract that matters most:
+
+> Preferences are saved automatically.
+
+**There is no Save button, and there must not be one.** A change applies when it
+is made. Anything that cannot apply immediately says so in its own description.
+
+## Sections are collapsible
+
+Inside a category, each section is a collapsible row, and this is the pattern to
+copy exactly — it is what makes a long preferences page navigable:
+
+- The header is **flat**: no box, no background. Just the title and a chevron.
+- Title at `sz(15)` bold, `text_primary`.
+- The chevron sits at the far right: `\u{f054}` pointing right when collapsed,
+  `\u{f078}` pointing down when expanded.
+- The whole header row is the toggle, not just the chevron.
+- Expanded state is per-section and remembered while the page is open.
+
+A category page therefore reads as a short list of closed rows on arrival —
+Startup, Language, Updates — rather than a wall of every control at once.
 
 Category buttons follow the same selection rules as the main sidebar: selected
 gets an `accent` background with `text_primary`, hover gets `bg_card_hover`,
@@ -72,14 +99,26 @@ this repo feeds directly.
 
 - **Theme** — the family/variant picker. Renders from `THEME_FAMILIES` in
   `generated/rust/palettes.rs`: one row per family, showing the family's Nerd
-  Font glyph and its localized name, then a horizontal row of variant cards. Each
-  card is drawn from that variant's `swatch` (a background and an accent), which
-  is why the swatch is stored in `tokens/` next to the palette rather than
-  recomputed — a picker card that does not resemble the theme it selects is a
-  picker that lies.
-- **Colors** — the accent override. Eight named accents from
-  `tokens/accents.toml`, plus *auto*. "Auto" is the absence of an override: fall
-  back to the active palette's own `accent_blue`. Never store "auto" as a colour.
+  Font glyph and its localized name, then a horizontal row of variant cards.
+
+  A card is a wide rectangle filled with the variant's `swatch.bg`, crossed by a
+  thin bar in its `swatch.accent`, with the variant's localized name at the
+  bottom-left and a check mark on the selected one. That is why the swatch lives
+  in `tokens/` next to the palette rather than being recomputed — a picker card
+  that does not resemble the theme it selects is a picker that lies.
+
+  Applying a theme raises a dismissible confirmation toast (`theme_applied`,
+  "Theme applied."). The change itself is immediate; the toast exists because
+  switching to a neighbouring variant can otherwise be hard to notice.
+- **Colors** — the accent override. A row of eight swatches, one per accent in
+  `tokens/accents.toml`, drawn as filled circles with a check on the selected
+  one. Below them, a separate **auto accent from background** toggle
+  (`settings_auto_accent`), which adapts the accent to the surfaces rather than
+  pinning it — off by default.
+
+  Two different notions of "auto" that are easy to conflate: that toggle is a
+  *behaviour*, whereas at the code level an unset override simply resolves to
+  the active palette's own `accent_blue`. Never store "auto" as a colour value.
 - **Typography** — font family and size. See [typography.md](typography.md).
 - **Effects** — visual extras. Must degrade to nothing when the user has asked
   for reduced motion.

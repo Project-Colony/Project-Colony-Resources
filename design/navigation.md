@@ -82,12 +82,17 @@ Colony's sidebar slide is 200 ms (`App::SIDEBAR_ANIM_MS`). Motion is a user
 preference — Settings → Accessibility → Motion — and a program that animates must
 honour it.
 
-## Known drift: "Settings" or "Preferences"?
+## The word the user sees is "Preferences"
 
-Colony and Digger say **Settings**. Grape says **Preferences**, and names its
-message `OpenPreferences`. Both are defensible in isolation; having both in one
-ecosystem is not, because it is the word the user searches for.
+Colony's page title is `Préférences` in French and `Preferences` in English
+(`settings_title`), and Grape agrees — its menu entry is Preferences. That is
+settled: **the user-facing word is Preferences**, not Settings.
 
-Not resolved here — picking one is a call for the ecosystem's owner, and it
-costs a rename in whichever program loses. Recorded so the choice is made
-deliberately rather than by whichever program is written next.
+Only the *code* is inconsistent. Colony calls the message `ToggleSettings` and
+prefixes every key `settings_*`; Grape calls it `OpenPreferences`. That costs
+nothing to a user and is not worth a rename on its own — but a new program
+should name its internals after what the screen says, and use `preferences_*`.
+
+Colony's own tutorial states the rule better than this page can:
+
+> The gear icon next to the title opens the preferences.
