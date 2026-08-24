@@ -48,6 +48,10 @@ pub const VENDOR: &str = "Colony";
 /// inside it.
 pub const APPS: &str = "apps";
 
+/// Sub-directory that isolates the cache on platforms where the cache root is
+/// shared with config and data — Windows.
+pub const CACHE: &str = "cache";
+
 /// Reject anything that is not a single, safe path component.
 ///
 /// The program name reaches these functions from a manifest or a config file in
@@ -108,10 +112,21 @@ pub mod locate {
 
     /// See [`super::cache_dir`].
     pub fn cache_dir(program: &str) -> io::Result<PathBuf> {
-        Ok(dirs::cache_dir()
+        let base = dirs::cache_dir()
             .ok_or_else(|| missing("cache"))?
             .join(VENDOR)
-            .join(component(program)?))
+            .join(component(program)?);
+
+        // Linux has ~/.cache and macOS has ~/Library/Caches, but Windows has no
+        // cache location at all: `dirs::cache_dir()` returns LocalAppData there,
+        // the very same root as config and data. Without a distinguishing
+        // component, "clear the cache" would delete the preferences sitting
+        // next to it. `CACHE` keeps the three separable on every platform.
+        Ok(if cfg!(windows) {
+            base.join(CACHE)
+        } else {
+            base
+        })
     }
 
     /// See [`super::apps_dir`].
@@ -260,5 +275,28 @@ mod tests {
             locate::config_dir("Colony").unwrap(),
             locate::data_dir("Colony").unwrap()
         );
+    }
+
+    /// The one thing that must hold everywhere: deleting the cache directory
+    /// must not be able to take config or data with it. On Windows all three
+    /// roots are LocalAppData, so this is only true because `cache_dir` adds a
+    /// component there.
+    #[test]
+    fn the_cache_is_never_the_config_or_data_directory() {
+        let cache = locate::cache_dir("Colony").unwrap();
+        let config = locate::config_dir("Colony").unwrap();
+        let data = locate::data_dir("Colony").unwrap();
+
+        assert_ne!(cache, config);
+        assert_ne!(cache, data);
+        assert!(!config.starts_with(&cache), "config sits inside the cache");
+        assert!(!data.starts_with(&cache), "data sits inside the cache");
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn windows_isolates_the_cache_under_the_shared_root() {
+        let cache = locate::cache_dir("Colony").unwrap();
+        assert!(cache.ends_with("Colony\\Colony\\cache"), "{cache:?}");
     }
 }

@@ -20,9 +20,19 @@ There are three roots, and they are not interchangeable:
 | **data** | `~/.local/share/Colony/<P>/` | `%LOCALAPPDATA%\Colony\<P>\` | `~/Library/Application Support/Colony/<P>/` |
 | **cache** | `~/.cache/Colony/<P>/` | `%LOCALAPPDATA%\Colony\<P>\cache\` | `~/Library/Caches/Colony/<P>/` |
 
-**Windows is `AppData\Local`, never `AppData\Roaming`.** Roaming is synchronised
-to the domain profile on managed machines; a launcher's installed binaries and
-caches have no business travelling across a network at logon.
+**Windows is `AppData\Local`, never `AppData\Roaming`.** `%LOCALAPPDATA%` *is*
+`AppData\Local` — the same place under two names, not a third option.
+
+Roaming is copied to and from the domain server at every logon and logoff on
+machines with roaming profiles, and counts against a per-user quota. It is meant
+for a few kilobytes of settings that make sense on any machine. Installed
+binaries, databases and caches are none of those things, and putting them there
+makes a user's logon slower every time they sign in.
+
+Windows also has no separate cache location: `dirs::cache_dir()` returns
+LocalAppData too, so **all three roots collapse into one directory there**. That
+is why cache gets its own `cache\` component on Windows — without it, clearing
+the cache would delete the preferences sitting beside it.
 
 On Windows and macOS, config and data land in the **same directory** — those
 platforms do not draw the distinction Linux does. Separate the two by
