@@ -29,15 +29,27 @@ for a few kilobytes of settings that make sense on any machine. Installed
 binaries, databases and caches are none of those things, and putting them there
 makes a user's logon slower every time they sign in.
 
-Windows also has no separate cache location: `dirs::cache_dir()` returns
-LocalAppData too, so **all three roots collapse into one directory there**. That
-is why cache gets its own `cache\` component on Windows — without it, clearing
-the cache would delete the preferences sitting beside it.
+### Only Linux keeps the three roots apart
 
-On Windows and macOS, config and data land in the **same directory** — those
-platforms do not draw the distinction Linux does. Separate the two by
-sub-directory, never by assuming the roots differ, or a file will collide on two
-platforms out of three and be fine on the one you tested.
+| | config vs data | vs cache |
+|---|---|---|
+| Linux | different | different |
+| Windows | **same** | same root, split by `cache\` |
+| macOS | **same** | different (`Library/Caches`) |
+
+Two consequences, and both bite on the platform you are least likely to be
+developing on:
+
+- **Never separate config from data by relying on the roots differing.** They
+  are the same directory on two platforms out of three. Separate them by
+  sub-directory — `preferences/`, `apps/` — or a file will collide everywhere
+  except where you tested it.
+- **Windows has no cache location at all.** `dirs::cache_dir()` returns
+  LocalAppData, the same root as config and data, so the layout adds a `cache\`
+  component there. Without it, clearing the cache would delete the preferences
+  sitting beside it. `paths::cache_dir` does this for you; the invariant is that
+  the cache directory never equals nor contains the config or data directory,
+  and that is what the crate tests.
 
 ## Which root for what
 
@@ -100,12 +112,15 @@ let tmp   = paths::cache_dir("Digger")?.join("metrics.bin");
 These create the directory. To *show* a path without bringing it into existence
 — an About screen, a log line — use `paths::locate::*`, which are pure.
 
-Two reasons this matters more than it looks:
+Three reasons this matters more than it looks:
 
 - **`dirs::config_dir()` and `dirs::config_local_dir()` are identical on Linux
   and different on Windows** (Roaming vs Local). A program written and tested on
   Linux cannot tell which one it picked. The helper picks `config_local_dir`,
   once, for everyone.
+- **`cache_dir` adds the `cache\` component on Windows and nowhere else.** That
+  is a rule nobody will remember to apply by hand, and forgetting it makes
+  "clear the cache" destructive.
 - The program name is joined into a path that later gets written to and removed.
   The helper rejects `..`, separators and empty names; hand-rolled code
   historically did not.
@@ -117,7 +132,7 @@ Current state, so a migration is a decision rather than a discovery:
 | Program | What | Should be |
 |---|---|---|
 | **Colony** | uses `dirs::config_dir()` → **Roaming** on Windows | `config_local_dir()` → Local |
-| **Colony** | caches in `<config>/Colony/Colony/cache/` | `<cache>/Colony/Colony/` |
+| **Colony** | caches in `<config>/Colony/Colony/cache/` | `<cache>/Colony/Colony/` — on Windows this lands in the same place once the root moves to Local, so only Linux and macOS actually move the files |
 | **Colony** | `docs/faq.md` and `docs/architecture.md` document `~/.config/colony/preferences.json`; the code writes `~/.config/Colony/Colony/preferences/preferences.json` | fix the docs |
 | **Digger** | `history.db` in `<data>/digger/` — lowercase, no `Colony/` level | `<data>/Colony/Digger/` |
 | **Grape** | `logs/` and `history.json` inside the config directory | `<data>/Colony/Grape/` |
