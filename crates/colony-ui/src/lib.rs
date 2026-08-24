@@ -21,6 +21,7 @@
 //! generated into this crate — see the repository README.
 
 pub mod i18n;
+pub mod paths;
 pub mod theme;
 pub mod widgets;
 

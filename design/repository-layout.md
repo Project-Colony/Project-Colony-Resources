@@ -176,7 +176,9 @@ Nothing at the root that a reader has to skip past. Directories only:
 | `config/` | data files the program embeds or reads at runtime |
 | `reference/` | third-party material kept for study; never compiled |
 
-Root *files* are listed in [documentation.md](documentation.md).
+Root *files* are listed in [documentation.md](documentation.md). Where the
+program writes at **runtime** — config, data and cache on each platform — is
+[filesystem.md](filesystem.md); none of it belongs in the repository.
 
 ## When you add a crate
 

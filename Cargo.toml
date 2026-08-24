@@ -22,3 +22,7 @@ toml = "1.1.4"
 # colony-ui inherits the same iced, instead of each repo drifting on its own —
 # which is how D1Gg2r ended up on 0.13 while everything else moved to 0.14.
 iced = "0.14.0"
+
+# Platform-standard directories. The Colony filesystem layout is defined on top
+# of it in colony-ui's `paths` module — see design/filesystem.md.
+dirs = "6.0.0"

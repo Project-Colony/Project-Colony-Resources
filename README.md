@@ -46,7 +46,7 @@ Colony shipped before the import; see [Guarantees](#guarantees).
 | `generated/i18n/labels.{fr,en}.json` | display strings, both locales |
 | `generated/palette.schema.json` | JSON Schema validating `tokens/families/*.toml` |
 | `generated/colony.schema.json` | JSON Schema validating a program's `colony.json` |
-| `design/*.md` | the conventions — layout, navigation, settings, theming, type, i18n, releases, dependencies, docs |
+| `design/*.md` | the conventions — layout, filesystem, navigation, settings, theming, type, i18n, releases, dependencies, docs |
 | `manifests/examples/*.json` | working `colony.json` files for each shape |
 | `templates/` | release workflow, release-please config, signing script |
 | `crates/colony-ui/` | the crate programs depend on — theme, labels, widgets |
@@ -88,6 +88,7 @@ widgets::theme_picker(&typo, &family, &variant, |f, v| Message::SelectTheme(f, v
 | `set_high_contrast` / `with_high_contrast` | derived, so no theme ships a high-contrast twin |
 | `app_tint` / `contrast_on` / `ColorExt` | identity tints and the shared "is this light?" answer |
 | `i18n::t` | theme and accent labels, both locales, embedded |
+| `paths::*` | `Colony/<Program>/` config, data and cache dirs on all three platforms |
 | `widgets::*` | collapsible section, functional toggle, theme picker, accent picker |
 
 **A new theme family reaches every program with zero code changes** — no match
@@ -178,7 +179,7 @@ Copy the workflow and configs from [`templates/`](templates/), a manifest from
 [`manifests/examples/`](manifests/examples/), and follow the checklist at the end
 of `design/releases.md`.
 
-Three rules apply to every repository in the organisation, program or not:
+Four rules apply across the organisation:
 
 - **[design/repository-layout.md](design/repository-layout.md) — crates and
   directories are arranged the same way everywhere.** `crates/<prefix>-<role>/`
@@ -189,6 +190,10 @@ Three rules apply to every repository in the organisation, program or not:
   latest release, always.** At creation, at every change, and on the weekly
   automated pass. Versions are pinned in full in the manifest so staleness shows
   up in a diff instead of hiding in the lockfile.
+- **[design/filesystem.md](design/filesystem.md) — every program writes to
+  `Colony/<Program>/`.** Config, data and cache, on all three platforms, with
+  Windows on `AppData\Local` rather than Roaming. `colony_ui::paths` computes
+  it so nobody rebuilds the path by hand.
 - **[design/documentation.md](design/documentation.md) — the README and `docs/`
   are laid out the same way everywhere.** `docs/` is sorted by *who is reading*
   — `guide/`, `internals/`, `project/` — behind a `docs/README.md` index, and
