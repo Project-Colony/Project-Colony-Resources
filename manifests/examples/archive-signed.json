@@ -6,7 +6,7 @@
   "platforms": ["linux"],
   "releaseFiles": {
     "linux": {
-      "tag": "latest",
+      "tag": "v1.4.0",
       "filePattern": "example-app-*-linux-x86_64.tar.gz",
       "binary": "example-app",
       "sha256": "0000000000000000000000000000000000000000000000000000000000000000"

@@ -10,6 +10,10 @@
 #   {{APP_NAME}}-macos  {{APP_NAME}}-macos-x86
 #
 # See design/releases.md in Project-Colony-Resources for the full contract.
+#
+# Action refs are pinned to commit SHAs on purpose: this workflow handles the
+# organisation's release signing key, and whoever can move a floating tag can
+# read that secret.
 
 name: Release
 
@@ -37,10 +41,22 @@ jobs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         id: release
         with:
           release-type: rust
+
+      # release-please PUBLISHES the release - and moves /releases/latest -
+      # before a single binary exists. For the whole build window every Colony
+      # in the field would show an update badge whose every click fails: a
+      # missing asset first, then a fail-closed signature refusal once the
+      # binary is up but its .sig is not. Held as a draft here and published by
+      # the `publish` job once everything is verified present.
+      - name: Hold the release as a draft until it is complete
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release edit "${{ steps.release.outputs.tag_name }}" --draft=true
 
   build:
     name: build ${{ matrix.asset }}
@@ -67,13 +83,13 @@ jobs:
             asset: "{{APP_NAME}}-macos-x86"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4 # stable branch
         with:
           targets: ${{ matrix.target }}
 
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
         with:
           key: ${{ matrix.target }}
 
@@ -95,19 +111,66 @@ jobs:
         if: runner.os == 'Windows'
         run: copy target\${{ matrix.target }}\release\{{APP_NAME}}.exe ${{ matrix.asset }}
 
+      # A manifest can PARSE perfectly and still leave the program listed in
+      # Colony with no Download button, because none of its assets match a
+      # convention. `colony validate-manifest` given the asset names catches
+      # exactly that. Linux only: one check per release is enough.
+      #
+      # Deliberately ordered BEFORE the signing step: this downloads and runs a
+      # binary, and the signing key must never have touched this runner's disk
+      # while a fetched executable is running on it.
+      - name: Validate colony.json
+        if: runner.os == 'Linux'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl -fsSL -o colony-validator \
+            https://github.com/Project-Colony/Colony/releases/latest/download/colony-linux
+          chmod +x colony-validator
+          ./colony-validator validate-manifest colony.json \
+            {{APP_NAME}}-linux {{APP_NAME}}-windows.exe {{APP_NAME}}-macos {{APP_NAME}}-macos-x86
+          rm -f colony-validator
+
+      # The signature proves provenance and says nothing about whether the
+      # binary RUNS. An artefact built for the wrong architecture, or one that
+      # aborts under the release profile's LTO, would otherwise be signed,
+      # published and installed with every check green.
+      - name: Smoke-test the artifact
+        if: matrix.target != 'x86_64-apple-darwin'
+        shell: bash
+        run: |
+          chmod +x "${{ matrix.asset }}" || true
+          "./${{ matrix.asset }}" --version
+
+      # The Intel macOS artefact is cross-compiled on an arm64 runner and
+      # cannot be executed there, so assert its architecture instead - that
+      # being the leg with the fewest users, where a regression survives
+      # longest.
+      - name: Check the cross-compiled artifact's architecture
+        if: matrix.target == 'x86_64-apple-darwin'
+        run: |
+          file "${{ matrix.asset }}"
+          file "${{ matrix.asset }}" | grep -q 'x86_64' \
+            || { echo "::error::${{ matrix.asset }} is not an x86_64 binary"; exit 1; }
+
       # Signing is opt-in. Delete this step and the next unless colony.json sets
       # "signed": true — a program that advertises signatures but ships none
       # fails closed and cannot be installed at all.
       #
-      # Requires the COLONY_SIGNING_KEY repository secret (the ed25519 private
-      # key, PEM). The key never lives in the repository.
+      # Requires the COLONY_SIGNING_KEY_PEM organisation secret (the ed25519
+      # private key, PEM). The key never lives in a repository.
+      #
+      # `shell: bash` rather than skipping Windows: the Windows runner has bash
+      # and openssl, and an unsigned .exe in a repo that declares
+      # "signed": true is refused at install time — so excluding it did not
+      # produce an unsigned-but-working asset, it produced an uninstallable one.
       - name: Sign the artifact
-        if: runner.os == 'Linux' || runner.os == 'macOS'
+        shell: bash
         env:
-          SIGNING_KEY: ${{ secrets.COLONY_SIGNING_KEY }}
+          SIGNING_KEY: ${{ secrets.COLONY_SIGNING_KEY_PEM }}
         run: |
           if [ -z "$SIGNING_KEY" ]; then
-            echo "::error::COLONY_SIGNING_KEY is not set but signing is enabled"
+            echo "::error::COLONY_SIGNING_KEY_PEM is not set but signing is enabled"
             exit 1
           fi
           keyfile="$(mktemp)"
@@ -118,7 +181,7 @@ jobs:
             ./scripts/sign-release.sh "${{ matrix.asset }}"
 
       - name: Upload to the GitHub release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
         with:
           tag_name: ${{ needs.release-please.outputs.tag_name }}
           files: |
@@ -126,4 +189,44 @@ jobs:
             ${{ matrix.asset }}.sig
             ${{ matrix.asset }}.meta
             ${{ matrix.asset }}.meta.sig
-          fail_on_unmatched_files: false
+          # true: a signature that silently failed to upload is exactly the
+          # state that makes the release uninstallable, so it must fail here
+          # rather than at the user's machine.
+          fail_on_unmatched_files: true
+
+  # Nothing is visible to users until every asset and every signature is really
+  # on the release. Chained as `needs:` rather than `on: release published`,
+  # because a release created by release-please with the default GITHUB_TOKEN
+  # does not fire release events - a workflow written that way never runs, and
+  # never says so.
+  publish:
+    name: Publish the release
+    needs: [release-please, build]
+    if: ${{ needs.release-please.outputs.release_created }}
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ needs.release-please.outputs.tag_name }}
+      # Single source of truth for the asset list. Repeating it per step is how
+      # a platform silently ends up unsigned.
+      ASSETS: "{{APP_NAME}}-linux {{APP_NAME}}-windows.exe {{APP_NAME}}-macos {{APP_NAME}}-macos-x86"
+      # Set to false if colony.json does not declare "signed": true.
+      SIGNED: "true"
+    steps:
+      - name: Verify the release carries everything
+        run: |
+          gh release view "$TAG" --json assets --jq '.assets[].name' | sort > /tmp/published
+          for a in $ASSETS; do
+            required="$a"
+            if [ "$SIGNED" = "true" ]; then
+              required="$a $a.sig $a.meta $a.meta.sig"
+            fi
+            for f in $required; do
+              grep -qx "$f" /tmp/published \
+                || { echo "::error::$f is missing from $TAG - Colony would refuse this release"; exit 1; }
+            done
+          done
+          echo "release verified"
+
+      - name: Make the release visible
+        run: gh release edit "$TAG" --draft=false
