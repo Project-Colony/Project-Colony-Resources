@@ -36,6 +36,25 @@ Write the body for the person reading `git log` in a year, not for the diff —
 what was broken, what is now true, and why the approach was chosen. The changelog
 is generated from the subject line, so the subject is what the *user* reads.
 
+### Squash-merge, always
+
+**Merge a pull request with squash, not a merge commit.** release-please reads
+the *merge commits* on the default branch and parses each one's own message as a
+conventional commit. A squash produces exactly that: one commit, carrying the PR
+title, which GitHub associates with the PR.
+
+A merge commit produces `Merge pull request #76 from …`, which is not a
+conventional commit. release-please sees nothing releasable, no release PR is
+opened, and the change reaches users with no changelog entry — even though every
+commit *inside* the branch was perfectly well formed. Those are invisible to it.
+
+The same trap catches the obvious repair: pushing a conventional commit straight
+to the branch does not help either, because a direct push is not a merge commit.
+The fix has to arrive the way the tool looks for it — as a squashed pull request.
+
+This is why the PR title matters more than the commit titles inside it: the
+title *is* the changelog entry.
+
 ## 2. Versioning
 
 release-please owns the version number. Two configurations are in use:
