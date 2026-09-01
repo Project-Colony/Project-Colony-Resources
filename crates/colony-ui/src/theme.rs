@@ -79,7 +79,7 @@ pub const fn hex(h: u32) -> Color {
 // Every palette const, `THEME_FAMILIES`, `resolve()`, `FALLBACK_PALETTE`,
 // `ACCENT_OVERRIDES` and `accent_key_to_color()`. Generated from tokens/ —
 // run `cargo run -p colony-tokens -- generate` after editing a colour.
-include!("../../../generated/rust/palettes.rs");
+include!("generated/palettes.rs");
 
 impl ThemeVariantMeta {
     /// The picker card's background, as a colour rather than a raw `0xRRGGBB`.

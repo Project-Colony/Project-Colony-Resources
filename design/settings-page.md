@@ -98,8 +98,8 @@ first, and they hold the same things in every program.
 This is the category that shares the most machinery across programs, and the one
 this repo feeds directly.
 
-- **Theme** — the family/variant picker. Renders from `THEME_FAMILIES` in
-  `generated/rust/palettes.rs`: one row per family, showing the family's Nerd
+- **Theme** — the family/variant picker. Renders from `colony_ui::THEME_FAMILIES`:
+  one row per family, showing the family's Nerd
   Font glyph and its localized name, then a horizontal row of variant cards.
 
   A card is a wide rectangle filled with the variant's `swatch.bg`, crossed by a

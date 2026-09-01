@@ -35,3 +35,10 @@ jobs:
       # Fails if someone edited generated/ by hand or forgot to regenerate.
       - name: generated/ is in sync with tokens/
         run: cargo run -p colony-tokens -- check
+
+      # colony-ui embeds files that must live INSIDE the crate: cargo package
+      # only ships the crate root, so anything that drifts back outside it would
+      # publish a crate that does not compile for whoever downloads it. This
+      # builds the crate from its own tarball, which is the only way to catch it.
+      - name: colony-ui is publishable
+        run: cargo package -p colony-ui

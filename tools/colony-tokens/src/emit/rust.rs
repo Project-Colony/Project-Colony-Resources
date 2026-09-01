@@ -1,4 +1,9 @@
-//! `generated/rust/palettes.rs` — palettes, the resolver and the picker table.
+//! `crates/colony-ui/src/generated/palettes.rs` — palettes, the resolver and
+//! the picker table.
+//!
+//! Inside the crate, not under the top-level `generated/`: `cargo package` only
+//! ships files under the crate root, so anything outside it is missing from a
+//! published crate and fails to build for whoever downloads it.
 
 use std::fmt::Write as _;
 

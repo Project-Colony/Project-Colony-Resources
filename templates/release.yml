@@ -180,9 +180,17 @@ jobs:
           COLONY_RELEASE_VERSION="${{ needs.release-please.outputs.tag_name }}" \
             ./scripts/sign-release.sh "${{ matrix.asset }}"
 
+      # `draft: true` is LOAD-BEARING. Without it this action calls
+      # finalizeRelease() after uploading, which PATCHes draft:false - so the
+      # first matrix leg to finish publishes the release carrying one of four
+      # binaries and zero signatures, and the `publish` job's final edit becomes
+      # a silent no-op with every check still green. The action's own action.yml
+      # documents it: "When reusing an existing draft release, set this to true
+      # to keep it draft; omit it to publish after upload."
       - name: Upload to the GitHub release
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
         with:
+          draft: true
           tag_name: ${{ needs.release-please.outputs.tag_name }}
           files: |
             ${{ matrix.asset }}

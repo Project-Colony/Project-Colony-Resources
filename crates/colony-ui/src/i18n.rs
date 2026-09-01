@@ -12,8 +12,8 @@
 use std::collections::HashMap;
 use std::sync::{OnceLock, RwLock};
 
-const EN: &str = include_str!("../../../generated/i18n/labels.en.json");
-const FR: &str = include_str!("../../../generated/i18n/labels.fr.json");
+const EN: &str = include_str!("generated/labels.en.json");
+const FR: &str = include_str!("generated/labels.fr.json");
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Locale {

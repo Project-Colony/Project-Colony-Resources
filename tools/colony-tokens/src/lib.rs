@@ -29,8 +29,12 @@ pub struct Artifact {
 pub fn plan(tokens: &Tokens) -> Result<Vec<Artifact>> {
     let mut out = Vec::new();
 
+    // The Rust artifacts live INSIDE the crate that embeds them: `cargo
+    // package` only ships files under the crate root, so anything outside it is
+    // silently missing from a published crate and fails to build for whoever
+    // downloads it.
     out.push(Artifact {
-        path: PathBuf::from("generated/rust/palettes.rs"),
+        path: PathBuf::from("crates/colony-ui/src/generated/palettes.rs"),
         contents: emit::rust::render(tokens),
     });
 
@@ -65,11 +69,11 @@ pub fn plan(tokens: &Tokens) -> Result<Vec<Artifact>> {
 
     let locales = emit::i18n::render(tokens)?;
     out.push(Artifact {
-        path: PathBuf::from("generated/i18n/labels.fr.json"),
+        path: PathBuf::from("crates/colony-ui/src/generated/labels.fr.json"),
         contents: to_json(&locales.fr),
     });
     out.push(Artifact {
-        path: PathBuf::from("generated/i18n/labels.en.json"),
+        path: PathBuf::from("crates/colony-ui/src/generated/labels.en.json"),
         contents: to_json(&locales.en),
     });
 
@@ -109,7 +113,7 @@ pub fn generate(repo_root: &Path) -> Result<Report> {
         }
     }
 
-    for stale in existing_files(&repo_root.join("generated"))? {
+    for stale in generated_roots(repo_root)? {
         let rel = stale
             .strip_prefix(repo_root)
             .unwrap_or(&stale)
@@ -143,7 +147,7 @@ pub fn check(repo_root: &Path) -> Result<Vec<String>> {
             Ok(_) => {}
         }
     }
-    for stale in existing_files(&repo_root.join("generated"))? {
+    for stale in generated_roots(repo_root)? {
         let rel = stale
             .strip_prefix(repo_root)
             .unwrap_or(&stale)
@@ -153,6 +157,18 @@ pub fn check(repo_root: &Path) -> Result<Vec<String>> {
         }
     }
     Ok(problems)
+}
+
+/// Every file the generator owns. `generated/` serves the non-Rust consumers;
+/// the crate's own `src/generated/` holds what colony-ui embeds, so that it
+/// travels with the crate when it is published.
+fn generated_roots(repo_root: &Path) -> Result<Vec<PathBuf>> {
+    let mut out = existing_files(&repo_root.join("generated"))?;
+    out.extend(existing_files(
+        &repo_root.join("crates/colony-ui/src/generated"),
+    )?);
+    out.sort();
+    Ok(out)
 }
 
 fn existing_files(dir: &Path) -> Result<Vec<PathBuf>> {

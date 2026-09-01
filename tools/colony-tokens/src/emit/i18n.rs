@@ -1,4 +1,7 @@
-//! `generated/i18n/theme_labels.{fr,en}.json` — the theme display strings.
+//! `crates/colony-ui/src/generated/labels.{fr,en}.json` — display strings.
+//!
+//! They live inside the crate rather than under the top-level `generated/`
+//! because `cargo package` only ships files under the crate root.
 //!
 //! Label keys are deliberately shared across families (`settings_theme_light` is
 //! used by a dozen of them), so the same key must always carry the same string.

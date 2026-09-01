@@ -49,7 +49,7 @@ nothing already-shipped drifted.
 ## 3. Target: Colony launcher (Rust/iced)
 
 Once the family is in `tokens/`, the generated
-`generated/rust/palettes.rs` already contains everything the launcher needs:
+`crates/colony-ui/src/generated/palettes.rs` already contains everything the launcher needs:
 
 - `ThemePalette::<CONST>` for each variant
 - `THEME_FAMILIES`, the ordered picker catalog with glyphs and swatches
@@ -58,7 +58,7 @@ Once the family is in `tokens/`, the generated
 
 A launcher consuming that file needs **no** per-family edit: no new match arm, no
 new entry in a `theme_families` vec, no i18n edit. That is the whole point.
-Labels come from `generated/i18n/labels.{fr,en}.json`.
+Labels come from `crates/colony-ui/src/generated/labels.{fr,en}.json`, embedded in the crate.
 
 Until a program is migrated it still carries its own hand-maintained copies, and
 adding a family there means the four manual edits it always did (palette consts,

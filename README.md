@@ -40,10 +40,9 @@ Colony shipped before the import; see [Guarantees](#guarantees).
 |---|---|
 | `tokens/families/*.toml` | 25 theme families, 57 variants, 38 colours each |
 | `tokens/accents.toml` | the 8 accent overrides, order-sensitive |
-| `generated/rust/palettes.rs` | palettes, picker catalog, resolver, accents |
+| `crates/colony-ui/src/generated/` | palettes and labels, embedded in the crate so they ship with it |
 | `generated/themes.json` | one bundle for every non-Rust consumer |
 | `generated/css/colony-*.css` | one stylesheet per theme, plus a bundle |
-| `generated/i18n/labels.{fr,en}.json` | display strings, both locales |
 | `generated/palette.schema.json` | JSON Schema validating `tokens/families/*.toml` |
 | `generated/colony.schema.json` | JSON Schema validating a program's `colony.json` |
 | `design/*.md` | the conventions — layout, filesystem, navigation, settings, theming, type, i18n, releases, dependencies, docs |
@@ -59,7 +58,7 @@ Colony shipped before the import; see [Guarantees](#guarantees).
 One dependency:
 
 ```toml
-colony-ui = { git = "https://github.com/Project-Colony/Project-Colony-Resources" }
+colony-ui = "0.1"
 ```
 
 ```rust
