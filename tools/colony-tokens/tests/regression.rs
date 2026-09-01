@@ -134,12 +134,13 @@ fn every_colony_palette_survives_the_round_trip() {
 
     assert_eq!(before.len(), 57, "the snapshot should hold 57 palettes");
 
+    // A subset check, not equality: adding a theme family is allowed and
+    // expected. What must never happen is one of Colony's palettes disappearing
+    // or changing value, which is what the snapshot pins.
     let names_before: BTreeSet<&String> = before.keys().collect();
     let names_after: BTreeSet<&String> = after.keys().collect();
-    assert_eq!(
-        names_before, names_after,
-        "the set of palette constants changed"
-    );
+    let lost: Vec<&&String> = names_before.difference(&names_after).collect();
+    assert!(lost.is_empty(), "palette constants disappeared: {lost:?}");
 
     let mut drifted = Vec::new();
     for (name, expected) in &before {
@@ -172,10 +173,15 @@ fn the_resolver_still_maps_to_the_same_constants() {
         57,
         "the snapshot should hold 57 resolver arms"
     );
-    assert_eq!(
-        before, after,
-        "a (family, variant) pair now resolves to a different palette"
-    );
+    // Subset again: a new family adds arms, which is fine. Every pair Colony
+    // shipped must still land on the same palette.
+    for (pair, target) in &before {
+        assert_eq!(
+            after.get(pair),
+            Some(target),
+            "{pair:?} no longer resolves to {target}"
+        );
+    }
 }
 
 #[test]
@@ -189,8 +195,9 @@ fn every_variant_carries_its_swatch_and_labels() {
     let root = colony_tokens::repo_root().expect("repository root");
     let tokens = Tokens::load(&root.join("tokens")).expect("tokens load");
 
-    assert_eq!(tokens.families.len(), 25);
-    assert_eq!(tokens.variant_count(), 57);
+    // At least what Colony shipped; families added since are welcome.
+    assert!(tokens.families.len() >= 25, "families were removed");
+    assert!(tokens.variant_count() >= 57, "variants were removed");
 
     for (family, variant) in tokens.variants() {
         let id = format!("{}/{}", family.key, variant.key);

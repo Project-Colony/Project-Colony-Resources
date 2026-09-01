@@ -2830,6 +2830,65 @@ impl ThemePalette {
         border_subtle: hex(0x382f4c),
         divider: hex(0x382f4c),
     };
+
+    // Parchment — The parchment-and-burgundy look Colony Firewall Control
+    // shipped, and the one DNS-345 Colony Edition, Grape and SAM were written
+    // to match. It lived as eleven hand-written colour constants in cfc-ui;
+    // the eleven are the identity, the other twenty-seven fields are derived
+    // from them by the rules in design/theming.md.
+    /// Parchment · Light mode.
+    ///
+    /// Aged paper as the single surface material, dark sepia ink for every
+    /// text step, and burgundy as the accent. The ink green becomes success
+    /// and the amber becomes warning, so both signature colours keep a role
+    /// instead of being decoration.
+    pub const PARCHMENT_LIGHT: Self = Self {
+        bg_primary: hex(0xf2e9d0),
+        bg_sidebar: hex(0xe6d9b6),
+        bg_card: hex(0xe6d9b6),
+        bg_card_hover: hex(0xded0a8),
+        bg_card_pressed: hex(0xd9c69a),
+        bg_selected: hex(0xd9c69a),
+        bg_input: hex(0xe6d9b6),
+        bg_progress: hex(0xe6d9b6),
+
+        text_primary: hex(0x2b1d0e),
+        text_secondary: hex(0x4a3a24),
+        text_muted: hex(0x6e5a3e),
+        text_dim: hex(0x8a7454),
+        text_dimmer: hex(0xb8996a),
+        text_dimmest: hex(0xc2aa7a),
+        text_placeholder: hex(0xb8996a),
+
+        accent_blue: hex(0x801f2c),
+        accent_icon: hex(0x801f2c),
+        accent_progress: hex(0x801f2c),
+
+        btn_default: hex(0xe6d9b6),
+        btn_hover: hex(0xded0a8),
+        btn_pressed: hex(0xd9c69a),
+
+        success: hex(0x3c5a3b),
+        success_bg: hex(0xd9e3d4),
+        btn_success: hex(0x3c5a3b),
+        btn_success_hover: hex(0x33502f),
+        btn_success_pressed: hex(0x2a4526),
+
+        warning: hex(0xb87333),
+        warning_bg: hex(0xf0e0c8),
+
+        error: hex(0x801f2c),
+        error_light: hex(0xa83442),
+        error_bg: hex(0xf0d4d4),
+        btn_danger_bg: hex(0xf0d4d4),
+        btn_danger_hover: hex(0xe0b4b4),
+        btn_trash_hover: hex(0x801f2c),
+        btn_trash_pressed: hex(0x5a121c),
+
+        bg_modal_section: hex(0xede2c4),
+        border_subtle: hex(0xc2aa7a),
+        divider: hex(0xc2aa7a),
+    };
 }
 
 /// One selectable variant inside a family, as shown in the Settings picker.
@@ -3392,8 +3451,19 @@ const STELLAR_BLADE_VARIANTS: &[ThemeVariantMeta] = &[
     },
 ];
 
+const PARCHMENT_VARIANTS: &[ThemeVariantMeta] = &[
+    ThemeVariantMeta {
+        key: "light",
+        label_key: "settings_theme_light",
+        mode: "light",
+        swatch_bg: 0xf2e9d0,
+        swatch_accent: 0x801f2c,
+        palette: ThemePalette::PARCHMENT_LIGHT,
+    },
+];
+
 /// Every theme family, in the order the Settings picker renders them
-/// (25 families, 57 variants).
+/// (26 families, 58 variants).
 pub const THEME_FAMILIES: &[ThemeFamilyMeta] = &[
     ThemeFamilyMeta {
         key: "catppuccin",
@@ -3545,6 +3615,12 @@ pub const THEME_FAMILIES: &[ThemeFamilyMeta] = &[
         icon: "\u{f04e5}",
         variants: STELLAR_BLADE_VARIANTS,
     },
+    ThemeFamilyMeta {
+        key: "parchment",
+        label_key: "settings_theme_parchment",
+        icon: "\u{f0f6}",
+        variants: PARCHMENT_VARIANTS,
+    },
 ];
 
 /// The palette used when a config names a theme this build does not know —
@@ -3612,6 +3688,7 @@ pub fn resolve(family: &str, variant: &str) -> ThemePalette {
         ("stellar_blade", "lily") => ThemePalette::STELLAR_LILY,
         ("stellar_blade", "enya") => ThemePalette::STELLAR_ENYA,
         ("stellar_blade", "kaya") => ThemePalette::STELLAR_KAYA,
+        ("parchment", "light") => ThemePalette::PARCHMENT_LIGHT,
         _ => FALLBACK_PALETTE,
     }
 }

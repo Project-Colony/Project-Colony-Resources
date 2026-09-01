@@ -1,0 +1,95 @@
+# Parchment — Project Colony theme family
+#
+# Source of truth. Edit here, then run `cargo run -p colony-tokens -- generate`.
+# Never edit anything under generated/ by hand.
+
+key = "parchment"
+order = 26
+label_key = "settings_theme_parchment"
+icon = "f0f6"  # Nerd Font codepoint
+
+notes = """
+The parchment-and-burgundy look Colony Firewall Control shipped, and the one
+DNS-345 Colony Edition, Grape and SAM were written to match. It lived as eleven
+hand-written colour constants in cfc-ui; the eleven are the identity, the other
+twenty-seven fields are derived from them by the rules in design/theming.md.
+"""
+
+[label]
+fr = "Parchemin"
+en = "Parchment"
+
+[[variants]]
+key = "light"
+const = "PARCHMENT_LIGHT"  # Rust const name, kept stable for consumers
+label_key = "settings_theme_light"
+mode = "light"
+notes = """
+Aged paper as the single surface material, dark sepia ink for every text step,
+and burgundy as the accent. The ink green becomes success and the amber becomes
+warning, so both signature colours keep a role instead of being decoration.
+"""
+
+[variants.label]
+fr = "Mode clair"
+en = "Light mode"
+
+# Swatch shown on the picker card in the Settings page.
+[variants.swatch]
+bg = "#f2e9d0"
+accent = "#801f2c"
+
+[variants.palette]
+# backgrounds
+bg_primary = "#f2e9d0"
+bg_sidebar = "#e6d9b6"
+bg_card = "#e6d9b6"
+bg_card_hover = "#ded0a8"
+bg_card_pressed = "#d9c69a"
+bg_selected = "#d9c69a"
+bg_input = "#e6d9b6"
+bg_progress = "#e6d9b6"
+
+# text
+text_primary = "#2b1d0e"
+text_secondary = "#4a3a24"
+text_muted = "#6e5a3e"
+text_dim = "#8a7454"
+text_dimmer = "#b8996a"
+text_dimmest = "#c2aa7a"
+text_placeholder = "#b8996a"
+
+# accent
+accent_blue = "#801f2c"
+accent_icon = "#801f2c"
+accent_progress = "#801f2c"
+
+# buttons
+btn_default = "#e6d9b6"
+btn_hover = "#ded0a8"
+btn_pressed = "#d9c69a"
+
+# success
+success = "#3c5a3b"
+success_bg = "#d9e3d4"
+btn_success = "#3c5a3b"
+btn_success_hover = "#33502f"
+btn_success_pressed = "#2a4526"
+
+# warning
+warning = "#b87333"
+warning_bg = "#f0e0c8"
+
+# error
+error = "#801f2c"
+error_light = "#a83442"
+error_bg = "#f0d4d4"
+btn_danger_bg = "#f0d4d4"
+btn_danger_hover = "#e0b4b4"
+btn_trash_hover = "#801f2c"
+btn_trash_pressed = "#5a121c"
+
+# modal
+bg_modal_section = "#ede2c4"
+border_subtle = "#c2aa7a"
+divider = "#c2aa7a"
