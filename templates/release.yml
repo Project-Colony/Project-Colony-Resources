@@ -20,6 +20,17 @@ name: Release
 on:
   push:
     branches: [main]
+  # Recovery path. release-please only ever emits `release_created` once per
+  # release, so once a tag exists there is no way to re-run build and publish
+  # for it: "Re-run all jobs" makes release-please report nothing to do and
+  # every downstream job skip, while the run goes green. Without this input, a
+  # release that fails after the tag is created cannot be finished at all.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing release tag to build and publish (e.g. v0.3.0)"
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -36,6 +47,12 @@ jobs:
   # Assembles a release PR from the conventional commits since the last release.
   # Merging that PR is what creates the tag; everything below runs only then.
   release-please:
+    # Push only. On a recovery dispatch the tag already exists, so there is
+    # nothing for release-please to assemble — and letting it run would have it
+    # open or update a release PR as a side effect of repairing an old release.
+    # `target` is written to run when this job is SKIPPED, which is what makes
+    # the dispatch path work.
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
@@ -56,12 +73,62 @@ jobs:
         if: ${{ steps.release.outputs.release_created }}
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release edit "${{ steps.release.outputs.tag_name }}" --draft=true
+        # `-R` is not optional: this job has no `actions/checkout`, so `gh` has
+        # no git remote to infer the repository from and dies with "fatal: not
+        # a git repository". When that happens here, `build` and `publish` are
+        # skipped as a consequence and the tag is published carrying nothing at
+        # all. Both Colony and Grape shipped an empty release this way before
+        # the cause was found.
+        run: gh release edit "${{ steps.release.outputs.tag_name }}" -R "$GITHUB_REPOSITORY" --draft=true
+
+  # One place that answers "which tag are we building?", so the jobs below do
+  # not each have to know whether this run came from a merge or a dispatch.
+  target:
+    name: Resolve the target release
+    needs: release-please
+    # NOT `always()`: that would also run this — and everything after it — when
+    # release-please FAILED, which is the brake that stops a broken run from
+    # going further than an empty draft. `!cancelled() && !failure()` still lets
+    # the job run when release-please is SKIPPED, which is what a dispatch does.
+    if: ${{ !cancelled() && !failure() && (needs.release-please.outputs.release_created || github.event_name == 'workflow_dispatch') }}
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.pick.outputs.tag }}
+    steps:
+      - id: pick
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # release-please's tag on a merge; the dispatch input on a recovery.
+          # On a dispatch release-please is skipped and its outputs are empty,
+          # so the fallback resolves in exactly one direction each time.
+          FROM_RELEASE: ${{ needs.release-please.outputs.tag_name }}
+          FROM_DISPATCH: ${{ inputs.tag }}
+        run: |
+          tag="${FROM_RELEASE:-$FROM_DISPATCH}"
+          [ -n "$tag" ] || { echo "::error::no tag to build"; exit 1; }
+
+          # Refuse to touch a release that is already visible to users. The
+          # uploader overwrites by default, so a dispatch against a published
+          # tag would DELETE and replace its live binaries and only then hit the
+          # draft assertion — leaving published assets whose .sig and .meta
+          # describe bytes that no longer exist. Self-update is fail-closed, so
+          # that breaks every install of that version.
+          if ! gh release view "$tag" -R "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft > /tmp/state 2>/dev/null; then
+            echo "::error::no release found for $tag"
+            exit 1
+          fi
+          if [ "$(cat /tmp/state)" != "true" ]; then
+            echo "::error::$tag is already published. Re-running would overwrite its live assets and leave their signatures stale. Draft it first if you really mean to replace it: gh release edit $tag -R $GITHUB_REPOSITORY --draft=true"
+            exit 1
+          fi
+
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "building $tag (draft)"
 
   build:
     name: build ${{ matrix.asset }}
-    needs: release-please
-    if: ${{ needs.release-please.outputs.release_created }}
+    needs: target
+    if: ${{ needs.target.outputs.tag }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -177,7 +244,7 @@ jobs:
           trap 'rm -f "$keyfile"' EXIT
           printf '%s' "$SIGNING_KEY" > "$keyfile"
           COLONY_SIGNING_KEY="$keyfile" \
-          COLONY_RELEASE_VERSION="${{ needs.release-please.outputs.tag_name }}" \
+          COLONY_RELEASE_VERSION="${{ needs.target.outputs.tag }}" \
             ./scripts/sign-release.sh "${{ matrix.asset }}"
 
       # `draft: true` is LOAD-BEARING. Without it this action calls
@@ -191,7 +258,7 @@ jobs:
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
         with:
           draft: true
-          tag_name: ${{ needs.release-please.outputs.tag_name }}
+          tag_name: ${{ needs.target.outputs.tag }}
           files: |
             ${{ matrix.asset }}
             ${{ matrix.asset }}.sig
@@ -209,12 +276,12 @@ jobs:
   # never says so.
   publish:
     name: Publish the release
-    needs: [release-please, build]
-    if: ${{ needs.release-please.outputs.release_created }}
+    needs: [target, build]
+    if: ${{ needs.target.outputs.tag }}
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
-      TAG: ${{ needs.release-please.outputs.tag_name }}
+      TAG: ${{ needs.target.outputs.tag }}
       # Single source of truth for the asset list. Repeating it per step is how
       # a platform silently ends up unsigned.
       ASSETS: "{{APP_NAME}}-linux {{APP_NAME}}-windows.exe {{APP_NAME}}-macos {{APP_NAME}}-macos-x86"
@@ -223,7 +290,7 @@ jobs:
     steps:
       - name: Verify the release carries everything
         run: |
-          gh release view "$TAG" --json assets --jq '.assets[].name' | sort > /tmp/published
+          gh release view "$TAG" -R "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | sort > /tmp/published
           for a in $ASSETS; do
             required="$a"
             if [ "$SIGNED" = "true" ]; then
@@ -237,4 +304,5 @@ jobs:
           echo "release verified"
 
       - name: Make the release visible
-        run: gh release edit "$TAG" --draft=false
+        # Same reason as the draft-hold step: no checkout in this job either.
+        run: gh release edit "$TAG" -R "$GITHUB_REPOSITORY" --draft=false

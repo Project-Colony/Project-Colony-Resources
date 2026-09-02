@@ -36,6 +36,23 @@ Write the body for the person reading `git log` in a year, not for the diff —
 what was broken, what is now true, and why the approach was chosen. The changelog
 is generated from the subject line, so the subject is what the *user* reads.
 
+### When a release goes out empty
+
+`gh` in a job with no `actions/checkout` has no git remote to infer the
+repository from, and dies with `fatal: not a git repository`. Every `gh` call in
+`templates/release.yml` therefore passes `-R "$GITHUB_REPOSITORY"`. Without it
+the draft-hold step fails, `build` and `publish` are skipped as a consequence,
+and the tag is published carrying no assets at all — which Colony's installer
+then finds nothing to fetch from. Both Colony (v0.10.0) and Grape (v0.3.0)
+shipped an empty release this way.
+
+The second half of the same lesson: release-please emits `release_created` only
+once per release, so re-running the workflow after such a failure does nothing —
+it reports no work and every downstream job skips, while the run goes green. The
+template's `workflow_dispatch` input exists for exactly that repair, and the
+`target` job refuses a tag that is already published, because overwriting live
+assets would leave their signatures describing bytes that no longer exist.
+
 ### Squash-merge, always
 
 **Merge a pull request with squash, not a merge commit.** release-please reads
