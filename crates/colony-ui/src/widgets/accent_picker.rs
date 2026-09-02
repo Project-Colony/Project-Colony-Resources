@@ -2,7 +2,7 @@ use iced::widget::{button, container, text, Row};
 use iced::{Alignment, Border, Color, Element, Length};
 
 use super::icons;
-use crate::theme::{hex, Palette, ACCENT_OVERRIDES};
+use crate::theme::{contrast_on, hex, Palette, ACCENT_OVERRIDES};
 use crate::Typography;
 
 /// The row of accent swatches, rendered from [`ACCENT_OVERRIDES`].
@@ -29,11 +29,16 @@ where
         let is_active = selected == Some(accent.key);
         let dot = hex(accent.color);
 
+        // Not white: four of the eight accents are light enough that a white
+        // check mark falls below 3:1 on them — yellow reaches 2.31:1 and amber
+        // 2.37:1, where the mark all but disappears on the swatch it is meant
+        // to mark.
+        let on_dot = contrast_on(dot);
         let check: Element<'a, M> = if is_active {
             text(icons::CHECK)
                 .size(typo.sz(8))
                 .font(typo.regular)
-                .color(Color::WHITE)
+                .color(on_dot)
                 .into()
         } else {
             text("").size(typo.sz(8)).into()
@@ -56,7 +61,7 @@ where
             };
             button::Style {
                 background: Some(dot.into()),
-                text_color: Color::WHITE,
+                text_color: on_dot,
                 border: Border {
                     color: border_color,
                     width: if is_active { 2.0 } else { 0.0 },
