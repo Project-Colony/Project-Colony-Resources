@@ -36,7 +36,7 @@ bg_card_hover = "#dce0e8"
 bg_card_pressed = "#ccd0da"
 bg_selected = "#ccd0da"
 bg_input = "#dce0e8"
-bg_progress = "#e6e9ef"
+bg_progress = "#dce0e8"
 
 # text
 text_primary = "#4c4f69"
@@ -106,7 +106,7 @@ bg_card_hover = "#414559"
 bg_card_pressed = "#51576d"
 bg_selected = "#51576d"
 bg_input = "#414559"
-bg_progress = "#292c3c"
+bg_progress = "#414559"
 
 # text
 text_primary = "#c6d0f5"
@@ -176,7 +176,7 @@ bg_card_hover = "#363a4f"
 bg_card_pressed = "#494d64"
 bg_selected = "#494d64"
 bg_input = "#363a4f"
-bg_progress = "#1e2030"
+bg_progress = "#363a4f"
 
 # text
 text_primary = "#cad3f5"
@@ -246,7 +246,7 @@ bg_card_hover = "#313244"
 bg_card_pressed = "#45475a"
 bg_selected = "#45475a"
 bg_input = "#313244"
-bg_progress = "#181825"
+bg_progress = "#313244"
 
 # text
 text_primary = "#cdd6f4"
