@@ -2,7 +2,7 @@ use iced::widget::{button, column, container, row, text, Column, Row};
 use iced::{Alignment, Border, Element, Length, Padding};
 
 use super::icons;
-use crate::theme::{Palette, THEME_FAMILIES};
+use crate::theme::{contrast_on, Palette, THEME_FAMILIES};
 use crate::{i18n, Typography};
 
 /// The whole theme picker: one row per family, each showing the family's Nerd
@@ -112,11 +112,14 @@ where
             Palette::TEXT_MUTED()
         });
 
+    // The mark sits on this variant's own swatch, so its legibility depends on
+    // that swatch rather than on the accent of whatever theme is active — which
+    // is what it used to be drawn in.
     let check: Element<'a, M> = if is_active {
         text(icons::CHECK)
             .size(typo.sz(8))
             .font(typo.regular)
-            .color(Palette::ACCENT())
+            .color(contrast_on(bg))
             .into()
     } else {
         text("").size(typo.sz(8)).into()

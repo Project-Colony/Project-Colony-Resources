@@ -140,3 +140,63 @@ fn a_program_gets_a_stable_identity_tint_without_shipping_an_icon() {
     assert_eq!(colony, theme::app_tint("Colony"));
     assert_ne!(colony, theme::app_tint("Eidos"));
 }
+
+/// A check mark drawn on a swatch has to be visible on it. Both pickers used a
+/// colour that does not depend on what it sits on — white for the accent dot,
+/// the active theme's accent for the variant card — and four of the eight
+/// accents are light enough that the white mark fell below 3:1, yellow reaching
+/// 2.31:1.
+#[test]
+fn a_check_mark_is_legible_on_every_swatch_it_can_be_drawn_on() {
+    const FLOOR: f32 = 3.0;
+    let mut failures = Vec::new();
+
+    for accent in theme::ACCENT_OVERRIDES {
+        let dot = theme::hex(accent.color);
+        let ratio = theme::contrast_ratio(theme::contrast_on(dot), dot);
+        if ratio < FLOOR {
+            failures.push(format!("accent {}: {ratio:.2}:1", accent.key));
+        }
+    }
+
+    for family in theme::THEME_FAMILIES {
+        for variant in family.variants {
+            let bg = theme::hex(variant.swatch_bg);
+            let ratio = theme::contrast_ratio(theme::contrast_on(bg), bg);
+            if ratio < FLOOR {
+                failures.push(format!(
+                    "{}/{} swatch: {ratio:.2}:1",
+                    family.key, variant.key
+                ));
+            }
+        }
+    }
+
+    assert!(
+        failures.is_empty(),
+        "check marks below {FLOOR}:1:\n  {}",
+        failures.join("\n  ")
+    );
+}
+
+/// `contrast_on` picks by the ratio each end achieves, not by a luminance
+/// threshold. The green accent is the case that proves the difference: its YIQ
+/// luma is 0.578, so the old threshold took the near-white branch and produced
+/// a 2.34:1 mark where near-black gives well over twice that.
+#[test]
+fn contrast_on_picks_the_end_that_actually_reads() {
+    for accent in theme::ACCENT_OVERRIDES {
+        let bg = theme::hex(accent.color);
+        let chosen = theme::contrast_on(bg);
+        let ink = theme::hex(0x141419);
+        let paper = theme::hex(0xf7f9ff);
+        let best = theme::contrast_ratio(ink, bg).max(theme::contrast_ratio(paper, bg));
+        assert!(
+            (theme::contrast_ratio(chosen, bg) - best).abs() < 0.5,
+            "{}: chose {:.2}:1 when {:.2}:1 was available",
+            accent.key,
+            theme::contrast_ratio(chosen, bg),
+            best
+        );
+    }
+}

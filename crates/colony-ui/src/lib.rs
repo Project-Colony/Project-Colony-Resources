@@ -26,9 +26,9 @@ pub mod theme;
 pub mod widgets;
 
 pub use theme::{
-    accent_key_to_color, active_palette, app_tint, contrast_on, effective_accent, hex, resolve,
-    set_active_accent, set_active_theme, set_high_contrast, AccentOverride, ColorExt, Palette,
-    ThemeFamilyMeta, ThemePalette, ThemeVariantMeta, ACCENT_OVERRIDES, FALLBACK_PALETTE,
+    accent_key_to_color, active_palette, app_tint, contrast_on, contrast_ratio, effective_accent,
+    hex, resolve, set_active_accent, set_active_theme, set_high_contrast, AccentOverride, ColorExt,
+    Palette, ThemeFamilyMeta, ThemePalette, ThemeVariantMeta, ACCENT_OVERRIDES, FALLBACK_PALETTE,
     THEME_FAMILIES,
 };
 
