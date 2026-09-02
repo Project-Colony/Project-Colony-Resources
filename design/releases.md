@@ -69,8 +69,22 @@ The same trap catches the obvious repair: pushing a conventional commit straight
 to the branch does not help either, because a direct push is not a merge commit.
 The fix has to arrive the way the tool looks for it — as a squashed pull request.
 
-This is why the PR title matters more than the commit titles inside it: the
-title *is* the changelog entry.
+This is why the PR title matters: the title is usually the changelog entry.
+
+**Usually, not always — and the exception costs a release.** GitHub's
+`squash_merge_commit_title` is `COMMIT_OR_PR_TITLE` on these repositories, which
+means it uses the *pull request* title only when the branch has more than one
+commit. With a **single-commit branch it uses that commit's own subject** and
+ignores the PR title entirely, including one edited just before merging.
+
+So a one-commit branch whose commit says `chore:` releases nothing, however the
+pull request is titled. Write the commit message as the changelog entry you want
+from the start, or check `git log --format=%s` on the branch before merging.
+
+Recovering afterwards is awkward: the change is already on `main` under a
+subject release-please will not act on, and pushing a corrected commit directly
+does not help either — see the squash-merge trap above. `Release-As: X.Y.Z` in
+the footer of a later commit is the designed escape hatch.
 
 ## 2. Versioning
 
