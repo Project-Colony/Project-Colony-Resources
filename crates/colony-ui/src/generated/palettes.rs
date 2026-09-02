@@ -557,6 +557,60 @@ impl ThemePalette {
         divider: hex(0xb8a878),
     };
 
+    /// Kanagawa · Dragon mode.
+    ///
+    /// Upstream Kanagawa Dragon, the low-contrast charcoal counterpart to
+    /// Wave. Values come from the theme's own dragonBlack/dragonWhite ramp
+    /// rather than from a darkening of Wave, so the greys stay warm instead
+    /// of turning blue.
+    pub const KANAGAWA_DRAGON_DARK: Self = Self {
+        bg_primary: hex(0x181616),
+        bg_sidebar: hex(0x0d0c0c),
+        bg_card: hex(0x282727),
+        bg_card_hover: hex(0x393836),
+        bg_card_pressed: hex(0x625e5a),
+        bg_selected: hex(0x393836),
+        bg_input: hex(0x282727),
+        bg_progress: hex(0x2d2a2a),
+
+        text_primary: hex(0xc5c9c5),
+        text_secondary: hex(0xa6a69c),
+        text_muted: hex(0x9e9b93),
+        text_dim: hex(0x7a8382),
+        text_dimmer: hex(0x737c73),
+        text_dimmest: hex(0x625e5a),
+        text_placeholder: hex(0x7a8382),
+
+        accent_blue: hex(0x8ba4b0),
+        accent_icon: hex(0x8ea4a2),
+        accent_progress: hex(0x8ea4a2),
+
+        btn_default: hex(0x282727),
+        btn_hover: hex(0x393836),
+        btn_pressed: hex(0x625e5a),
+
+        success: hex(0x87a987),
+        success_bg: hex(0x2b332b),
+        btn_success: hex(0x8a9a7b),
+        btn_success_hover: hex(0x7c8c6d),
+        btn_success_pressed: hex(0x6e7e5f),
+
+        warning: hex(0xc4b28a),
+        warning_bg: hex(0x46413c),
+
+        error: hex(0xc4746e),
+        error_light: hex(0xd4827c),
+        error_bg: hex(0x3d2a28),
+        btn_danger_bg: hex(0x3d2a28),
+        btn_danger_hover: hex(0x5a3a37),
+        btn_trash_hover: hex(0xc4746e),
+        btn_trash_pressed: hex(0xa35c57),
+
+        bg_modal_section: hex(0x181616),
+        border_subtle: hex(0x282727),
+        divider: hex(0x282727),
+    };
+
     /// Nord · Dark mode.
     pub const NORD_DARK: Self = Self {
         bg_primary: hex(0x2e3440),
@@ -3018,6 +3072,14 @@ const KANAGAWA_VARIANTS: &[ThemeVariantMeta] = &[
         swatch_accent: 0x7a6840,
         palette: ThemePalette::KANAGAWA_DRAGON,
     },
+    ThemeVariantMeta {
+        key: "dragon",
+        label_key: "settings_theme_kanagawa_dragon",
+        mode: "dark",
+        swatch_bg: 0x181616,
+        swatch_accent: 0x8ba4b0,
+        palette: ThemePalette::KANAGAWA_DRAGON_DARK,
+    },
 ];
 
 const NORD_VARIANTS: &[ThemeVariantMeta] = &[
@@ -3463,7 +3525,7 @@ const PARCHMENT_VARIANTS: &[ThemeVariantMeta] = &[
 ];
 
 /// Every theme family, in the order the Settings picker renders them
-/// (26 families, 58 variants).
+/// (26 families, 59 variants).
 pub const THEME_FAMILIES: &[ThemeFamilyMeta] = &[
     ThemeFamilyMeta {
         key: "catppuccin",
@@ -3642,6 +3704,7 @@ pub fn resolve(family: &str, variant: &str) -> ThemePalette {
         ("kanagawa", "light") => ThemePalette::KANAGAWA_LOTUS,
         ("kanagawa", "dark") => ThemePalette::KANAGAWA_WAVE,
         ("kanagawa", "journal") => ThemePalette::KANAGAWA_DRAGON,
+        ("kanagawa", "dragon") => ThemePalette::KANAGAWA_DRAGON_DARK,
         ("nord", "dark") => ThemePalette::NORD_DARK,
         ("nord", "light") => ThemePalette::NORD_LIGHT,
         ("dracula", "dark") => ThemePalette::DRACULA_DARK,
