@@ -181,7 +181,7 @@ bg_card_hover = "#bdae80"
 bg_card_pressed = "#b0a070"
 bg_selected = "#bdae80"
 bg_input = "#c8b98e"
-bg_progress = "#c8b98e"
+bg_progress = "#bdae80"
 
 # text
 text_primary = "#43412e"

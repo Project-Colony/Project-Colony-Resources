@@ -23,7 +23,7 @@ impl ThemePalette {
         bg_card_pressed: hex(0xccd0da),
         bg_selected: hex(0xccd0da),
         bg_input: hex(0xdce0e8),
-        bg_progress: hex(0xe6e9ef),
+        bg_progress: hex(0xdce0e8),
 
         text_primary: hex(0x4c4f69),
         text_secondary: hex(0x5c5f77),
@@ -72,7 +72,7 @@ impl ThemePalette {
         bg_card_pressed: hex(0x51576d),
         bg_selected: hex(0x51576d),
         bg_input: hex(0x414559),
-        bg_progress: hex(0x292c3c),
+        bg_progress: hex(0x414559),
 
         text_primary: hex(0xc6d0f5),
         text_secondary: hex(0xb5bfe2),
@@ -121,7 +121,7 @@ impl ThemePalette {
         bg_card_pressed: hex(0x494d64),
         bg_selected: hex(0x494d64),
         bg_input: hex(0x363a4f),
-        bg_progress: hex(0x1e2030),
+        bg_progress: hex(0x363a4f),
 
         text_primary: hex(0xcad3f5),
         text_secondary: hex(0xb8c0e0),
@@ -170,7 +170,7 @@ impl ThemePalette {
         bg_card_pressed: hex(0x45475a),
         bg_selected: hex(0x45475a),
         bg_input: hex(0x313244),
-        bg_progress: hex(0x181825),
+        bg_progress: hex(0x313244),
 
         text_primary: hex(0xcdd6f4),
         text_secondary: hex(0xbac2de),
@@ -517,7 +517,7 @@ impl ThemePalette {
         bg_card_pressed: hex(0xb0a070),
         bg_selected: hex(0xbdae80),
         bg_input: hex(0xc8b98e),
-        bg_progress: hex(0xc8b98e),
+        bg_progress: hex(0xbdae80),
 
         text_primary: hex(0x43412e),
         text_secondary: hex(0x5c5840),
@@ -2904,7 +2904,7 @@ impl ThemePalette {
         bg_card_pressed: hex(0xd9c69a),
         bg_selected: hex(0xd9c69a),
         bg_input: hex(0xe6d9b6),
-        bg_progress: hex(0xe6d9b6),
+        bg_progress: hex(0xded0a8),
 
         text_primary: hex(0x2b1d0e),
         text_secondary: hex(0x4a3a24),

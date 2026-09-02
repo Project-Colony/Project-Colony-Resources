@@ -48,7 +48,7 @@ bg_card_hover = "#ded0a8"
 bg_card_pressed = "#d9c69a"
 bg_selected = "#d9c69a"
 bg_input = "#e6d9b6"
-bg_progress = "#e6d9b6"
+bg_progress = "#ded0a8"
 
 # text
 text_primary = "#2b1d0e"

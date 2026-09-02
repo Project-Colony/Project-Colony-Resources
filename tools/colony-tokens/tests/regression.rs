@@ -127,6 +127,54 @@ fn generated_rust() -> String {
         .contents
 }
 
+/// Values that have deliberately moved since the import, and why.
+///
+/// The snapshot stays the file Colony shipped: re-cutting it would turn this
+/// test into a comparison of the generator against itself. An intended change
+/// is recorded here instead, which keeps the diff reviewable and still fails on
+/// anything that moved by accident.
+const INTENTIONAL_CHANGES: &[(&str, &str, u32, u32, &str)] = &[
+    // A progress track the same colour as the card it sits on is an invisible
+    // progress bar. Found in Digger, but it affects every program that draws
+    // one from the shared palette, Colony included. Each moves to its own
+    // bg_card_hover, the neighbouring surface the theme already defines.
+    (
+        "CATPPUCCIN_LATTE",
+        "bg_progress",
+        0xe6e9ef,
+        0xdce0e8,
+        "track matched the card",
+    ),
+    (
+        "CATPPUCCIN_FRAPPE",
+        "bg_progress",
+        0x292c3c,
+        0x414559,
+        "track matched the card",
+    ),
+    (
+        "CATPPUCCIN_MACCHIATO",
+        "bg_progress",
+        0x1e2030,
+        0x363a4f,
+        "track matched the card",
+    ),
+    (
+        "CATPPUCCIN_MOCHA",
+        "bg_progress",
+        0x181825,
+        0x313244,
+        "track matched the card",
+    ),
+    (
+        "KANAGAWA_DRAGON",
+        "bg_progress",
+        0xc8b98e,
+        0xbdae80,
+        "track matched the card",
+    ),
+];
+
 #[test]
 fn every_colony_palette_survives_the_round_trip() {
     let before = parse_palette_consts(SNAPSHOT);
@@ -143,12 +191,26 @@ fn every_colony_palette_survives_the_round_trip() {
     assert!(lost.is_empty(), "palette constants disappeared: {lost:?}");
 
     let mut drifted = Vec::new();
+    let mut accounted = BTreeSet::new();
     for (name, expected) in &before {
         let actual = &after[name];
         if expected != actual {
             for (i, (field, value)) in expected.iter().enumerate() {
                 match actual.get(i) {
                     Some((f, v)) if f == field && v == value => {}
+                    Some((f, v)) if f == field => {
+                        let intended = INTENTIONAL_CHANGES.iter().find(|(n, fl, from, to, _)| {
+                            n == name && fl == field && from == value && to == v
+                        });
+                        match intended {
+                            Some((n, fl, ..)) => {
+                                accounted.insert(format!("{n}.{fl}"));
+                            }
+                            None => {
+                                drifted.push(format!("{name}.{field}=#{value:06x} -> #{v:06x}"))
+                            }
+                        }
+                    }
                     Some((f, v)) => {
                         drifted.push(format!("{name}.{field}=#{value:06x} -> {f}=#{v:06x}"))
                     }
@@ -161,6 +223,38 @@ fn every_colony_palette_survives_the_round_trip() {
         drifted.is_empty(),
         "palette values drifted:\n  {}",
         drifted.join("\n  ")
+    );
+
+    // Keep the list honest: an entry describing a change that is no longer
+    // there is folklore, and would silently permit a future drift on that field.
+    let declared: BTreeSet<String> = INTENTIONAL_CHANGES
+        .iter()
+        .map(|(n, f, ..)| format!("{n}.{f}"))
+        .collect();
+    assert_eq!(
+        declared, accounted,
+        "INTENTIONAL_CHANGES is stale — an entry no longer describes a real change"
+    );
+}
+
+/// The invariant the change above exists to establish, applied to every palette
+/// rather than to the six that happened to break it.
+#[test]
+fn a_progress_track_is_never_the_colour_of_the_card_it_sits_on() {
+    let root = colony_tokens::repo_root().expect("repository root");
+    let tokens = Tokens::load(&root.join("tokens")).expect("tokens load");
+
+    let mut invisible = Vec::new();
+    for (family, variant) in tokens.variants() {
+        let p = &variant.palette;
+        if p.bg_progress == p.bg_card {
+            invisible.push(format!("{}/{}", family.key, variant.key));
+        }
+    }
+    assert!(
+        invisible.is_empty(),
+        "these palettes draw an invisible progress bar:\n  {}",
+        invisible.join("\n  ")
     );
 }
 
