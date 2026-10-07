@@ -11,8 +11,7 @@ Project Colony program.
 ## 0. The palettes live in Project-Colony-Resources. Do not re-derive them.
 
 `tokens/families/*.toml` in this repository is the single source of truth for
-every Colony palette — 25 families, 57 variants, 38 fields each, including the
-Stellar Blade set.
+every Colony palette, including the Stellar Blade set.
 
 **Never paste hex values into this skill file, into a program, or into a chat
 answer as if they were authoritative.** Read them from `tokens/`, or from
@@ -39,7 +38,7 @@ authority.
 ## 2. Adding a family to the source of truth
 
 Follow "Adding a theme family" in `design/theming.md`. In short: one TOML file
-named after the family key, an unused `order`, all 38 fields lowercase
+named after the family key, an unused `order`, every palette field lowercase
 `#rrggbb`, a `mode` that matches `bg_primary`'s luminance, a picker `swatch`,
 `notes` explaining the material and the ink, and both locales for every label.
 

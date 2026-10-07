@@ -6,8 +6,9 @@ members = ["crates/colony-ui", "tools/colony-tokens"]
 edition = "2021"
 license = "GPL-3.0-or-later"
 repository = "https://github.com/Project-Colony/Project-Colony-Resources"
-# Matches Colony's floor so anything published from here stays consumable by it.
-rust-version = "1.80"
+# iced 0.14 (and wgpu 27 under it) require 1.88, so nothing that depends on
+# colony-ui can build below it. The msrv job in CI holds this honest.
+rust-version = "1.88"
 
 [workspace.dependencies]
 # Pinned to the current release, not a floating minor. Staleness has to be

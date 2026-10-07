@@ -38,21 +38,22 @@ not Cargo metadata, switch to `"simple"` and add the files to rewrite:
 **Signing.** The signing step in `release.yml` is written for the opt-in case and
 fails loudly if the key is missing, because a program whose `colony.json` says
 `"signed": true` but ships no `.sig` cannot be installed at all — fail-closed is
-the point. If you are not signing, delete the step and the three `.sig` / `.meta`
-/ `.meta.sig` lines from the upload.
+the point. If you are not signing, delete the step, the three `.sig` / `.meta`
+/ `.meta.sig` lines from the upload, and set `SIGNED: "false"` in the `publish`
+job.
 
-The step is skipped on Windows runners: `sign-release.sh` needs a POSIX shell and
-`openssl`. Signing Windows assets means either adding a bash step on the Windows
-runner or signing centrally in a follow-up job — decide it deliberately rather
-than discovering the gap after a release.
+The step runs on every runner, Windows included, with `shell: bash`:
+`sign-release.sh` needs only a POSIX shell and `openssl`, and the Windows runner
+has both. Skipping Windows would not produce an unsigned-but-working `.exe`; in a
+repository that declares `"signed": true` it produces one Colony refuses to
+install.
 
 **`sign-release.sh`** is copied verbatim from Colony, which is where it is
 maintained today. It needs only `openssl`. It is reproduced here so a new program
 does not have to go read the launcher's source to find it.
 
-**Pin the actions.** `release.yml` ships with version tags (`@v4`) because a
-commit SHA has to be resolved against the real action repository at the moment
-you adopt it. A release workflow holds `contents: write` and can sign and
-publish, so pin its actions by SHA once you have copied it — Dependabot bumps
-the SHA and the trailing version comment together. See
+**Pinned actions.** `release.yml` pins every action to a commit SHA with the
+version in a trailing comment. A release workflow holds `contents: write` and
+can sign and publish, so keep the pins when you copy it; the `github-actions`
+entry in `dependabot.yml` bumps the SHA and the comment together. See
 [design/dependencies.md](../design/dependencies.md).
