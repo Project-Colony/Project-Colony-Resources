@@ -1,8 +1,9 @@
 # Releasing a Colony program
 
 How a Project Colony program is versioned, built, published, and picked up by the
-launcher. Reference implementation: [`templates/release.yml`](../templates/release.yml),
-which Colony's own release workflow follows.
+launcher. Reference implementation: [`templates/release.yml`](../templates/release.yml).
+Colony's own release workflow implements the same contract, with signing done in
+one central job instead of on each build runner.
 
 ## The chain
 
