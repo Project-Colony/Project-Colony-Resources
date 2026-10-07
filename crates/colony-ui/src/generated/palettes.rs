@@ -2621,10 +2621,10 @@ impl ThemePalette {
     };
 
     // Stellar Blade — Fan-made and unofficial. No official colour codes
-    // exist for these characters; every hex is derived from screenshots the
-    // user provided (hair, suit, glow, material). Palettes are not
-    // copyrightable and no game art ships with this set. Adam and Roxanne are
-    // still pending reference images.
+    // exist for these characters; every hex is derived from reference
+    // screenshots (hair, suit, glow, material). Palettes are not copyrightable
+    // and no game art ships with this set. Adam and Roxanne are still pending
+    // reference images.
     /// Stellar Blade · EVE.
     ///
     /// Green ink on white-grey ceramic — her Planet Diving Suit. A light

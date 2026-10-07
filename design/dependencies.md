@@ -76,23 +76,18 @@ lets Dependabot bump both together. That is the right posture for any workflow
 holding `contents: write` — a release workflow can sign and publish, so a
 compromised tag in a third-party action is a compromised release.
 
-The templates in this repository ship with version tags (`@v4`) because a SHA
-has to be resolved against the real repository at the time you adopt them. Pin
-them when you copy them, in anything that can write.
+The workflow templates in this repository ship pinned the same way. Copy them
+with the pins intact and add the `github-actions` entry from
+`templates/dependabot.yml`, so the SHAs keep moving after you adopt them.
 
 ## Where the ecosystem stands
 
-Measured across the Rust programs, at the time this was written:
-
-| | |
-|---|---|
-| iced | 0.14 everywhere except **D1Gg2r, still on 0.13** |
-| `rust-version` | declared in 2 repositories of 5, at **1.78** and **1.80** |
-
-Both are exactly the drift this rule exists to prevent, and neither was noticed
-until someone went looking. Nothing pins a shared floor today; `colony-ui` will
-carry one in `[workspace.dependencies]` when it lands, and the programs that
-depend on it inherit it.
+`colony-ui` is the shared floor. It declares iced once, in
+`[workspace.dependencies]`, so every program that depends on it builds against
+the same iced instead of each repository drifting on its own. Its `rust-version`
+is the oldest toolchain that iced accepts, and CI builds on exactly that
+toolchain, so a program that depends on `colony-ui` cannot usefully declare a
+lower one.
 
 ## Doing an upgrade
 

@@ -29,7 +29,7 @@ let prefs = paths::config_dir("Digger")?.join("preferences.json");
 
 | | |
 |---|---|
-| `ThemePalette` + 57 palettes | 25 theme families, each a full 38-colour palette |
+| `ThemePalette` + one const per variant | every theme family, each variant a full palette |
 | `set_active_theme` / `Palette::*` | the active theme and its semantic accessors |
 | `THEME_FAMILIES` | the ordered catalog a theme picker renders from |
 | `ACCENT_OVERRIDES` | eight palette-independent accents the user can pick |
@@ -53,7 +53,7 @@ anything else.
 Themes included: Catppuccin, Gruvbox, Everblush, Kanagawa, Nord, Dracula,
 Solarized, Tokyo Night, Rosé Pine, One Dark, Monokai, Ayu, Everforest, Material,
 Flexoki, Nightfox, Sonokai, Oxocarbon, Night Owl, Iceberg, Horizon, Melange,
-Synthwave '84, Modus, and a fan-made Stellar Blade character set.
+Synthwave '84, Modus, Parchment, and a fan-made Stellar Blade character set.
 
 ## Licence
 

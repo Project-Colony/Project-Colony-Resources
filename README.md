@@ -38,7 +38,7 @@ Colony shipped before the import; see [Guarantees](#guarantees).
 
 | Path | What it is |
 |---|---|
-| `tokens/families/*.toml` | 25 theme families, 57 variants, 38 colours each |
+| `tokens/families/*.toml` | one file per theme family, every variant a full palette |
 | `tokens/accents.toml` | the 8 accent overrides, order-sensitive |
 | `crates/colony-ui/src/generated/` | palettes and labels, embedded in the crate so they ship with it |
 | `generated/themes.json` | one bundle for every non-Rust consumer |
@@ -79,7 +79,7 @@ widgets::theme_picker(&typo, &family, &variant, |f, v| Message::SelectTheme(f, v
 
 | | |
 |---|---|
-| `ThemePalette` + 57 consts | the palette shape and every theme, e.g. `ThemePalette::GRUVBOX_DARK` |
+| `ThemePalette` + one const per variant | the palette shape and every theme, e.g. `ThemePalette::GRUVBOX_DARK` |
 | `set_active_theme` / `active_palette` / `Palette::*` | the active theme, and the screaming-case accessors Colony's widgets already use |
 | `THEME_FAMILIES` | the ordered picker catalog — glyph, labels, swatches, modes |
 | `resolve` / `FALLBACK_PALETTE` | config → palette, degrading instead of failing on an unknown theme |
@@ -100,8 +100,8 @@ preferences.
 
 ### Everything else
 
-Read `generated/themes.json`. It carries the families, variants, all 38 fields
-per palette, the light/dark mode, the picker swatches, the accent list, the
+Read `generated/themes.json`. It carries the families, variants, every field
+of every palette, the light/dark mode, the picker swatches, the accent list, the
 per-field CSS variable names, and the computed contrast ratios.
 
 Web and Electron programs can skip the JSON and load the stylesheets directly.
@@ -137,7 +137,7 @@ its own rules. Read [design/theming.md](design/theming.md) first.
 
 `cargo test` enforces all of the following:
 
-- **Every one of Colony's 57 palettes round-trips unchanged.** The test parses a
+- **Every palette Colony shipped before the import round-trips unchanged.** The test parses a
   verbatim snapshot of Colony's `theme.rs` and compares it, const by const and
   field by field, against what the generator produces today.
 - **The resolver is stable.** Every `(family, variant)` pair still maps to the
@@ -198,7 +198,7 @@ Four rules apply across the organisation:
   — `guide/`, `internals/`, `project/` — behind a `docs/README.md` index, and
   the README answers what/why/how-to-get-it in that order.
 
-These three are what make an unfamiliar repository cheap to work in: most of the
+These four are what make an unfamiliar repository cheap to work in: most of the
 cost of changing code you did not write is finding what to change, and a layout
 you can predict removes that cost outright.
 
@@ -207,15 +207,10 @@ from.
 
 ## Status
 
-Phase 2. `crates/colony-ui` exists and is tested — a program can depend on it
-today and get the palettes, the resolver, the accents, the labels and the shared
-widgets.
-
-**No consumer has been migrated yet.** Colony, SphereCord and the rest still
-ship their own copies. Migrating them is the next step, one at a time, starting
-with Colony: replacing its `src/ui/theme.rs` with this crate deletes roughly
-2900 lines from it, including the 100 KB of hand-maintained colour constants
-that another repository was downloading and regex-parsing.
+`colony-ui` is published on crates.io, and Colony itself has migrated to it:
+its hand-maintained palette constants are gone, replaced by this crate. A
+program that still ships its own copy of the palettes migrates by depending on
+`colony-ui` and deleting that copy.
 
 ## Licence
 
