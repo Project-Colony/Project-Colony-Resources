@@ -329,8 +329,9 @@ the project:
    repository.
 2. In SignPath, a project for the repository: its repository URL, the GitHub.com
    build system linked, a `release-signing` policy with the approvers and
-   origin verification allowing `main` (release runs start from a push to
-   `main`; run a recovery dispatch from `main` too), and an artifact
+   origin verification allowing `main` and the release tags `v*` (release
+   runs start from a push to `main`; a recovery dispatch starts from the tag,
+   see below), and an artifact
    configuration for a zip holding one PE file, with file metadata
    restrictions: product name equal to the project name, product version set.
    The `.exe` therefore needs a version resource (ProductName,
@@ -343,6 +344,19 @@ the project:
 From that release on, a Windows file without Authenticode cannot be published:
 a missing token or organisation id fails `preflight`, and a request that is
 denied, fails or times out fails the run with the release still a draft.
+
+**Recovery dispatches start from the tag.** SignPath does not take the commit
+from the build script: it records the run's own commit (`GITHUB_SHA`) as the
+source of the file it signs. The build legs check out the tag, so the two must
+be the same commit, or the approver sees, and SignPath vouches for, source the
+binary was not built from. With SignPath on, `preflight` refuses a run whose
+commit is not the tag's. A push run passes, since release-please tags the
+merge commit it runs on. A recovery dispatch must therefore be started from the
+tag, not from `main`:
+
+```bash
+gh workflow run release.yml -R Project-Colony/<repo> --ref vX.Y.Z -f tag=vX.Y.Z
+```
 
 **The manual approval.** Every release-signing request waits for an approver
 to approve it in SignPath, which notifies by email. The workflow waits up to 5

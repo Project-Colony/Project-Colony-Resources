@@ -156,6 +156,19 @@ jobs:
           [ "$state" = "true" ] \
             || fail "$TAG is already published. Refusing to replace its assets. Draft it first if you really mean to: gh release edit $TAG -R $GITHUB_REPOSITORY --draft=true"
 
+          # SignPath records this run's commit (GITHUB_SHA) as the source of
+          # the file it signs, while the caller builds the tag. On a dispatch
+          # from main the two differ, and the approver would vouch for source
+          # the binary was not built from. So the tag must be this run's commit,
+          # which means a recovery dispatch runs from the tag itself.
+          if [ "$signpath" = true ]; then
+            tag_sha=$(gh api "repos/$GITHUB_REPOSITORY/commits/refs/tags/$TAG" --jq .sha) \
+              || fail "cannot resolve tag $TAG to a commit"
+            wf=${GITHUB_WORKFLOW_REF%@*}
+            [ "$tag_sha" = "$GITHUB_SHA" ] \
+              || fail "$TAG is commit $tag_sha but this run is for $GITHUB_SHA ($GITHUB_REF), so SignPath would record the wrong source commit. Start the recovery dispatch from the tag: gh workflow run ${wf##*/} -R $GITHUB_REPOSITORY --ref $TAG -f tag=$TAG"
+          fi
+
           echo "signpath=$signpath" >> "$GITHUB_OUTPUT"
           echo "windows=$(jq -cn '$ARGS.positional' --args "${windows[@]}")" >> "$GITHUB_OUTPUT"
 

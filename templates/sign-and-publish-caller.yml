@@ -18,11 +18,15 @@ name: Release
 on:
   push:
     branches: [main]
-  # Recovery path: finish an existing DRAFT release whose run failed.
+  # Recovery path: finish an existing DRAFT release whose run failed. Start it
+  # from the tag ("Use workflow from: v0.3.0", or `gh workflow run release.yml
+  # --ref v0.3.0 -f tag=v0.3.0`): with SignPath on, sign-and-publish refuses a
+  # run whose commit is not the tag's, since SignPath records the run's commit
+  # as the source of what it signs.
   workflow_dispatch:
     inputs:
       tag:
-        description: "Existing draft release to build, sign and publish (e.g. v0.3.0)"
+        description: "Existing draft release to build, sign and publish (e.g. v0.3.0). Run from that same tag."
         required: true
         type: string
 
