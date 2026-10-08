@@ -103,6 +103,12 @@ release-please owns the version number. Two configurations are in use:
 Both keep `CHANGELOG.md` at the repo root. `templates/release-please-config.json`
 is the shared starting point, with the changelog sections already set.
 
+Either way, the release type goes in `release-please-config.json` and the
+workflow passes the action `config-file` and `manifest-file` only. Passing the
+action's `release-type` input as well makes it ignore both files, and with them
+the changelog sections, `extra-files` and the manifest version, with no
+warning.
+
 ## 3. Asset naming — this is the contract
 
 Colony auto-detects which platforms a program supports **from the release asset
@@ -240,6 +246,111 @@ the *second* downloads the previous `.meta`, treats it as an asset, and signs it
 `dist/*.meta` to that `rm` line, or replace the job with the template, which
 does not have the problem.
 
+### Shared signing workflow
+
+[`.github/workflows/sign-and-publish.yml`](../.github/workflows/sign-and-publish.yml)
+is a reusable workflow that does everything after the build: Authenticode
+through SignPath for the Windows files (once a repository turns it on), the
+ed25519 `.sig`, `.meta` and `.meta.sig` for every asset, upload, verification,
+and publishing. A program's release workflow calls it; the starting point is
+[`templates/sign-and-publish-caller.yml`](../templates/sign-and-publish-caller.yml).
+It works the same with SignPath off, so a program can adopt it today and turn
+SignPath on later without touching anything else.
+
+**When to call it.** As the last job of the release workflow, in the **same
+run** as the builds, with `needs:` on every build job. The build legs upload
+each binary with `actions/upload-artifact`, at the artifact root under its
+release asset name, and upload nothing to the release themselves. The release
+must already exist as a **draft** for the tag (the draft hold after
+release-please); the workflow refuses a release that is already published, and
+checks again just before uploading, since the SignPath wait can take hours.
+
+```yaml
+sign-and-publish:
+  needs: [release-please, build]
+  if: ${{ !cancelled() && needs.build.result == 'success' }}
+  permissions:
+    actions: read     # SignPath downloads the unsigned artifact with the job token
+    contents: write   # drafts, uploads, publishing
+  uses: Project-Colony/Project-Colony-Resources/.github/workflows/sign-and-publish.yml@<sha> # main
+  with:
+    tag: ${{ needs.release-please.outputs.tag_name || inputs.tag }}
+    assets: "grape-linux grape-windows.exe grape-macos grape-macos-x86"
+    artifact-pattern: build-*
+    signpath-project-slug: grape   # leave out while SignPath is off
+  secrets:
+    COLONY_SIGNING_KEY_PEM: ${{ secrets.COLONY_SIGNING_KEY_PEM }}
+    SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+```
+
+| Input | Meaning |
+|---|---|
+| `tag` | The release tag. Required. |
+| `assets` | Space-separated asset names. Required. Plain file names only. |
+| `artifact-pattern` | Glob matching the build artifacts. Required. Use a prefix such as `build-*`, so it never matches the workflow's own `signpath-*` artifacts. |
+| `windows-assets` | The assets to Authenticode-sign. Empty means every asset ending in `.exe`. |
+| `signpath-project-slug` | The repository's SignPath project. Empty means SignPath is off. |
+| `signpath-signing-policy-slug` | Default `release-signing`. |
+| `signpath-artifact-configuration-slug` | Empty uses the project's default artifact configuration. |
+| `code-signing-policy` | Default `true`: appends a "Code signing policy" link to the calling repository's `README#code-signing-policy`. Set `false` in a repository whose README has no such section. |
+
+The organisation variable `SIGNPATH_ORGANIZATION_ID` is read directly; the two
+secrets are passed by name, never with `secrets: inherit`.
+
+**The order, and why it cannot change.** Authenticode embeds its signature in
+the PE itself: a certificate table is appended and the header's security
+directory and checksum are rewritten. The `.exe` that comes back from SignPath
+is different bytes from the one the compiler wrote. The ed25519 `.sig` and the
+sha256 in `.meta` must describe the bytes users download, so the only correct
+chain is:
+
+```
+build -> Authenticode (SignPath) -> ed25519 .sig/.meta/.meta.sig -> upload -> verify -> publish
+```
+
+If the ed25519 step runs first, or an unsigned `.exe` reaches the release and is
+later replaced by the signed one, the published signatures describe bytes that
+no longer exist and Colony refuses the file. That is why the builds upload only
+artifacts, why nothing is uploaded to the release until every byte is final,
+and why the release stays a draft for the whole round trip.
+
+The workflow does not run `scripts/sign-release.sh` from the calling
+repository: no repository code runs in the job that holds the key. It writes
+the same three files byte for byte, so `.meta` keeps a single format. Change
+that format in both places, or not at all.
+
+**Turning SignPath on for a repository**, once SignPath Foundation has accepted
+the project:
+
+1. Once for the organisation: the predefined *GitHub.com* trusted build system
+   in the SignPath organisation, a CI user with submitter rights whose API
+   token is the `SIGNPATH_API_TOKEN` organisation secret, and the
+   `SIGNPATH_ORGANIZATION_ID` organisation variable. Grant the secret to the
+   repository.
+2. In SignPath, a project for the repository: its repository URL, the GitHub.com
+   build system linked, a `release-signing` policy with the approvers and
+   origin verification allowing `main` (release runs start from a push to
+   `main`; run a recovery dispatch from `main` too), and an artifact
+   configuration for a zip holding one PE file, with file metadata
+   restrictions: product name equal to the project name, product version set.
+   The `.exe` therefore needs a version resource (ProductName,
+   ProductVersion).
+3. In the repository: every job leading to the signing request on
+   GitHub-hosted runners, no build cache in the release build (SignPath forbids
+   reusing outputs of earlier, unverified builds), a "Code signing policy"
+   section in the README, and `signpath-project-slug` set in the call.
+
+From that release on, a Windows file without Authenticode cannot be published:
+a missing token or organisation id fails `preflight`, and a request that is
+denied, fails or times out fails the run with the release still a draft.
+
+**The manual approval.** Every release-signing request waits for an approver
+to approve it in SignPath, which notifies by email. The workflow waits up to 5
+hours (GitHub-hosted jobs stop at 6), so merging a release pull request means
+someone has to be there to approve. If nobody does, the job fails with a link to
+the request and nothing is published; re-running the failed jobs submits a new
+request, which needs a new approval.
+
 ### Rotating the key
 
 `src/signing.rs` in Colony embeds a **list** of accepted keys, and a signature is
@@ -341,6 +452,7 @@ after it no release of that program may stop publishing sidecars.
 |---|---|
 | Release workflow | `templates/release.yml` (this repo) |
 | Signing script | `templates/sign-release.sh` (this repo) |
+| Shared sign-and-publish workflow | `.github/workflows/sign-and-publish.yml` (this repo) |
 | Manifest schema | `generated/colony.schema.json` (this repo) |
 | Manifest examples | `manifests/examples/` (this repo) |
 | Manifest validator | `colony validate-manifest`, shipped in the launcher |
