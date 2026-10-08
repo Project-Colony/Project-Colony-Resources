@@ -109,6 +109,8 @@ action's `release-type` input as well makes it ignore both files, and with them
 the changelog sections, `extra-files` and the manifest version, with no
 warning.
 
+Do not set `separate-pull-requests` to `false` for a single-package repository. Its default is `true` when the config has one package, which names the release branch `release-please--branches--main--components--<name>`. Forced to `false`, the branch loses its component, and release-please 17.x then refuses to release the merged release PR (`PR component: undefined does not match configured component`) whenever the package has a name, as Rust and Node packages do. SAM-Colony-Edition 0.7.0 was stuck this way.
+
 ## 3. Asset naming — this is the contract
 
 Colony auto-detects which platforms a program supports **from the release asset
