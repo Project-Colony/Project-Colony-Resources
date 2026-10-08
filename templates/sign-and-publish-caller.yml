@@ -1,0 +1,156 @@
+# Colony Rust program: release workflow using the shared signing workflow
+#
+# Copy to your repo as .github/workflows/release.yml, replace {{APP_NAME}}
+# with your binary name (lowercase) and {{RESOURCES_SHA}} with the commit of
+# Project-Colony-Resources to use:
+#
+#   gh api repos/Project-Colony/Project-Colony-Resources/commits/main --jq .sha
+#
+# The build legs only build and upload artifacts; they never see a key.
+# Authenticode (SignPath, once approved), ed25519 signing, verification and
+# publishing all happen in .github/workflows/sign-and-publish.yml of
+# Project-Colony-Resources, in this same run. See design/releases.md, section
+# "Shared signing workflow". templates/release.yml explains the release-please
+# and recovery parts in more detail.
+
+name: Release
+
+on:
+  push:
+    branches: [main]
+  # Recovery path: finish an existing DRAFT release whose run failed. Start it
+  # from the tag ("Use workflow from: v0.3.0", or `gh workflow run release.yml
+  # --ref v0.3.0 -f tag=v0.3.0`): with SignPath on, sign-and-publish refuses a
+  # run whose commit is not the tag's, since SignPath records the run's commit
+  # as the source of what it signs.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing draft release to build, sign and publish (e.g. v0.3.0). Run from that same tag."
+        required: true
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  release-please:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      # No `release-type` input: when it is set, the action ignores both files.
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        id: release
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+      # release-please publishes the release before any binary exists. Held as
+      # a draft; sign-and-publish refuses anything else and publishes it last.
+      - name: Hold the release as a draft
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag_name }}
+        run: gh release edit "$TAG" -R "$GITHUB_REPOSITORY" --draft=true
+
+  build:
+    name: build ${{ matrix.asset }}
+    needs: release-please
+    # Runs on a merge that created a release, or on a recovery dispatch (when
+    # release-please is skipped).
+    if: ${{ !cancelled() && !failure() && (needs.release-please.outputs.release_created || github.event_name == 'workflow_dispatch') }}
+    # GitHub-hosted runners only: SignPath rejects a signing request if any
+    # job leading to it ran on a self-hosted runner.
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            asset: "{{APP_NAME}}-linux"
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            asset: "{{APP_NAME}}-windows.exe"
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            asset: "{{APP_NAME}}-macos"
+          - target: x86_64-apple-darwin
+            os: macos-latest
+            asset: "{{APP_NAME}}-macos-x86"
+    steps:
+      # The tag, not the branch: a recovery dispatch must rebuild the tagged
+      # commit, since the .meta sidecar binds these bytes to that version.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name || inputs.tag }}
+          persist-credentials: false
+
+      - uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4 # stable branch
+        with:
+          targets: ${{ matrix.target }}
+
+      # No build cache here: SignPath forbids release builds that reuse
+      # outputs of earlier, unverified builds.
+
+      - name: Build
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Name the artifact (Unix)
+        if: runner.os != 'Windows'
+        run: cp target/${{ matrix.target }}/release/{{APP_NAME}} ${{ matrix.asset }}
+
+      - name: Name the artifact (Windows)
+        if: runner.os == 'Windows'
+        run: copy target\${{ matrix.target }}\release\{{APP_NAME}}.exe ${{ matrix.asset }}
+
+      - name: Smoke-test the artifact
+        if: matrix.target != 'x86_64-apple-darwin'
+        shell: bash
+        run: |
+          chmod +x "${{ matrix.asset }}" || true
+          "./${{ matrix.asset }}" --version
+
+      # The file at the artifact root, under its release name. The name
+      # prefix is what `artifact-pattern` below matches.
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: build-${{ matrix.asset }}
+          path: ${{ matrix.asset }}
+          if-no-files-found: error
+          retention-days: 1
+
+  sign-and-publish:
+    needs: [release-please, build]
+    if: ${{ !cancelled() && needs.build.result == 'success' }}
+    # The ceiling for every job in the called workflow.
+    permissions:
+      actions: read
+      contents: write
+    uses: Project-Colony/Project-Colony-Resources/.github/workflows/sign-and-publish.yml@{{RESOURCES_SHA}} # main
+    with:
+      tag: ${{ needs.release-please.outputs.tag_name || inputs.tag }}
+      assets: "{{APP_NAME}}-linux {{APP_NAME}}-windows.exe {{APP_NAME}}-macos {{APP_NAME}}-macos-x86"
+      artifact-pattern: build-*
+      # Uncomment once SignPath has approved this project and its project
+      # exists in the Project-Colony SignPath organisation:
+      # signpath-project-slug: "{{APP_NAME}}"
+    # Named, not `inherit`: the called workflow gets these two and nothing else.
+    secrets:
+      COLONY_SIGNING_KEY_PEM: ${{ secrets.COLONY_SIGNING_KEY_PEM }}
+      SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}

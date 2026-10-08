@@ -1,0 +1,419 @@
+# Sign and publish a Colony release (reusable workflow)
+#
+# A program's release workflow calls this AFTER its build jobs, in the SAME
+# run, once every platform binary has been uploaded with actions/upload-artifact:
+#
+#   build legs (upload-artifact)  ->  sign-and-publish (this file)
+#
+# The release must already exist as a DRAFT for the tag (release-please plus
+# the draft hold in templates/release.yml). This workflow then:
+#
+#   preflight     checks the inputs and that the tag is still a draft
+#   authenticode  sends each Windows file to SignPath and takes back the
+#                 Authenticode-signed copy (only once SignPath is turned on)
+#   publish       writes .sig, .meta and .meta.sig over the FINAL bytes with
+#                 the organisation's ed25519 key, uploads everything to the
+#                 draft, downloads it again, verifies it, and publishes
+#
+# The order is the whole point. Authenticode rewrites the PE (certificate
+# table, security directory, checksum), so an ed25519 signature or a .meta
+# sha256 computed before SignPath describes bytes that no longer exist, and
+# Colony refuses the file. Nothing is uploaded to the release before every
+# byte is final, and nothing is public before everything is verified.
+#
+# Usage and the SignPath setup: design/releases.md, section "Shared signing
+# workflow". Caller example: templates/sign-and-publish-caller.yml.
+#
+# Action refs are pinned to commit SHAs: this workflow holds the release
+# signing key, and whoever can move a floating tag can read it.
+
+name: Sign and publish
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: "Release tag. Its release must exist and still be a draft."
+        required: true
+        type: string
+      assets:
+        description: "Space-separated release asset names, e.g. 'grape-linux grape-windows.exe'."
+        required: true
+        type: string
+      artifact-pattern:
+        description: "Glob matching the artifacts the build jobs uploaded (actions/download-artifact `pattern`). Each asset must be at the root of one of them."
+        required: true
+        type: string
+      windows-assets:
+        description: "Space-separated subset of `assets` to Authenticode-sign. Empty means every asset ending in .exe."
+        required: false
+        type: string
+        default: ""
+      signpath-project-slug:
+        description: "SignPath project slug. Empty means SignPath is off for this repository."
+        required: false
+        type: string
+        default: ""
+      signpath-signing-policy-slug:
+        description: "SignPath signing policy slug."
+        required: false
+        type: string
+        default: release-signing
+      signpath-artifact-configuration-slug:
+        description: "SignPath artifact configuration slug. Empty uses the project's default configuration."
+        required: false
+        type: string
+        default: ""
+      code-signing-policy:
+        description: "Append a 'Code signing policy' link (README#code-signing-policy of the calling repository) to the release notes."
+        required: false
+        type: boolean
+        default: true
+    secrets:
+      COLONY_SIGNING_KEY_PEM:
+        description: "The organisation's ed25519 release key, PEM."
+        required: true
+      SIGNPATH_API_TOKEN:
+        description: "SignPath CI user API token. Needed only once signpath-project-slug is set."
+        required: false
+
+permissions: {}
+
+defaults:
+  run:
+    # bash -eo pipefail, on every step.
+    shell: bash
+
+jobs:
+  preflight:
+    name: Check the release and the inputs
+    runs-on: ubuntu-latest
+    permissions:
+      # Only reads. But a draft release is invisible to a token without push
+      # access, so with `contents: read` every draft looks like "no release".
+      contents: write
+    outputs:
+      signpath: ${{ steps.check.outputs.signpath }}
+      windows: ${{ steps.check.outputs.windows }}
+    steps:
+      - id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+          ASSETS: ${{ inputs.assets }}
+          WINDOWS_ASSETS: ${{ inputs.windows-assets }}
+          SIGNPATH_PROJECT: ${{ inputs.signpath-project-slug }}
+          SIGNPATH_POLICY: ${{ inputs.signpath-signing-policy-slug }}
+          SIGNPATH_ORG: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          # Whether the token is there, never the token itself.
+          SIGNPATH_TOKEN_SET: ${{ secrets.SIGNPATH_API_TOKEN != '' }}
+        run: |
+          fail() { echo "::error::$*"; exit 1; }
+
+          [ -n "$TAG" ] || fail "tag is empty"
+          [[ "$TAG" =~ ^[A-Za-z0-9._/+-]+$ ]] || fail "tag '$TAG' has characters a release tag should not have"
+
+          # Names become file paths, artifact names and glob patterns below, so
+          # nothing but plain file-name characters gets through. Split on any
+          # whitespace, newlines included, with globbing off.
+          set -f
+          # shellcheck disable=SC2206
+          assets=($ASSETS) windows=($WINDOWS_ASSETS)
+          [ "${#assets[@]}" -gt 0 ] || fail "assets is empty"
+          for a in "${assets[@]}"; do
+            [[ "$a" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] || fail "asset name '$a' is not a plain file name"
+          done
+          if [ "${#windows[@]}" -eq 0 ]; then
+            for a in "${assets[@]}"; do
+              [[ "$a" == *.exe ]] && windows+=("$a")
+            done
+          else
+            for w in "${windows[@]}"; do
+              [[ " ${assets[*]} " == *" $w "* ]] || fail "windows-assets names '$w', which is not in assets"
+            done
+          fi
+
+          # Once a repository turns SignPath on, a Windows file without
+          # Authenticode must never ship again: anything missing is an error,
+          # not a quiet fallback to unsigned.
+          signpath=false
+          if [ -z "$SIGNPATH_PROJECT" ]; then
+            echo "::notice::SignPath is off for this repository (no signpath-project-slug): Windows files ship without Authenticode."
+          elif [ "${#windows[@]}" -eq 0 ]; then
+            echo "::notice::SignPath is on, but this release has no Windows asset to sign."
+          else
+            [ "$SIGNPATH_TOKEN_SET" = "true" ] || fail "SignPath is on (project '$SIGNPATH_PROJECT') but the SIGNPATH_API_TOKEN secret was not passed. Refusing to publish unsigned Windows files."
+            [ -n "$SIGNPATH_ORG" ] || fail "SignPath is on (project '$SIGNPATH_PROJECT') but the SIGNPATH_ORGANIZATION_ID variable is not set. Refusing to publish unsigned Windows files."
+            [ -n "$SIGNPATH_POLICY" ] || fail "signpath-signing-policy-slug is empty"
+            signpath=true
+            echo "Authenticode via SignPath project '$SIGNPATH_PROJECT', policy '$SIGNPATH_POLICY': ${windows[*]}"
+          fi
+
+          # A published release has users. Replacing its files would leave
+          # their .sig and .meta describing bytes that no longer exist.
+          state=$(gh release view "$TAG" -R "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft) \
+            || fail "no release found for $TAG"
+          [ "$state" = "true" ] \
+            || fail "$TAG is already published. Refusing to replace its assets. Draft it first if you really mean to: gh release edit $TAG -R $GITHUB_REPOSITORY --draft=true"
+
+          # SignPath records this run's commit (GITHUB_SHA) as the source of
+          # the file it signs, while the caller builds the tag. On a dispatch
+          # from main the two differ, and the approver would vouch for source
+          # the binary was not built from. So the tag must be this run's commit,
+          # which means a recovery dispatch runs from the tag itself.
+          if [ "$signpath" = true ]; then
+            tag_sha=$(gh api "repos/$GITHUB_REPOSITORY/commits/refs/tags/$TAG" --jq .sha) \
+              || fail "cannot resolve tag $TAG to a commit"
+            wf=${GITHUB_WORKFLOW_REF%@*}
+            [ "$tag_sha" = "$GITHUB_SHA" ] \
+              || fail "$TAG is commit $tag_sha but this run is for $GITHUB_SHA ($GITHUB_REF), so SignPath would record the wrong source commit. Start the recovery dispatch from the tag: gh workflow run ${wf##*/} -R $GITHUB_REPOSITORY --ref $TAG -f tag=$TAG"
+          fi
+
+          echo "signpath=$signpath" >> "$GITHUB_OUTPUT"
+          echo "windows=$(jq -cn '$ARGS.positional' --args "${windows[@]}")" >> "$GITHUB_OUTPUT"
+
+  # One leg per Windows file. SignPath's origin verification accepts only an
+  # artifact uploaded by this same run on a GitHub-hosted runner, so each file
+  # is uploaded here on its own and submitted by its artifact id.
+  authenticode:
+    name: Authenticode ${{ matrix.asset }}
+    needs: preflight
+    if: needs.preflight.outputs.signpath == 'true'
+    runs-on: ubuntu-latest
+    # Every release-signing request waits for a person to approve it in
+    # SignPath. The wait below is 5 hours; the job must outlive it.
+    timeout-minutes: 330
+    permissions:
+      # The SignPath action hands this job's token to SignPath, which uses it
+      # to read the job and download the unsigned artifact.
+      actions: read
+      contents: read
+    strategy:
+      matrix:
+        asset: ${{ fromJSON(needs.preflight.outputs.windows) }}
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: ${{ inputs.artifact-pattern }}
+          path: build
+          merge-multiple: true
+
+      - name: Take the unsigned file
+        env:
+          ASSET: ${{ matrix.asset }}
+          PATTERN: ${{ inputs.artifact-pattern }}
+        run: |
+          [ -s "build/$ASSET" ] || { echo "::error::$ASSET is in no artifact matching '$PATTERN'"; exit 1; }
+          mkdir unsigned
+          mv "build/$ASSET" unsigned/
+
+      - name: Upload the unsigned file for SignPath
+        id: unsigned
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: signpath-unsigned-${{ matrix.asset }}
+          path: unsigned/${{ matrix.asset }}
+          if-no-files-found: error
+          # A re-run of a failed job uploads again under the same name.
+          overwrite: true
+          retention-days: 1
+
+      - name: Submit to SignPath and wait for approval
+        id: signpath
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3.0
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ inputs.signpath-project-slug }}
+          signing-policy-slug: ${{ inputs.signpath-signing-policy-slug }}
+          artifact-configuration-slug: ${{ inputs.signpath-artifact-configuration-slug }}
+          github-artifact-id: ${{ steps.unsigned.outputs.artifact-id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 18000
+          # The artifact is a zip holding the one file; the action unpacks the
+          # signed zip here, so the signed file lands at signed/<asset>.
+          output-artifact-directory: signed
+
+      - name: Explain the SignPath failure
+        if: failure() && steps.signpath.outcome == 'failure'
+        env:
+          ASSET: ${{ matrix.asset }}
+          TAG: ${{ inputs.tag }}
+          REQUEST: ${{ steps.signpath.outputs.signing-request-web-url }}
+        run: |
+          echo "::error::SignPath did not return a signed $ASSET (denied, failed, or not approved within 5 hours). ${REQUEST:+Request: $REQUEST. }$TAG stays a draft and nothing was published. Once the cause is fixed, re-run the failed jobs: that submits a new signing request, which needs a new approval."
+          exit 1
+
+      - name: Check the signed file came back changed
+        env:
+          ASSET: ${{ matrix.asset }}
+        run: |
+          [ -s "signed/$ASSET" ] || { echo "::error::SignPath returned no signed/$ASSET"; ls -la signed || true; exit 1; }
+          if cmp -s "unsigned/$ASSET" "signed/$ASSET"; then
+            echo "::error::signed/$ASSET is byte-identical to the unsigned file"
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: signpath-signed-${{ matrix.asset }}
+          path: signed/${{ matrix.asset }}
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 1
+
+  publish:
+    name: Sign and publish ${{ inputs.tag }}
+    needs: [preflight, authenticode]
+    # `authenticode` may be skipped only because SignPath is off. Skipped or
+    # failed with SignPath on means unsigned Windows files: stop.
+    if: >-
+      ${{ !cancelled() && needs.preflight.result == 'success' &&
+      (needs.authenticode.result == 'success' ||
+      (needs.authenticode.result == 'skipped' && needs.preflight.outputs.signpath != 'true')) }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ inputs.tag }}
+      ASSETS: ${{ inputs.assets }}
+      WINDOWS: ${{ needs.preflight.outputs.windows }}
+      SIGNPATH: ${{ needs.preflight.outputs.signpath }}
+    steps:
+      # No checkout: nothing from the calling repository runs in the job that
+      # holds the signing key.
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: ${{ inputs.artifact-pattern }}
+          path: dist
+          merge-multiple: true
+
+      - if: env.SIGNPATH == 'true'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: signpath-signed-*
+          path: signed
+          merge-multiple: true
+
+      - name: Put the Authenticode-signed files in place
+        env:
+          PATTERN: ${{ inputs.artifact-pattern }}
+        run: |
+          for a in $ASSETS; do
+            [ -s "dist/$a" ] || { echo "::error::$a is in no artifact matching '$PATTERN'"; exit 1; }
+          done
+          [ "$SIGNPATH" = "true" ] || exit 0
+
+          mapfile -t windows < <(jq -r '.[]' <<< "$WINDOWS")
+          for a in "${windows[@]}"; do
+            [ -s "signed/$a" ] || { echo "::error::no Authenticode-signed $a came back from SignPath"; exit 1; }
+            mv -f "signed/$a" "dist/$a"
+          done
+
+          # The gate that matters: an Authenticode signature lives in the PE
+          # security directory, so a file whose directory is empty is unsigned,
+          # whatever happened upstream. Presence only; SignPath vouches for it.
+          python3 - "${windows[@]/#/dist/}" <<'PY'
+          import struct, sys
+          for path in sys.argv[1:]:
+              data = open(path, "rb").read()
+              if data[:2] != b"MZ":
+                  sys.exit(f"::error::{path} is not a PE file")
+              pe = struct.unpack_from("<I", data, 0x3C)[0]
+              if data[pe:pe + 4] != b"PE\0\0":
+                  sys.exit(f"::error::{path} is not a PE file")
+              optional = pe + 24
+              magic = struct.unpack_from("<H", data, optional)[0]
+              directories = optional + (96 if magic == 0x10B else 112)
+              offset, size = struct.unpack_from("<II", data, directories + 4 * 8)
+              if size == 0 or offset + size > len(data):
+                  sys.exit(f"::error::{path} carries no Authenticode signature")
+              print(f"{path}: Authenticode signature present ({size} bytes)")
+          PY
+
+      # Same output as templates/sign-release.sh, over the final bytes:
+      #   <asset>.sig       ed25519 over the asset
+      #   <asset>.meta      version=<tag>\nasset=<name>\nsha256=<hex>\n
+      #   <asset>.meta.sig  ed25519 over the .meta
+      # The .meta format is the contract Colony verifies (design/releases.md
+      # section 5); change it there and in sign-release.sh, or not at all.
+      - name: Sign with the organisation key
+        env:
+          KEY: ${{ secrets.COLONY_SIGNING_KEY_PEM }}
+        run: |
+          [ -n "$KEY" ] || { echo "::error::COLONY_SIGNING_KEY_PEM is not set. The release would ship unsigned and Colony would refuse it."; exit 1; }
+          keyfile=$(mktemp)
+          # Removed even when a command below fails.
+          trap 'rm -f "$keyfile"' EXIT
+          chmod 600 "$keyfile"
+          printf '%s' "$KEY" > "$keyfile"
+          openssl pkey -in "$keyfile" -pubout -out "$RUNNER_TEMP/colony-release.pub"
+
+          cd dist
+          for a in $ASSETS; do
+            openssl pkeyutl -sign -inkey "$keyfile" -rawin -in "$a" -out "$a.sig"
+            digest=$(openssl dgst -sha256 -r "$a" | cut -d' ' -f1)
+            printf 'version=%s\nasset=%s\nsha256=%s\n' "$TAG" "$a" "$digest" > "$a.meta"
+            openssl pkeyutl -sign -inkey "$keyfile" -rawin -in "$a.meta" -out "$a.meta.sig"
+            echo "signed $a (sha256 ${digest:0:16}...)"
+          done
+
+      - name: Verify, upload, download again and verify
+        run: |
+          # Every signature against the public half of the key, and every
+          # .meta against exactly what it must say for these bytes.
+          verify() {
+            local dir="$1" a digest
+            for a in $ASSETS; do
+              for f in "$a" "$a.sig" "$a.meta" "$a.meta.sig"; do
+                [ -s "$dir/$f" ] || { echo "::error::$dir/$f is missing or empty"; return 1; }
+              done
+              openssl pkeyutl -verify -pubin -inkey "$RUNNER_TEMP/colony-release.pub" -rawin -in "$dir/$a" -sigfile "$dir/$a.sig" >/dev/null \
+                || { echo "::error::$dir/$a.sig does not verify"; return 1; }
+              openssl pkeyutl -verify -pubin -inkey "$RUNNER_TEMP/colony-release.pub" -rawin -in "$dir/$a.meta" -sigfile "$dir/$a.meta.sig" >/dev/null \
+                || { echo "::error::$dir/$a.meta.sig does not verify"; return 1; }
+              digest=$(openssl dgst -sha256 -r "$dir/$a" | cut -d' ' -f1)
+              printf 'version=%s\nasset=%s\nsha256=%s\n' "$TAG" "$a" "$digest" | cmp -s - "$dir/$a.meta" \
+                || { echo "::error::$dir/$a.meta does not bind $a at $TAG to these bytes"; return 1; }
+            done
+          }
+
+          files=()
+          for a in $ASSETS; do files+=("dist/$a" "dist/$a.sig" "dist/$a.meta" "dist/$a.meta.sig"); done
+
+          verify dist
+          echo "signed locally and verified"
+
+          # The SignPath wait can take hours; the release may have changed.
+          state=$(gh release view "$TAG" -R "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)
+          [ "$state" = "true" ] || { echo "::error::$TAG was published while this run was signing. Not touching it."; exit 1; }
+
+          gh release upload "$TAG" -R "$GITHUB_REPOSITORY" --clobber "${files[@]}"
+
+          # A local file proves nothing about what users will download.
+          mkdir published
+          patterns=()
+          for f in "${files[@]}"; do patterns+=(--pattern "${f#dist/}"); done
+          gh release download "$TAG" -R "$GITHUB_REPOSITORY" --dir published "${patterns[@]}"
+          verify published
+          for f in "${files[@]}"; do
+            cmp -s "$f" "published/${f#dist/}" || { echo "::error::${f#dist/} on the release differs from what was signed"; exit 1; }
+          done
+          echo "release assets verified as published"
+
+      - name: Link the code signing policy
+        if: inputs.code-signing-policy
+        run: |
+          link="https://github.com/$GITHUB_REPOSITORY#code-signing-policy"
+          gh release view "$TAG" -R "$GITHUB_REPOSITORY" --json body --jq .body > notes.md
+          # Idempotent: a re-run must not append it twice.
+          if ! grep -qF "$link" notes.md; then
+            printf '\n[Code signing policy](%s)\n' "$link" >> notes.md
+            gh release edit "$TAG" -R "$GITHUB_REPOSITORY" --notes-file notes.md
+          fi
+
+      # Only now does /releases/latest move, so no Colony is ever offered a
+      # release it cannot install.
+      - name: Publish the release
+        run: gh release edit "$TAG" -R "$GITHUB_REPOSITORY" --draft=false
