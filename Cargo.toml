@@ -18,6 +18,9 @@ anyhow = "1.0.104"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1.0.151", features = ["preserve_order"] }
 toml = "1.1.4"
+# Test-only: reads the embedded font files to check the names, weights and
+# glyphs colony-ui relies on. Already in the tree under iced.
+ttf-parser = "0.25.1"
 
 # The shared UI baseline. Declared here so every Colony program that depends on
 # colony-ui inherits the same iced, instead of each repo drifting on its own —

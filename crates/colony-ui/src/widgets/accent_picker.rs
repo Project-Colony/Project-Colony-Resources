@@ -3,7 +3,7 @@ use iced::{Alignment, Border, Color, Element, Length};
 
 use super::icons;
 use crate::theme::{contrast_on, hex, Palette, ACCENT_OVERRIDES};
-use crate::Typography;
+use crate::{fonts, Typography};
 
 /// The row of accent swatches, rendered from [`ACCENT_OVERRIDES`].
 ///
@@ -37,7 +37,7 @@ where
         let check: Element<'a, M> = if is_active {
             text(icons::CHECK)
                 .size(typo.sz(8))
-                .font(typo.regular)
+                .font(fonts::glyph_font())
                 .color(on_dot)
                 .into()
         } else {

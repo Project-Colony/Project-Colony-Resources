@@ -8,7 +8,7 @@ are built from.
 
 ```toml
 [dependencies]
-colony-ui = "0.1"
+colony-ui = "0.1.6"
 ```
 
 ```rust
@@ -47,7 +47,7 @@ let config = paths::config_dir("Digger")?.join("preferences.json");
 | `motion::*` | reduced motion, and `effects_enabled` for every animation to check |
 | `i18n::t` | theme, accent and Preferences labels in English and French, embedded |
 | `paths::*` | `Colony/<Program>/` config, data and cache on Linux, Windows, macOS |
-| `widgets::*` | identity button, sidebar items, the Preferences page and its categories, collapsible section, toggle, drop-down, theme and accent pickers |
+| `widgets::*` | identity button, sidebar items, the Preferences page and its categories, collapsible section, toggle, drop-down, theme and accent pickers, toast |
 
 The palettes are **generated** from design tokens rather than hand-written, so
 adding a theme family reaches every program that depends on this crate without
@@ -99,6 +99,11 @@ colony_ui::fonts::BYTES
     .default_font(colony_ui::ui_font())
     .run()
 ```
+
+Text takes its font from `ui_font()`, `ui_font_medium()` or `ui_font_bold()`
+(or `Typography::current()`), which swap to OpenDyslexic with the dyslexia
+toggle. A Nerd Font glyph takes `fonts::glyph_font()`, which does not:
+OpenDyslexic has no glyphs.
 
 Turn the feature off to ship the files yourself; the family names and the
 accessors stay.

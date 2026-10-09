@@ -3,7 +3,7 @@ use iced::{Alignment, Border, Color, Element, Length, Padding};
 
 use super::icons;
 use crate::theme::Palette;
-use crate::Typography;
+use crate::{fonts, Typography};
 
 /// A collapsible section: a flat header row that toggles its body.
 ///
@@ -41,7 +41,7 @@ where
             container(text("")).width(Length::Fill),
             text(chevron)
                 .size(typo.sz(9))
-                .font(typo.regular)
+                .font(fonts::glyph_font())
                 .color(Palette::TEXT_DIMMER()),
         ]
         .spacing(8)

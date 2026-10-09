@@ -59,7 +59,7 @@ Colony shipped before the import; see [Guarantees](#guarantees).
 One dependency:
 
 ```toml
-colony-ui = "0.1"
+colony-ui = "0.1.6"
 ```
 
 ```rust
@@ -102,7 +102,7 @@ way: the identity button, a sidebar, and the whole Preferences page.
 | `motion::*` | reduced motion, and `effects_enabled` for every animation to check |
 | `i18n::t` | every shared label (themes, accents, the Preferences page), both locales, embedded |
 | `paths::*` | `Colony/<Program>/` config, data and cache dirs on all three platforms |
-| `widgets::*` | identity button, sidebar items, the Preferences page, its categories and sections, theme and accent pickers |
+| `widgets::*` | identity button, sidebar items, the Preferences page, its categories and sections, theme and accent pickers, toast |
 
 **A new theme family reaches every program with zero code changes**: no match
 arm, no picker entry, no locale edit. Add the TOML, regenerate, bump the

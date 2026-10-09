@@ -108,7 +108,11 @@ where
 
 /// The category list on the left of the page: one [`nav_item`] per label,
 /// `on_select` receiving the index. Start the labels with
-/// [`STANDARD_CATEGORIES`]:
+/// [`STANDARD_CATEGORIES`].
+///
+/// It is 180 wide at a text scale of 1.0 and grows with the scale, so the
+/// longest standard label, "Accessibility", fits on one line from 0.7225x to
+/// 1.68x, OpenDyslexic included.
 ///
 /// ```
 /// # use colony_ui::{i18n, Typography};
@@ -137,7 +141,7 @@ where
         .map(|(i, label)| nav_item(typo, label.as_ref(), i == selected, on_select(i)));
 
     container(Column::with_children(items).spacing(2))
-        .width(Length::Fixed(160.0))
+        .width(Length::Fixed(CATEGORY_LIST_WIDTH * typo.scale))
         .padding(Padding {
             top: 0.0,
             right: 16.0,
@@ -146,6 +150,11 @@ where
         })
         .into()
 }
+
+/// The category list's width at a text scale of 1.0. OpenDyslexic sets
+/// "Accessibility" at 9.3 em; at `sz(13)` that plus the item's padding and the
+/// list's gutter needs 165.
+const CATEGORY_LIST_WIDTH: f32 = 180.0;
 
 /// What every category opens with: its heading at `sz(18)` bold and a
 /// one-line description under it in `text_muted`.
@@ -799,3 +808,57 @@ pub(crate) const KEYS: &[&str] = &[
     "settings_text_size_a11y_desc",
     "theme_applied",
 ];
+
+#[cfg(all(test, feature = "fonts"))]
+mod tests {
+    use super::*;
+    use crate::i18n::{t_in, Locale};
+
+    /// The claim on [`category_list`]: every standard category name fits on one
+    /// line at every combination of the two text sizes, in either locale and
+    /// either interface font, measured from the embedded files.
+    #[test]
+    fn the_category_names_fit_the_list_at_every_text_scale() {
+        // nav_item's horizontal padding, then the list's right gutter.
+        const CHROME: f32 = 14.0 * 2.0 + 16.0;
+
+        let fonts = [
+            ("JetBrainsMono Nerd Font", crate::fonts::BYTES[0]),
+            ("OpenDyslexic", crate::fonts::BYTES[3]),
+        ];
+        for (font, bytes) in fonts {
+            let face = ttf_parser::Face::parse(bytes, 0).unwrap();
+            let em = |label: &str| -> f32 {
+                label
+                    .chars()
+                    .map(|c| {
+                        let glyph = face.glyph_index(c).expect("the font has every letter");
+                        face.glyph_hor_advance(glyph).unwrap_or(0) as f32
+                    })
+                    .sum::<f32>()
+                    / face.units_per_em() as f32
+            };
+
+            for font_size in FontSize::ALL {
+                for text_size in TextSize::ALL {
+                    let typo = Typography {
+                        scale: font_size.factor() * text_size.factor(),
+                        ..Typography::default()
+                    };
+                    let width = CATEGORY_LIST_WIDTH * typo.scale;
+                    for key in STANDARD_CATEGORIES.iter().chain([&ABOUT_CATEGORY]) {
+                        for locale in [Locale::En, Locale::Fr] {
+                            let label = t_in(locale, key);
+                            let needed = em(label) * typo.sz(13) + CHROME;
+                            assert!(
+                                needed <= width,
+                                "{label:?} in {font} at {:.4}x needs {needed:.1}, the list is {width:.1}",
+                                typo.scale
+                            );
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

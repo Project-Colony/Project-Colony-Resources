@@ -14,7 +14,12 @@ crate is 0.x, anything that breaks a consumer bumps the minor version.
   collapsible and available on its own.
 * **Preferences page.** `preferences_page`, `preferences_header`,
   `category_list`, `category_heading`, `section_description`, `setting_row`
-  and `dropdown`, plus `STANDARD_CATEGORIES` and `ABOUT_CATEGORY`.
+  and `dropdown`, plus `STANDARD_CATEGORIES` and `ABOUT_CATEGORY`. The
+  category list grows with the text scale, so every standard category name
+  fits on one line from 0.7225x to 1.68x, in OpenDyslexic too.
+* **`widgets::toast`**: the dismissible confirmation Appearance raises after a
+  theme change (`theme_applied`), drawn the way Colony draws its
+  notifications.
 * **Navigation.** `identity_button` (the program's name as the way into
   Preferences, with its open state), `nav_item`, `selection_style`,
   `nav_label` and `nav_hint`. Selection is an accent background with its label
@@ -30,7 +35,9 @@ crate is 0.x, anything that breaks a consumer bumps the minor version.
 * **Fonts.** JetBrainsMono Nerd Font (Regular, Medium, Bold), OpenDyslexic and
   Font Awesome 6 Free embedded behind the default `fonts` feature, with their
   SIL OFL 1.1 texts; `ui_font()`, `ui_font_medium()` and `ui_font_bold()`
-  follow the dyslexia toggle.
+  follow the dyslexia toggle. `glyph_font()` is the Nerd Font whatever the
+  toggle says, and every glyph the widgets draw now uses it: OpenDyslexic has
+  none of them.
 * **Motion.** `set_reduced_motion`, `set_effects` and `effects_enabled()`, which
   is false whenever reduced motion is on.
 * **Labels.** The Preferences page's strings in English and French, generated
@@ -38,6 +45,13 @@ crate is 0.x, anything that breaks a consumer bumps the minor version.
 * `is_high_contrast` is re-exported at the crate root next to
   `set_high_contrast`.
 * The GPL-3.0 licence text ships inside the crate.
+
+### Fixes
+
+* Dracula's picker glyph is the Nerd Font's ghost, `\u{eefe}`. It was
+  `\u{f6e2}`, a Font Awesome codepoint JetBrainsMono Nerd Font does not
+  carry, so it only rendered when a fallback font happened to have it. A test
+  now holds every family glyph to the embedded font.
 * `examples/preferences.rs`: a complete program built from the kit.
 
 ## 0.1.5

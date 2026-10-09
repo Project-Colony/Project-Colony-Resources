@@ -25,7 +25,7 @@ use colony_ui::preferences::{Change, StandardPreferences};
 use colony_ui::theme::Palette;
 use colony_ui::widgets::{self, PreferencesView, ABOUT_CATEGORY, STANDARD_CATEGORIES};
 use colony_ui::{fonts, i18n, Typography};
-use iced::widget::{button, column, container, row, space, text};
+use iced::widget::{column, container, row, space, stack, text};
 use iced::{Element, Length};
 
 fn main() -> iced::Result {
@@ -130,11 +130,13 @@ impl Demo {
                 Message::Section(index),
             ));
         }
+        // Like the category list, the sidebar grows with the text so the name
+        // still fits at 1.68x.
         let sidebar = sidebar
             .push(space().height(Length::Fill))
             .push(widgets::nav_hint(&typo, "Click Demo to open Preferences"))
             .padding(16)
-            .width(200);
+            .width(200.0 * typo.scale);
 
         let content = if self.preferences_open {
             self.preferences(&typo)
@@ -151,10 +153,17 @@ impl Demo {
             .into()
         };
 
-        let mut main = column![content];
-        if let Some(notice) = self.notice {
-            main = main.push(self.notice_bar(&typo, notice));
-        }
+        // The theme_applied toast, over the bottom of the page.
+        let main: Element<'_, Message> = match self.notice {
+            Some(notice) => stack![
+                content,
+                container(widgets::toast(&typo, notice, Message::DismissNotice))
+                    .padding(16)
+                    .align_bottom(Length::Fill),
+            ]
+            .into(),
+            None => content,
+        };
 
         container(row![
             container(sidebar)
@@ -223,34 +232,5 @@ impl Demo {
             content,
             Message::TogglePreferences,
         )
-    }
-
-    /// The `theme_applied` confirmation: the change was immediate, this only
-    /// makes it noticeable. Dismissible, like every notice.
-    fn notice_bar<'a>(&self, typo: &Typography, notice: &'a str) -> Element<'a, Message> {
-        container(
-            row![
-                text(notice)
-                    .size(typo.sz(12))
-                    .font(typo.regular)
-                    .color(Palette::SUCCESS()),
-                space().width(Length::Fill),
-                button(
-                    text(i18n::t("settings_close"))
-                        .size(typo.sz(12))
-                        .font(typo.regular)
-                )
-                .on_press(Message::DismissNotice)
-                .style(widgets::selection_style(false)),
-            ]
-            .align_y(iced::Alignment::Center),
-        )
-        .padding([8, 16])
-        .width(Length::Fill)
-        .style(|_theme| container::Style {
-            background: Some(Palette::SUCCESS_BG().into()),
-            ..Default::default()
-        })
-        .into()
     }
 }

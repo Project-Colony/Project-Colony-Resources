@@ -14,6 +14,7 @@
 //! | [`category_heading`], [`section_description`], [`setting_row`], [`dropdown`] | the parts of a category |
 //! | [`collapsible_section`], [`functional_toggle`] | a section and an on/off setting |
 //! | [`theme_picker`], [`accent_picker`] | Appearance's two pickers |
+//! | [`toast`] | a dismissible confirmation, such as `theme_applied` |
 //! | [`PreferencesView`] | General, Appearance and Accessibility, ready-made |
 //!
 //! Sizes go through [`Typography`](crate::Typography) rather than being
@@ -28,6 +29,7 @@ mod collapsible;
 mod navigation;
 mod preferences;
 mod theme_picker;
+mod toast;
 mod toggle;
 
 pub use accent_picker::accent_picker;
@@ -38,11 +40,14 @@ pub use preferences::{
     section_description, setting_row, PreferencesView, ABOUT_CATEGORY, STANDARD_CATEGORIES,
 };
 pub use theme_picker::theme_picker;
+pub use toast::toast;
 pub use toggle::functional_toggle;
 
 /// Glyphs the shared widgets draw, in the Nerd Font range that
 /// `JetBrainsMono Nerd Font` covers. Exposed so a program's own widgets can use
-/// the same ones rather than picking a near-miss.
+/// the same ones rather than picking a near-miss. Draw them in
+/// [`fonts::glyph_font`](crate::fonts::glyph_font), which keeps them while the
+/// dyslexia font is on.
 pub mod icons {
     /// Section expanded.
     pub const CHEVRON_DOWN: &str = "\u{f078}";
@@ -52,6 +57,8 @@ pub mod icons {
     pub const CHECK: &str = "\u{f00c}";
     /// Opens the preferences, next to the program name.
     pub const GEAR: &str = "\u{f013}";
+    /// Dismisses a toast.
+    pub const CLOSE: &str = "\u{f00d}";
 }
 
 #[cfg(test)]

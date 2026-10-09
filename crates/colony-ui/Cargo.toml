@@ -27,6 +27,7 @@ serde_json.workspace = true
 
 [dev-dependencies]
 toml.workspace = true
+ttf-parser.workspace = true
 
 [[example]]
 name = "preferences"

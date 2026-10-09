@@ -84,6 +84,11 @@ padding `[8, 14]`, radius 8, full width. The label is not `text_primary`: on an
 accent fill that pairing is below 4.5:1 on almost every theme and reaches 1.01:1
 on Ayu Dark, where the selected category disappeared.
 
+The list is 180 wide at a text scale of 1.0 and grows with the scale. Colony's
+fixed 160 holds "Accessibility" at the default size only: at large text, or in
+OpenDyslexic, it no longer fits on one line. A test measures every standard
+category name, in both locales and both fonts, at all twelve size combinations.
+
 ## The categories
 
 **The first three are fixed, and in this order:**
@@ -173,8 +178,9 @@ this repo feeds directly.
   Applying a theme raises a dismissible confirmation toast (`theme_applied`,
   "Theme applied."). The change itself is immediate; the toast exists because
   switching to a neighbouring variant can otherwise be hard to notice. The kit
-  ships the string; the host raises the toast when it receives
-  `Change::Theme`, through its own notification system.
+  ships the string and the toast (`widgets::toast`); the host shows it when it
+  receives `Change::Theme`, where its notifications go, and removes it on
+  dismiss.
 - **Colors**: the accent override (`widgets::accent_picker`). A row of eight
   swatches, one per accent in `tokens/accents.toml`, drawn as filled circles
   with a check on the selected one. Below them, a separate **auto accent from

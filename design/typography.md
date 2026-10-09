@@ -80,6 +80,13 @@ Nerd Font glyphs are written as codepoints, not pasted characters: pasted glyphs
 do not survive every editor, terminal and diff tool intact. The ones the shared
 widgets draw are in `colony_ui::widgets::icons`.
 
+Draw a glyph in `colony_ui::fonts::glyph_font()`, not in the interface font.
+OpenDyslexic has none of the Nerd Font glyphs, so a glyph set in `ui_font()`
+while the dyslexia font is on is left to the text engine's fallback, which may
+find it somewhere else or not at all. `glyph_font()` is the Nerd Font whatever
+the toggle says. When a glyph and a label sit side by side, they are two texts
+in two fonts.
+
 In `tokens/`, a family's icon is a bare lowercase hex codepoint:
 
 ```toml
@@ -97,7 +104,10 @@ its neighbours.
 
 Verify a codepoint renders in JetBrainsMono Nerd Font before committing it. A
 missing glyph shows as a tofu box, and it will be tofu on every user's machine,
-not just yours.
+not just yours. `cargo test` checks every family icon and every glyph in
+`widgets::icons` against the embedded font file, which is how Dracula's
+`f6e2`, a Font Awesome codepoint the Nerd Font does not carry, was replaced by
+the Nerd Font's own ghost, `eefe`.
 
 A glyph outside the Nerd Font range is drawn in Font Awesome:
 `colony_ui::fonts::icon_font()` for the solid set, `icon_font_regular()` for

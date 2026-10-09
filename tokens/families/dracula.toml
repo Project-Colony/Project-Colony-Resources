@@ -6,7 +6,7 @@
 key = "dracula"
 order = 6
 label_key = "settings_theme_dracula"
-icon = "f6e2"  # Nerd Font codepoint
+icon = "eefe"  # Nerd Font codepoint (nf-fa-ghost)
 
 [label]
 fr = "Dracula"

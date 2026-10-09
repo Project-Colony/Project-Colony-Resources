@@ -104,6 +104,18 @@ pub fn ui_font_bold() -> Font {
     with_weight(Weight::Bold)
 }
 
+/// The font a Nerd Font glyph (`"\u{f013}"`, a family's picker icon) is drawn
+/// in: JetBrainsMono Nerd Font Regular, **whatever the dyslexia toggle says**.
+///
+/// OpenDyslexic has none of these glyphs, so a glyph drawn in [`ui_font`]
+/// while it is on is left to the text engine's fallback, which may find it in
+/// a different font or not at all. Draw glyphs in this and they render the
+/// same either way. Every glyph colony-ui draws is checked against the
+/// embedded file by `cargo test`.
+pub fn glyph_font() -> Font {
+    Font::with_name(APP_FAMILY)
+}
+
 /// Font Awesome, Solid: the filled glyphs, and the only style that has most of
 /// them.
 pub fn icon_font() -> Font {
@@ -146,7 +158,44 @@ mod tests {
 
         set_dyslexia_font(true);
         assert_eq!(icon_font().family, Family::Name(ICON_FAMILY));
+        assert_eq!(glyph_font().family, Family::Name(APP_FAMILY));
+        assert_eq!(glyph_font().weight, Weight::Normal);
         set_dyslexia_font(false);
+    }
+
+    /// design/typography.md: a codepoint that is not in JetBrainsMono Nerd
+    /// Font is a tofu box on every user's machine. Holds every glyph the
+    /// widgets draw and every theme family's picker icon to the embedded file,
+    /// so a new family with a bad codepoint fails here rather than on screen.
+    #[cfg(feature = "fonts")]
+    #[test]
+    fn every_glyph_colony_ui_draws_is_in_the_nerd_font() {
+        use crate::widgets::icons;
+
+        let face = ttf_parser::Face::parse(BYTES[0], 0).expect("the Regular file parses");
+        let glyphs = [
+            ("CHEVRON_DOWN", icons::CHEVRON_DOWN),
+            ("CHEVRON_RIGHT", icons::CHEVRON_RIGHT),
+            ("CHECK", icons::CHECK),
+            ("GEAR", icons::GEAR),
+            ("CLOSE", icons::CLOSE),
+        ]
+        .into_iter()
+        .chain(
+            crate::THEME_FAMILIES
+                .iter()
+                .filter(|family| !family.icon.is_empty())
+                .map(|family| (family.key, family.icon)),
+        );
+        for (name, glyph) in glyphs {
+            for c in glyph.chars() {
+                assert!(
+                    face.glyph_index(c).is_some(),
+                    "{name}: U+{:04X} is not in {APP_FAMILY}",
+                    c as u32
+                );
+            }
+        }
     }
 
     /// The bytes are what iced is handed: each file has to be a real font, not
@@ -161,6 +210,50 @@ mod tests {
                 "not a TrueType or OpenType file: {magic:?}"
             );
             assert!(bytes.len() > 10_000);
+        }
+    }
+
+    /// A font is looked up by typographic family name and weight, so an
+    /// accessor that drifts from the file it means silently draws in another
+    /// font, or in a weight the text engine synthesizes.
+    #[cfg(feature = "fonts")]
+    #[test]
+    fn the_accessors_name_the_embedded_files() {
+        use ttf_parser::name_id::TYPOGRAPHIC_FAMILY;
+
+        let _guard = crate::test_lock();
+        set_dyslexia_font(false);
+        let expected = [
+            ui_font(),
+            ui_font_medium(),
+            ui_font_bold(),
+            Font {
+                weight: Weight::Normal,
+                ..Font::with_name(DYSLEXIA_FAMILY)
+            },
+            icon_font(),
+            icon_font_regular(),
+        ];
+        for (bytes, font) in BYTES.into_iter().zip(expected) {
+            let face = ttf_parser::Face::parse(bytes, 0).expect("every file parses");
+            let iced::font::Family::Name(family) = font.family else {
+                panic!("{font:?} is not a named family");
+            };
+            assert!(
+                face.names()
+                    .into_iter()
+                    .any(|name| name.name_id == TYPOGRAPHIC_FAMILY
+                        && name.to_string().as_deref() == Some(family)),
+                "no embedded file is {family}"
+            );
+            let weight = match font.weight {
+                Weight::Normal => 400,
+                Weight::Medium => 500,
+                Weight::Bold => 700,
+                Weight::Black => 900,
+                other => panic!("{other:?} is not a weight colony-ui uses"),
+            };
+            assert_eq!(face.weight().to_number(), weight, "{family} {weight}");
         }
     }
 }

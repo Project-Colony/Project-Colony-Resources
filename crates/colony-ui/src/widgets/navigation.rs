@@ -3,7 +3,7 @@ use iced::{Alignment, Border, Color, Element, Length, Theme};
 
 use super::icons;
 use crate::theme::{contrast_on, Palette};
-use crate::Typography;
+use crate::{fonts, Typography};
 
 /// The program's name in the top-left corner: the way into Preferences.
 ///
@@ -39,7 +39,7 @@ where
             .color(Palette::TEXT_PRIMARY()),
         text(icons::GEAR)
             .size(typo.sz(14))
-            .font(typo.regular)
+            .font(fonts::glyph_font())
             .color(if open {
                 Palette::TEXT_PRIMARY()
             } else {
