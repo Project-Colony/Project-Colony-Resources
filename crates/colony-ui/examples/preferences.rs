@@ -132,10 +132,7 @@ impl Demo {
         }
         let sidebar = sidebar
             .push(space().height(Length::Fill))
-            .push(widgets::nav_hint(
-                &typo,
-                "Tab and arrow keys move between sections",
-            ))
+            .push(widgets::nav_hint(&typo, "Click Demo to open Preferences"))
             .padding(16)
             .width(200);
 

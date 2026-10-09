@@ -60,6 +60,8 @@ pub struct StandardPreferences {
     /// Accent override key from [`theme::ACCENT_OVERRIDES`], e.g. `"violet"`.
     /// `None` means the theme's own accent. "Auto" is never stored here: that
     /// is [`auto_accent`](Self::auto_accent).
+    // Skipped rather than written as null: TOML has no null.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub selected_accent: Option<String>,
     /// Appearance → Colors → Auto accent from background. While on, the theme's
     /// own accent applies and `selected_accent` is remembered but not used.
@@ -369,6 +371,21 @@ mod tests {
         assert_eq!(back.language, "fr");
         assert_eq!(back.standard.selected_theme, "nord");
         assert_eq!(back.standard.font_size, FontSize::Default);
+    }
+
+    #[test]
+    fn it_round_trips_through_toml_too() {
+        // TOML has no null, so an unset accent must be left out, not written.
+        let p = StandardPreferences::default();
+        let written = toml::to_string(&p).expect("TOML can hold every field");
+        assert!(!written.contains("selected_accent"));
+        let back: StandardPreferences = toml::from_str(&written).unwrap();
+        assert_eq!(back, p);
+
+        let lenient: StandardPreferences =
+            toml::from_str("font_size = 3\ntext_size_a11y = \"large\"\n").unwrap();
+        assert_eq!(lenient.font_size, FontSize::Default);
+        assert_eq!(lenient.text_size_a11y, TextSize::Large);
     }
 
     #[test]
