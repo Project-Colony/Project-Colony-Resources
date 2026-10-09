@@ -191,17 +191,38 @@ jobs:
       # Deliberately ordered BEFORE the signing step: this downloads and runs a
       # binary, and the signing key must never have touched this runner's disk
       # while a fetched executable is running on it.
+      #
+      # Nothing runs until it verifies, the way Colony checks its own updates:
+      # the signature over colony-linux, the signature over its .meta sidecar,
+      # and that sidecar naming colony-linux with these exact bytes.
       - name: Validate colony.json
         if: runner.os == 'Linux'
         env:
           GH_TOKEN: ${{ github.token }}
+          # Colony's ed25519 release public key: RELEASE_PUBLIC_KEYS in
+          # src/signing.rs of Project-Colony/Colony, as PEM. It is public.
+          # Change it here when Colony's releases are signed with a new key.
+          COLONY_RELEASE_PUB: |
+            -----BEGIN PUBLIC KEY-----
+            MCowBQYDK2VwAyEARNjg3Nn8H6/aBg1unwGjkUTcrdTxERNefVaqU8cFu0s=
+            -----END PUBLIC KEY-----
         run: |
-          curl -fsSL -o colony-validator \
-            https://github.com/Project-Colony/Colony/releases/latest/download/colony-linux
-          chmod +x colony-validator
-          ./colony-validator validate-manifest colony.json \
+          d=$(mktemp -d)
+          gh release download -R Project-Colony/Colony -D "$d" \
+            -p colony-linux -p colony-linux.sig -p colony-linux.meta -p colony-linux.meta.sig
+          printf '%s' "$COLONY_RELEASE_PUB" > "$d/release.pub"
+          openssl pkeyutl -verify -pubin -inkey "$d/release.pub" -rawin \
+            -in "$d/colony-linux" -sigfile "$d/colony-linux.sig"
+          openssl pkeyutl -verify -pubin -inkey "$d/release.pub" -rawin \
+            -in "$d/colony-linux.meta" -sigfile "$d/colony-linux.meta.sig"
+          digest=$(sha256sum "$d/colony-linux" | cut -d' ' -f1)
+          grep -qx 'asset=colony-linux' "$d/colony-linux.meta" \
+            && grep -qx "sha256=$digest" "$d/colony-linux.meta" \
+            || { echo "::error::colony-linux.meta does not describe the downloaded colony-linux"; exit 1; }
+          chmod +x "$d/colony-linux"
+          "$d/colony-linux" validate-manifest colony.json \
             {{APP_NAME}}-linux {{APP_NAME}}-windows.exe {{APP_NAME}}-macos {{APP_NAME}}-macos-x86
-          rm -f colony-validator
+          rm -rf "$d"
 
       # The signature proves provenance and says nothing about whether the
       # binary RUNS. An artefact built for the wrong architecture, or one that
