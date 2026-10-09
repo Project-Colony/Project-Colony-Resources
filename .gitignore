@@ -1,7 +1,4 @@
-# Rust build output. `generated/` is NOT ignored — it is committed on purpose so
+# Rust build output. `generated/` is NOT ignored: it is committed on purpose so
 # consumers can read the artifacts straight from a checkout without a toolchain.
 /target
 **/*.rs.bk
-
-# Claude Code scratch state
-.claude/worktrees/

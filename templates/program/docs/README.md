@@ -29,7 +29,7 @@ Sorted by who is reading, not by subject.
 <!--
 Delete the rows you do not have; an index linking a page that does not exist is
 worse than a shorter index. Each line says what the page ANSWERS, not what it is
-called — "why FUSE, and what it costs" beats "architecture documentation".
+called: "why FUSE, and what it costs" beats "architecture documentation".
 
 Security policy, if the repository has one: [../SECURITY.md](../SECURITY.md).
 -->

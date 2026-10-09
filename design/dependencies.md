@@ -76,9 +76,11 @@ lets Dependabot bump both together. That is the right posture for any workflow
 holding `contents: write` — a release workflow can sign and publish, so a
 compromised tag in a third-party action is a compromised release.
 
-The workflow templates in this repository ship pinned the same way. Copy them
-with the pins intact and add the `github-actions` entry from
-`templates/dependabot.yml`, so the SHAs keep moving after you adopt them.
+The workflow template in this repository ships pinned the same way, including
+its call to the shared signing workflow. Copy it with the pins intact and add
+the `github-actions` entry from `templates/dependabot.yml`, so the action SHAs
+keep moving after you adopt them. Dependabot does not read `templates/`, so
+the pins there are bumped by hand, to the current release of each action.
 
 ## Where the ecosystem stands
 

@@ -55,6 +55,8 @@ this does instead. Concrete, not adjectives.
 ### Direct binary download
 ### Build from source
 ## Documentation
+## Code signing policy
+## Privacy
 ## License
 ```
 
@@ -75,6 +77,20 @@ Notes on each part:
 - **Installation** leads with Colony, because that is the point of the
   ecosystem, then the platform-native path, then source.
 - **`## Documentation`** links into `docs/`. It does not duplicate it.
+- **`## Code signing policy`**, under exactly that heading, in every repository
+  that publishes releases. The shared signing workflow links each release's
+  notes to `README.md#code-signing-policy`, and SignPath Foundation requires
+  the section before it signs anything. It says what is signed, with which
+  key, and how to verify a download with `openssl`; the SignPath wording goes in
+  only once SignPath actually signs the Windows build. A repository without the
+  section passes `code-signing-policy: false` to the shared workflow, or its
+  release notes link to nothing. See [releases.md](releases.md#5-signing).
+- **`## Privacy`** says what the program collects, stores and sends over the
+  network, to whom and when, and where credentials are kept. It is true to
+  the code: nothing the code does is missing, and nothing claimed is false. A
+  library or a program that contacts nothing says so in one sentence.
+
+`templates/program/README.md` has both sections ready to fill in.
 
 ## Everything is written in English
 
