@@ -121,7 +121,14 @@ Solarized, Tokyo Night, Rosé Pine, One Dark, Monokai, Ayu, Everforest, Material
 Flexoki, Nightfox, Sonokai, Oxocarbon, Night Owl, Iceberg, Horizon, Melange,
 Synthwave '84, Modus, Parchment, and a fan-made Stellar Blade character set.
 
-## Licence
+## Privacy
+
+colony-ui collects, stores and sends nothing, and opens no network
+connection. The `paths` functions create the `Colony/` directory they return
+and write nothing in it; `StandardPreferences` does no I/O at all, the program
+reads and writes its own config file.
+
+## License
 
 GPL-3.0-or-later, see [LICENSE](https://github.com/Project-Colony/Project-Colony-Resources/blob/main/crates/colony-ui/LICENSE). Linking this crate makes your program
 GPL-3.0-or-later too.
