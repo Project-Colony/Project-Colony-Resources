@@ -9,7 +9,7 @@ Where a Colony program keeps its files. One answer, on all three platforms.
 ```
 
 The organisation, then the program. `<Program>` is the display name, capitalised
-the way the program spells it — `Colony`, `Digger`, `Grape`, `Eidos` — not a
+the way the program spells it (`Colony`, `Digger`, `Grape`, `Eidos`), not a
 lowercased slug.
 
 There are three roots, and they are not interchangeable:
@@ -21,7 +21,7 @@ There are three roots, and they are not interchangeable:
 | **cache** | `~/.cache/Colony/<P>/` | `%LOCALAPPDATA%\Colony\<P>\cache\` | `~/Library/Caches/Colony/<P>/` |
 
 **Windows is `AppData\Local`, never `AppData\Roaming`.** `%LOCALAPPDATA%` *is*
-`AppData\Local` — the same place under two names, not a third option.
+`AppData\Local`: the same place under two names, not a third option.
 
 Roaming is copied to and from the domain server at every logon and logoff on
 machines with roaming profiles, and counts against a per-user quota. It is meant
@@ -42,7 +42,7 @@ developing on:
 
 - **Never separate config from data by relying on the roots differing.** They
   are the same directory on two platforms out of three. Separate them by
-  sub-directory — `preferences/`, `apps/` — or a file will collide everywhere
+  sub-directory (`preferences/`, `apps/`) or a file will collide everywhere
   except where you tested it.
 - **Windows has no cache location at all.** `dirs::cache_dir()` returns
   LocalAppData, the same root as config and data, so the layout adds a `cache\`
@@ -53,11 +53,11 @@ developing on:
 
 ## Which root for what
 
-- **config** — what the *user* chose, and what they would want to keep or carry
+- **config**: what the *user* chose, and what they would want to keep or carry
   to another machine: preferences, credentials, custom scan paths.
-- **data** — what the *program* produced and cannot re-derive: installed
+- **data**: what the *program* produced and cannot re-derive: installed
   binaries, databases, history.
-- **cache** — what the program can rebuild by asking again. Deleting the whole
+- **cache**: what the program can rebuild by asking again. Deleting the whole
   cache directory must cost nothing but time.
 
 When in doubt: if losing it would annoy the user, it is not cache.
@@ -94,7 +94,7 @@ Colony as the worked example:
 
 Installed programs live in `<data>/Colony/apps/<repo>/`, hanging off `Colony/`
 rather than off `Colony/Colony/`. They belong to the ecosystem, not to
-Colony-the-launcher — a user removing the launcher should not discover their
+Colony-the-launcher: a user removing the launcher should not discover their
 programs were kept inside it.
 
 `apps/` is therefore reserved: no program may be named `apps`.
@@ -110,7 +110,7 @@ let tmp   = paths::cache_dir("Digger")?.join("metrics.bin");
 ```
 
 These create the directory. To *show* a path without bringing it into existence
-— an About screen, a log line — use `paths::locate::*`, which are pure.
+(an About screen, a log line), use `paths::locate::*`, which are pure.
 
 What goes in the preferences file is the program's own config struct. Its
 Appearance and Accessibility part is `colony_ui::preferences::StandardPreferences`,
@@ -138,9 +138,9 @@ Current state, so a migration is a decision rather than a discovery:
 | Program | What | Should be |
 |---|---|---|
 | **Colony** | uses `dirs::config_dir()` → **Roaming** on Windows | `config_local_dir()` → Local |
-| **Colony** | caches in `<config>/Colony/Colony/cache/` | `<cache>/Colony/Colony/` — on Windows this lands in the same place once the root moves to Local, so only Linux and macOS actually move the files |
+| **Colony** | caches in `<config>/Colony/Colony/cache/` | `<cache>/Colony/Colony/`; on Windows this lands in the same place once the root moves to Local, so only Linux and macOS actually move the files |
 | **Colony** | `docs/faq.md` and `docs/architecture.md` document `~/.config/colony/preferences.json`; the code writes `~/.config/Colony/Colony/preferences/preferences.json` | fix the docs |
-| **Digger** | `history.db` in `<data>/digger/` — lowercase, no `Colony/` level | `<data>/Colony/Digger/` |
+| **Digger** | `history.db` in `<data>/digger/`, lowercase, no `Colony/` level | `<data>/Colony/Digger/` |
 | **Grape** | `logs/` and `history.json` inside the config directory | `<data>/Colony/Grape/` |
 | **Eidos** | `~/.config/eidos/`, lowercase, no `Colony/` level at all | `<config>/Colony/Eidos/` |
 
@@ -154,14 +154,14 @@ These paths are live on users' machines, so moving one means moving their files:
 1. On startup, compute the new path. If it exists, done.
 2. If the **old** path exists and the new one does not, move it, then write a
    marker so the check is skipped next time.
-3. Leave the old directory alone if the move fails — a failed migration must
+3. Leave the old directory alone if the move fails: a failed migration must
    degrade to the old location, never to an empty profile.
 4. Never delete the old path in the same release that adds the move. If the
    migration is wrong, the user's data has to still be there.
 
 ## Note on `~/.config/colony/` (lowercase)
 
-Colony also reads `~/.config/colony/<file>` — lowercase, single level — in
+Colony also reads `~/.config/colony/<file>` (lowercase, single level) in
 `config.rs`, for optional user overrides of the config files it ships, like
 `categories.json`. That is a different mechanism from user state, and the two
 being one letter apart is a trap. A new program that does not ship overridable
