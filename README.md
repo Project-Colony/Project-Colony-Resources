@@ -238,7 +238,7 @@ GPL-3.0-or-later, matching the rest of the Project Colony organisation. See
 
 The fonts embedded in `colony-ui` are not ours and keep their own licence, the
 SIL Open Font License 1.1, whose texts ship next to them in
-[`crates/colony-ui/fonts/`](crates/colony-ui/fonts/).
+[`crates/colony-ui/assets/fonts/`](crates/colony-ui/assets/fonts/).
 
 A consequence worth stating plainly: a program that links `colony-ui` will have
 to be GPL-3.0-or-later too. If that ever becomes the wrong trade for the shared

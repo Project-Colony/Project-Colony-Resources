@@ -49,15 +49,15 @@ pub const ICON_FAMILY: &str = "Font Awesome 6 Free";
 /// `iced::font::load`: JetBrainsMono Nerd Font Regular, Medium and Bold,
 /// OpenDyslexic Regular, Font Awesome 6 Free Solid and Regular.
 ///
-/// The licences travel with the crate, in `fonts/` next to the files.
+/// The licences travel with the crate, in `assets/fonts/` next to the files.
 #[cfg(feature = "fonts")]
 pub const BYTES: [&[u8]; 6] = [
-    include_bytes!("../fonts/JetBrainsMonoNerdFont/JetBrainsMonoNerdFont-Regular.ttf"),
-    include_bytes!("../fonts/JetBrainsMonoNerdFont/JetBrainsMonoNerdFont-Medium.ttf"),
-    include_bytes!("../fonts/JetBrainsMonoNerdFont/JetBrainsMonoNerdFont-Bold.ttf"),
-    include_bytes!("../fonts/OpenDyslexic/OpenDyslexic-Regular.otf"),
-    include_bytes!("../fonts/FontAwesome/fa-solid-900.ttf"),
-    include_bytes!("../fonts/FontAwesome/fa-regular-400.ttf"),
+    include_bytes!("../assets/fonts/JetBrainsMonoNerdFont/JetBrainsMonoNerdFont-Regular.ttf"),
+    include_bytes!("../assets/fonts/JetBrainsMonoNerdFont/JetBrainsMonoNerdFont-Medium.ttf"),
+    include_bytes!("../assets/fonts/JetBrainsMonoNerdFont/JetBrainsMonoNerdFont-Bold.ttf"),
+    include_bytes!("../assets/fonts/OpenDyslexic/OpenDyslexic-Regular.otf"),
+    include_bytes!("../assets/fonts/FontAwesome/fa-solid-900.ttf"),
+    include_bytes!("../assets/fonts/FontAwesome/fa-regular-400.ttf"),
 ];
 
 static DYSLEXIA: AtomicBool = AtomicBool::new(false);

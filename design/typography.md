@@ -23,7 +23,7 @@ while `set_dyslexia_font(true)` is in effect, and `Typography::current()` carrie
 all three to the shared widgets.
 
 The files ship inside `colony-ui` (feature `fonts`, on by default), with their
-SIL Open Font License texts in `crates/colony-ui/fonts/`. Register them with
+SIL Open Font License texts in `crates/colony-ui/assets/fonts/`. Register them with
 iced once, at startup:
 
 ```rust

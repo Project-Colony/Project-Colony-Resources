@@ -122,7 +122,7 @@ GPL-3.0-or-later, see [LICENSE](https://github.com/Project-Colony/Project-Colony
 GPL-3.0-or-later too.
 
 The embedded fonts keep their own licence, the SIL Open Font License 1.1; the
-texts are in [`fonts/`](https://github.com/Project-Colony/Project-Colony-Resources/tree/main/crates/colony-ui/fonts).
+texts are in [`assets/fonts/`](https://github.com/Project-Colony/Project-Colony-Resources/tree/main/crates/colony-ui/assets/fonts).
 
 Source, design tokens and conventions:
 [Project-Colony-Resources](https://github.com/Project-Colony/Project-Colony-Resources).

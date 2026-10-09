@@ -12,11 +12,11 @@ categories = ["gui"]
 
 [features]
 default = ["fonts"]
-# Embeds the three Colony font families (about 8 MB of TTF/OTF, see fonts/) so a
-# program registers them with iced from `colony_ui::fonts::BYTES`. Without it,
-# the family names and the accessors are still here and the program ships the
-# files itself. Unused bytes do not reach a binary either way: the linker drops
-# them.
+# Embeds the three Colony font families (about 8 MB of TTF/OTF, see
+# assets/fonts/) so a program registers them with iced from
+# `colony_ui::fonts::BYTES`. Without it, the family names and the accessors are
+# still here and the program ships the files itself. `BYTES` is a const, so a
+# program that never names it carries none of it either way.
 fonts = []
 
 [dependencies]
