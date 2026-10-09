@@ -9,7 +9,7 @@ are built from.
 <!-- x-release-please-start-version -->
 ```toml
 [dependencies]
-colony-ui = "0.1.6"
+colony-ui = "0.1.7"
 ```
 <!-- x-release-please-end -->
 
