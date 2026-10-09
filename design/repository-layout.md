@@ -40,7 +40,7 @@ two pieces have different lifetimes, different consumers, or different targets.
 ├── assets/               fonts, brand, icons
 ├── docs/                 see documentation.md
 ├── packaging/            distribution: AUR, .desktop, systemd units
-├── scripts/              sign-release.sh and friends
+├── scripts/              generators and dev helpers
 └── colony.json
 ```
 
@@ -172,7 +172,7 @@ Nothing at the root that a reader has to skip past. Directories only:
 | `assets/` | fonts, brand images, icons |
 | `docs/` | beyond a few screens of prose — see [documentation.md](documentation.md) |
 | `packaging/` | AUR PKGBUILDs, `.desktop` files, systemd units |
-| `scripts/` | release signing, generators, dev helpers |
+| `scripts/` | generators, dev helpers (release signing is the shared workflow's job, see [releases.md](releases.md#5-signing)) |
 | `config/` | data files the program embeds or reads at runtime |
 | `reference/` | third-party material kept for study; never compiled |
 

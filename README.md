@@ -47,7 +47,7 @@ Colony shipped before the import; see [Guarantees](#guarantees).
 | `generated/colony.schema.json` | JSON Schema validating a program's `colony.json` |
 | `design/*.md` | the conventions — layout, filesystem, navigation, settings, theming, type, i18n, releases, dependencies, docs |
 | `manifests/examples/*.json` | working `colony.json` files for each shape |
-| `templates/` | release workflow, release-please config, signing script |
+| `templates/` | release workflow (signing through the shared workflow), release-please and Dependabot configs, README skeletons |
 | `crates/colony-ui/` | the crate programs depend on — theme, labels, widgets |
 | `tools/colony-tokens/` | the generator and its tests |
 

@@ -1,18 +1,20 @@
 # Releasing a Colony program
 
 How a Project Colony program is versioned, built, published, and picked up by the
-launcher. Reference implementation: [`templates/release.yml`](../templates/release.yml).
-Colony's own release workflow implements the same contract, with signing done in
-one central job instead of on each build runner.
+launcher. Reference implementation:
+[`templates/sign-and-publish-caller.yml`](../templates/sign-and-publish-caller.yml),
+which builds on each platform and hands signing and publishing to the
+organisation's shared workflow. Colony's own release workflow calls the same
+shared workflow.
 
 ## The chain
 
 ```
 conventional commits  →  release-please opens a release PR
-merge the PR          →  a tag is created
-the tag               →  builds the platform binaries
-                      →  uploads them as release assets
-                      →  (optionally) signs them
+merge the PR          →  a tag is created, its release held as a draft
+the tag               →  builds the platform binaries (no key on these runners)
+                      →  sign-and-publish signs them, uploads them,
+                         verifies them and publishes the release
 colony.json           →  the launcher finds and installs them
 ```
 
@@ -34,68 +36,86 @@ changelog from them.
 | `chore:`, `test:`, `ci:` | patch bump | hidden |
 | `feat!:` or a `BREAKING CHANGE:` footer | major bump | Features |
 
-Write the body for the person reading `git log` in a year, not for the diff —
-what was broken, what is now true, and why the approach was chosen. The changelog
-is generated from the subject line, so the subject is what the *user* reads.
+Write the body for the person reading `git log` in a year, not for the diff:
+what was broken, what is now true, and why the approach was chosen. The
+changelog is generated from the subject line, so the subject is what the *user*
+reads.
+
+### From adoption onward
+
+Conventional commits, and the squash-only merges below, are required on the
+default branch from the moment a repository adopts these rules. A repository
+created in the organisation adopts them with its first commit. For the
+repositories that were already in the organisation, adoption is 2026-10-09.
+
+History from before adoption is kept exactly as it is, and is never rewritten
+to satisfy either rule. Rewriting a published default branch breaks every
+clone and every open branch, loses the commit release-please last released
+from, and leaves published tags pointing at commits the branch no longer
+contains. A check of these rules therefore reads the history from adoption on
+(`git log --since=2026-10-09` for those repositories), not the whole log.
 
 ### When a release goes out empty
 
 `gh` in a job with no `actions/checkout` has no git remote to infer the
 repository from, and dies with `fatal: not a git repository`. Every `gh` call in
-`templates/release.yml` therefore passes `-R "$GITHUB_REPOSITORY"`. Without it
-the draft-hold step fails, `build` and `publish` are skipped as a consequence,
-and the tag is published carrying no assets at all — which Colony's installer
-then finds nothing to fetch from. Both Colony (v0.10.0) and Grape (v0.3.0)
-shipped an empty release this way.
+the release workflow template and in the shared signing workflow therefore
+passes `-R "$GITHUB_REPOSITORY"`. Without it the draft-hold step fails, the
+builds and the publishing are skipped as a consequence, and the tag is
+published carrying no assets at all, which Colony's installer then finds nothing
+to fetch from. Both Colony (v0.10.0) and Grape (v0.3.0) shipped an empty release
+this way.
 
 The second half of the same lesson: release-please emits `release_created` only
-once per release, so re-running the workflow after such a failure does nothing —
-it reports no work and every downstream job skips, while the run goes green. The
-template's `workflow_dispatch` input exists for exactly that repair, and the
-`target` job refuses a tag that is already published, because overwriting live
-assets would leave their signatures describing bytes that no longer exist.
+once per release, so re-running the workflow after such a failure does nothing.
+It reports no work and every downstream job skips, while the run goes green.
+The template's `workflow_dispatch` input exists for exactly that repair, and the
+shared workflow refuses a tag that is already published, because overwriting
+live assets would leave their signatures describing bytes that no longer exist.
 
 ### Squash-merge, always
 
-**Merge a pull request with squash, not a merge commit.** release-please reads
-the *merge commits* on the default branch and parses each one's own message as a
-conventional commit. A squash produces exactly that: one commit, carrying the PR
-title, which GitHub associates with the PR.
+**Merge a pull request with squash, not a merge commit, and never push feature
+work straight to the default branch.** release-please reads the *merge commits*
+on the default branch and parses each one's own message as a conventional
+commit. A squash produces exactly that: one commit, carrying the PR title,
+which GitHub associates with the PR.
 
 A merge commit produces `Merge pull request #76 from …`, which is not a
 conventional commit. release-please sees nothing releasable, no release PR is
-opened, and the change reaches users with no changelog entry — even though every
+opened, and the change reaches users with no changelog entry, even though every
 commit *inside* the branch was perfectly well formed. Those are invisible to it.
 
 The same trap catches the obvious repair: pushing a conventional commit straight
 to the branch does not help either, because a direct push is not a merge commit.
-The fix has to arrive the way the tool looks for it — as a squashed pull request.
+The fix has to arrive the way the tool looks for it: as a squashed pull request.
 
-This is why the PR title matters: the title is usually the changelog entry.
+Every repository therefore allows squash merges only, with the squash commit
+title set to `PR_TITLE` and the message to `COMMIT_MESSAGES`, and deletes the
+branch on merge. **The PR title is the changelog entry**: write it as a
+conventional commit, for the user.
 
-**Usually, not always — and the exception costs a release.** GitHub's
-`squash_merge_commit_title` is `COMMIT_OR_PR_TITLE` on these repositories, which
-means it uses the *pull request* title only when the branch has more than one
-commit. With a **single-commit branch it uses that commit's own subject** and
-ignores the PR title entirely, including one edited just before merging.
-
-So a one-commit branch whose commit says `chore:` releases nothing, however the
-pull request is titled. Write the commit message as the changelog entry you want
-from the start, or check `git log --format=%s` on the branch before merging.
+The title setting is not cosmetic. GitHub's default, `COMMIT_OR_PR_TITLE`, uses
+the pull request title only when the branch has more than one commit; a
+single-commit branch is squashed under that commit's own subject, and the PR
+title is ignored, including one edited just before merging. A one-commit
+branch whose commit says `chore:` then releases nothing, however the pull
+request is titled. Check the setting on any repository that is new to the
+organisation.
 
 Recovering afterwards is awkward: the change is already on `main` under a
 subject release-please will not act on, and pushing a corrected commit directly
-does not help either — see the squash-merge trap above. `Release-As: X.Y.Z` in
-the footer of a later commit is the designed escape hatch.
+does not help either (see the trap above). `Release-As: X.Y.Z` in the footer of
+a later commit is the designed escape hatch.
 
 ## 2. Versioning
 
 release-please owns the version number. Two configurations are in use:
 
-- **`release-type: rust`** — release-please understands Cargo and bumps
+- **`release-type: rust`**: release-please understands Cargo and bumps
   `Cargo.toml` (and the lockfile) itself. Fewest moving parts; use this for a
   single-crate program.
-- **`release-type: simple`** with `"extra-files": ["Cargo.toml"]` — release-please
+- **`release-type: simple`** with `"extra-files": ["Cargo.toml"]`: release-please
   tracks the version in `.release-please-manifest.json` and rewrites the version
   wherever it is told to. Use this for a workspace, or when the version also has
   to appear somewhere that is not Cargo metadata.
@@ -111,7 +131,7 @@ warning.
 
 Do not set `separate-pull-requests` to `false` for a single-package repository. Its default is `true` when the config has one package, which names the release branch `release-please--branches--main--components--<name>`. Forced to `false`, the branch loses its component, and release-please 17.x then refuses to release the merged release PR (`PR component: undefined does not match configured component`) whenever the package has a name, as Rust and Node packages do. SAM-Colony-Edition 0.7.0 was stuck this way.
 
-## 3. Asset naming — this is the contract
+## 3. Asset naming: this is the contract
 
 Colony auto-detects which platforms a program supports **from the release asset
 names**. Follow the convention and the manifest stays two lines.
@@ -126,12 +146,12 @@ names**. Follow the convention and the manifest stays two lines.
 `<repo>` is the repository name, lowercased. Colony compares
 case-insensitively, but write it lowercase.
 
-`macos` means Apple Silicon and `macos-x86` means Intel — Colony chooses between
+`macos` means Apple Silicon and `macos-x86` means Intel; Colony chooses between
 them with `cfg!(target_arch)` at runtime. A program shipping only `macos` is
 simply unavailable to Intel Macs, which is a legitimate choice, not a bug.
 
-If the assets cannot follow the convention — a versioned archive, a bundle, an
-installer — declare them explicitly in `colony.json` instead. See below.
+If the assets cannot follow the convention (a versioned archive, a bundle, an
+installer), declare them explicitly in `colony.json` instead. See below.
 
 ## 4. `colony.json`
 
@@ -150,27 +170,27 @@ That is the whole file when the assets follow the naming convention. Working
 examples for each shape live in [`manifests/examples/`](../manifests/examples/)
 and are validated by `cargo test`.
 
-**Categories** — `development`, `graphics`, `network`, `office`, `multimedia`,
+**Categories**: `development`, `graphics`, `network`, `office`, `multimedia`,
 `system`, `utility`, `security`, `game`, `other`. Matched case-insensitively;
 `utilities` and `games` are accepted aliases. An unrecognized category is
-*warned about and ignored*, which files the program nowhere — so a typo here
+*warned about and ignored*, which files the program nowhere, so a typo here
 fails quietly. `cargo test` in this repo catches it for the examples; the schema
 catches it in your editor.
 
-**Icons** — a repo-relative square PNG via `"icon"`. When absent, Colony probes
+**Icons**: a repo-relative square PNG via `"icon"`. When absent, Colony probes
 `icon.png` at the repo root, then falls back to a hexagon tinted by
-`app_tint(name)` — a deterministic hash of the program's *name* into the eight
+`app_tint(name)`, a deterministic hash of the program's *name* into the eight
 shared accents, so a program without an icon still gets a stable identity colour.
 
-**`releaseFiles`** — only when auto-detection cannot work. Per platform:
+**`releaseFiles`**: only when auto-detection cannot work. Per platform:
 
-- `tag` — a git tag, or `"latest"` to always track the newest release.
-- `file` — the exact asset name, **or** `filePattern` — a case-insensitive
+- `tag`: a git tag, or `"latest"` to always track the newest release.
+- `file`: the exact asset name, **or** `filePattern`: a case-insensitive
   pattern for assets whose name carries the version. Exactly one of the two, and
   the pattern must match exactly one asset or the install fails.
-- `binary` — the binary to extract from inside a `.zip` / `.tar.gz`. Omit when
+- `binary`: the binary to extract from inside a `.zip` / `.tar.gz`. Omit when
   the downloaded file is itself the binary.
-- `sha256` — 64 lowercase hex characters, optional.
+- `sha256`: 64 lowercase hex characters, optional.
 
 If you provide `releaseFiles`, it must cover every platform you declare in
 `platforms`. A partial map means a platform the launcher lists but cannot
@@ -202,19 +222,34 @@ The version rule differs by consumer, and deliberately so:
 - **A program** requires no *older* than what is installed. Equal is fine,
   because a program pinned to a fixed `tag` must stay reinstallable.
 
-`templates/sign-release.sh` produces all three files. It needs nothing but
-`openssl`:
+**Who signs, and where.** The [shared signing workflow](#shared-signing-workflow)
+writes all three files, in CI, for every program. Its signing job checks out
+nothing and compiles nothing: it downloads the finished binaries, writes the
+key from the `COLONY_SIGNING_KEY_PEM` organisation secret to a temporary file,
+signs, and removes the file. The private key never lives in a repository or on
+a developer machine.
+
+**The key never reaches a job that compiles code.** `cargo build` runs the
+`build.rs` and procedural macros of every dependency, and a process started
+there can keep running until the job ends, reading whatever a later step of the
+same job writes, a key file included. `COLONY_SIGNING_KEY_PEM` is also the key
+Colony trusts for its own self-updates, so one compromised crate in one
+program's build would be enough to forge launcher updates for everyone. That is
+why no template signs inside a build leg any more, and why a program's release
+workflow passes the secret to the shared workflow and to nothing else.
+
+**Checking a release by hand** takes OpenSSL 3 and the public key, which is in
+`src/signing.rs` of Colony and, as PEM, in `templates/program/README.md`:
 
 ```bash
-COLONY_SIGNING_KEY=/path/to/colony-release.pem \
-COLONY_RELEASE_VERSION=v1.2.3 \
-  ./sign-release.sh <asset>...
+openssl pkeyutl -verify -pubin -inkey colony-release.pub -rawin -in <asset> -sigfile <asset>.sig
+openssl pkeyutl -verify -pubin -inkey colony-release.pub -rawin -in <asset>.meta -sigfile <asset>.meta.sig
 ```
 
-In CI, write the private key from the `COLONY_SIGNING_KEY_PEM` organisation
-secret to a temporary file and point `COLONY_SIGNING_KEY` at it. The private key
-never lives in a repository. Upload every `.sig`, `.meta` and `.meta.sig`
-alongside its binary — `templates/release.yml` does all of this.
+Then `<asset>.meta` must read exactly `version=<tag>`, `asset=<file name>` and
+`sha256=<sha256 of the asset>`. A program's README says this under
+`## Code signing policy`; `templates/program/README.md` has that section ready,
+public key included, and the shared workflow links every release's notes to it.
 
 ### Adopting signatures in a program that already ships
 
@@ -226,27 +261,22 @@ stops a compromised repository from quietly opting back out.
 
 So the migration is per-repo and safe in any order:
 
-1. Copy `templates/sign-release.sh` to `scripts/sign-release.sh` in the program's
-   repository, and `templates/release.yml` over
+1. Copy `templates/sign-and-publish-caller.yml` over
    `.github/workflows/release.yml`.
-2. Set `"signed": true` in `colony.json` — **only after** the first release that
-   actually carries signatures. Declaring it earlier fails closed and makes the
-   current release uninstallable.
-3. Release as usual.
+2. Release as usual. Every asset now ships its `.sig`, `.meta` and `.meta.sig`.
+3. Only then set `"signed": true` in `colony.json`. Declaring it before a
+   release actually carries signatures fails closed and makes the current
+   release uninstallable.
 
-**The trap, if you are editing an older hand-written signing job rather than
-replacing it.** Those jobs download the previous release's assets and strip the
-companions before signing:
-
-```bash
-rm -f dist/*.sig dist/*.sha256 dist/*.txt dist/*.yml dist/*.json dist/*.asc
-```
-
-`*.meta` is not in that list. The first release after adopting sidecars works;
-the *second* downloads the previous `.meta`, treats it as an asset, and signs it
-— producing `foo-linux.meta.sig.sig` and a `.meta` describing a `.meta`. Add
-`dist/*.meta` to that `rm` line, or replace the job with the template, which
-does not have the problem.
+**Replace an older signing job; do not patch it.** Release workflows written
+before the shared workflow sign inside the build legs, where the key shares a
+job with the compiler (see above). Some of them sign only on Linux and macOS,
+and some strip the previous release's companions with an `rm` line that does
+not know about `.meta`, so the second release after adopting sidecars signs the
+previous `.meta` as if it were an asset and publishes
+`foo-linux.meta.sig.sig`. Patching keeps all of that. Replace the whole
+workflow with the template; a `scripts/sign-release.sh` the repository may have
+is then unused, and goes.
 
 ### Shared signing workflow
 
@@ -254,7 +284,7 @@ does not have the problem.
 is a reusable workflow that does everything after the build: Authenticode
 through SignPath for the Windows files (once a repository turns it on), the
 ed25519 `.sig`, `.meta` and `.meta.sig` for every asset, upload, verification,
-and publishing. A program's release workflow calls it; the starting point is
+and publishing. A program's release workflow calls it; the template is
 [`templates/sign-and-publish-caller.yml`](../templates/sign-and-publish-caller.yml).
 It works the same with SignPath off, so a program can adopt it today and turn
 SignPath on later without touching anything else.
@@ -274,7 +304,7 @@ sign-and-publish:
   permissions:
     actions: read     # SignPath downloads the unsigned artifact with the job token
     contents: write   # drafts, uploads, publishing
-  uses: Project-Colony/Project-Colony-Resources/.github/workflows/sign-and-publish.yml@<sha> # main
+  uses: Project-Colony/Project-Colony-Resources/.github/workflows/sign-and-publish.yml@619460ff4dc0049f129955f0988d368427b9eedb # organisation pin
   with:
     tag: ${{ needs.release-please.outputs.tag_name || inputs.tag }}
     assets: "grape-linux grape-windows.exe grape-macos grape-macos-x86"
@@ -284,6 +314,12 @@ sign-and-publish:
     COLONY_SIGNING_KEY_PEM: ${{ secrets.COLONY_SIGNING_KEY_PEM }}
     SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
 ```
+
+**The pin.** Every caller pins the shared workflow at the same commit,
+`619460ff4dc0049f129955f0988d368427b9eedb`, which is the one the template names.
+The pin moves only when `sign-and-publish.yml` itself changes, and then the
+template and every caller move to the new commit together. A commit to this
+repository that does not touch the workflow is no reason to move it.
 
 | Input | Meaning |
 |---|---|
@@ -316,10 +352,9 @@ no longer exist and Colony refuses the file. That is why the builds upload only
 artifacts, why nothing is uploaded to the release until every byte is final,
 and why the release stays a draft for the whole round trip.
 
-The workflow does not run `scripts/sign-release.sh` from the calling
-repository: no repository code runs in the job that holds the key. It writes
-the same three files byte for byte, so `.meta` keeps a single format. Change
-that format in both places, or not at all.
+Nothing from the calling repository runs in the job that holds the key: it
+checks nothing out. The `.meta` format is written in that one workflow and
+verified by Colony (`src/signing.rs`). Change it in both, or not at all.
 
 **Turning SignPath on for a repository**, once SignPath Foundation has accepted
 the project:
@@ -341,7 +376,9 @@ the project:
 3. In the repository: every job leading to the signing request on
    GitHub-hosted runners, no build cache in the release build (SignPath forbids
    reusing outputs of earlier, unverified builds), a "Code signing policy"
-   section in the README, and `signpath-project-slug` set in the call.
+   section in the README with SignPath's wording and team roles added (the
+   commented block in `templates/program/README.md`), and
+   `signpath-project-slug` set in the call.
 
 From that release on, a Windows file without Authenticode cannot be published:
 a missing token or organisation id fails `preflight`, and a request that is
@@ -384,16 +421,18 @@ Rotate over three releases of the launcher:
 | N+1 | `[new, old]` | **new** | everyone on N or later |
 | N+2 | `[new]` | **new** | everyone on N or later; `old` is revoked |
 
-N **must** be signed with the outgoing key — its whole job is to widen the
+N **must** be signed with the outgoing key: its whole job is to widen the
 trusted set on machines that only trust `old`. Do not skip to N+2: anyone still
 on N-1 when `old` is dropped can no longer self-update and must reinstall by
 hand.
 
-`templates/release.yml` also trusts the key: it verifies the Colony it
-downloads against a copy embedded as a PEM, and runs nothing that fails. Update
-that PEM in the template and in every program's copy of it when Colony's
-releases start being signed with `new` (N+1), or their releases stop at the
-manifest check.
+The release workflow template also trusts the key: its `Validate colony.json`
+step verifies the Colony it downloads against a copy embedded as a PEM, and
+runs nothing that fails. Update that PEM in the template and in every program's
+copy of it when Colony's releases start being signed with `new` (N+1), or their
+releases stop at the manifest check. The public key in the
+`## Code signing policy` section of `templates/program/README.md` and of every
+program's README changes at the same time.
 
 ### Validating before you ship
 
@@ -402,7 +441,7 @@ colony validate-manifest colony.json
 ```
 
 Pass the asset names the release publishes to also check that every platform
-actually **resolves** — which is the failure that matters, because a manifest can
+actually **resolves**. That is the failure that matters, because a manifest can
 be structurally perfect and still leave the program listed with no Download
 button:
 
@@ -411,9 +450,25 @@ gh release view v1.2.3 --json assets --jq '.assets[].name' > names.txt
 colony validate-manifest colony.json $(tr '\n' ' ' < names.txt)
 ```
 
-It exits non-zero on any problem. `templates/release.yml` runs it on every
-release, before signing, with the latest Colony release, and only once that
-binary's signature and signed `.meta` check out.
+It exits non-zero on any problem. The release workflow template runs it on
+every release, in the Linux build leg, with the latest Colony release, and only
+once that binary's signature and signed `.meta` check out.
+
+### Distribution artefacts
+
+Arch Colony ships what pacman and a bootloader consume rather than files the
+launcher installs, so its artefacts are signed the way those tools verify them:
+
+- **Package repositories.** Every package and every repository database of a
+  Colony pacman repository is signed with the distribution's OpenPGP key, the
+  one its keyring package installs. The repository's entry in `pacman.conf`
+  says `SigLevel = Required DatabaseRequired`, so pacman refuses an unsigned or
+  wrongly signed package or database instead of installing it.
+- **ISO images.** An image carries GPL software in binary form, so its sources
+  travel with it: the complete corresponding source next to the image, from the
+  same place and at no extra charge, or a written offer, valid for at least
+  three years and to any third party, to provide it. Each image also has a
+  detached OpenPGP signature and a sha256 file.
 
 ## 6. Release profile
 
@@ -428,38 +483,47 @@ strip = "symbols"
 
 Thin LTO and a single codegen unit for speed and size; stripping symbols because
 users download this over the network. Set `rust-version` in `Cargo.toml` to the
-oldest toolchain you actually support, and mean it — it is a promise, and CI
+oldest toolchain you actually support, and mean it: it is a promise, and CI
 should be the thing that keeps you honest about it.
 
 ## 7. Checklist for a new program
 
-1. `colony.json` at the repo root — name and category, plus an icon if you have
+1. `colony.json` at the repo root: name and category, plus an icon if you have
    one. Validate it: `colony validate-manifest colony.json`.
 2. `release-please-config.json` and `.release-please-manifest.json` from
    `templates/`.
-3. `.github/workflows/release.yml` from `templates/release.yml`, with
-   `{{APP_NAME}}` replaced by the binary name.
-4. If you are signing: `templates/sign-release.sh` to `scripts/sign-release.sh`,
-   and set `"signed": true` in `colony.json` **only after** the first release
-   that carries signatures.
-5. `CHANGELOG.md` — release-please creates it on the first release; you do not
+3. `.github/workflows/release.yml` from `templates/sign-and-publish-caller.yml`,
+   with `{{APP_NAME}}` replaced by the binary name. Keep every pin, the shared
+   workflow's included.
+4. Signing: nothing to copy. The shared workflow signs every release with
+   `COLONY_SIGNING_KEY_PEM`, which the repository must be allowed to read (see
+   §8, step 3). The README gets `## Code signing policy` and `## Privacy` from
+   `templates/program/README.md`. Set `"signed": true` in `colony.json` **only
+   after** the first release that carries signatures.
+5. `CHANGELOG.md`: release-please creates it on the first release; you do not
    write it.
 6. GPL-3.0-or-later `LICENSE`, matching the rest of the organisation.
-7. Conventional commits from the first commit onward.
+7. Conventional commits from the first commit onward, each change merged as a
+   squashed pull request.
 
 ## 8. Checklist for a program that already ships
 
 For the repositories that predate the current template. Safe in any order, one
-repository at a time — nothing here requires coordinating a flag day.
+repository at a time: nothing here requires coordinating a flag day.
 
-1. Replace `.github/workflows/release.yml` with `templates/release.yml`, rather
-   than patching the existing job. Hand-written signing jobs in the
-   organisation predate the `.meta` sidecar, sign only on Linux and macOS, and
-   strip companions with an `rm` line that does not know about `.meta` (see
-   §5). Replacing avoids all three.
-2. Copy `templates/sign-release.sh` to `scripts/sign-release.sh`.
+1. Replace `.github/workflows/release.yml` with
+   `templates/sign-and-publish-caller.yml`, rather than patching the existing
+   workflow, and add the `## Code signing policy` section of
+   `templates/program/README.md` to the README, since every release's notes
+   link to it. Workflows from before the template sign inside the build legs,
+   next to the compiler, some only on Linux and macOS, and some strip
+   companions with an `rm` line that does not know about `.meta` (see §5).
+   Replacing avoids all of it.
+2. Delete `scripts/sign-release.sh`, and any other signing step outside the
+   shared workflow: nothing runs them any more, and a stale copy invites
+   someone to wire it back into a build job.
 3. Confirm the repository can read the `COLONY_SIGNING_KEY_PEM` organisation
-   secret — it is restricted to Project-Colony repositories, so a new or renamed
+   secret. It is restricted to Project-Colony repositories, so a new or renamed
    repository has to be added to that list.
 4. Release. The first signed release publishes `.sig`, `.meta` and `.meta.sig`
    for every asset.
@@ -473,16 +537,17 @@ after it no release of that program may stop publishing sidecars.
 
 | Piece | Canonical location |
 |---|---|
-| Release workflow | `templates/release.yml` (this repo) |
-| Signing script | `templates/sign-release.sh` (this repo) |
-| Shared sign-and-publish workflow | `.github/workflows/sign-and-publish.yml` (this repo) |
+| Release workflow template | `templates/sign-and-publish-caller.yml` (this repo) |
+| Signing: ed25519 for every asset, Authenticode for Windows | `.github/workflows/sign-and-publish.yml` (this repo), called at the organisation pin |
 | Manifest schema | `generated/colony.schema.json` (this repo) |
 | Manifest examples | `manifests/examples/` (this repo) |
 | Manifest validator | `colony validate-manifest`, shipped in the launcher |
 | Embedded trust keys | `src/signing.rs` in Project-Colony/Colony |
 | Private signing key | off-machine; `COLONY_SIGNING_KEY_PEM` in CI, never in a repository |
 
-There is deliberately **one** copy of the workflow and **one** of the script.
-They used to be duplicated in the Colony repository, the two drifted, and the
-result was a template naming a secret that does not exist and skipping Windows
-signing entirely — neither visible from either side.
+There is deliberately **one** copy of the signing code. It used to be
+duplicated in the Colony repository, the copies drifted, and the result was a
+template naming a secret that does not exist and skipping Windows signing
+entirely, neither visible from either side. The in-build signing template that
+came next kept the key in the same job as the compiler, and was retired for
+that reason.
