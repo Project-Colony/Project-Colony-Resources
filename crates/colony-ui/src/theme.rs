@@ -440,14 +440,13 @@ impl Palette {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::{Mutex, MutexGuard};
+    use std::sync::MutexGuard;
 
     /// The active theme is process-global, so tests that set it must not run
-    /// concurrently with each other.
-    static GLOBALS: Mutex<()> = Mutex::new(());
-
+    /// concurrently with each other, nor with the other modules' tests that
+    /// set it through `StandardPreferences::apply`.
     fn exclusive() -> MutexGuard<'static, ()> {
-        GLOBALS.lock().unwrap_or_else(|e| e.into_inner())
+        crate::test_lock()
     }
 
     #[test]
