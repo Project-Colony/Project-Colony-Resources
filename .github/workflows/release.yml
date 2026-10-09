@@ -1,0 +1,106 @@
+# colony-ui release: release-please, then crates.io through Trusted Publishing.
+#
+# Conventional commits that touch crates/colony-ui feed a release PR. Merging
+# it tags colony-ui-vX.Y.Z and publishes the crate from that tag. No version is
+# bumped and no tag is pushed by hand. crates.io takes a short-lived token
+# minted from this job's OIDC identity (repository, this workflow file, the
+# crates-io environment), so no long-lived registry token is stored anywhere.
+#
+# Action refs are pinned to commit SHAs on purpose: this workflow publishes,
+# and whoever can move a floating tag can change what it runs.
+
+name: Release
+
+on:
+  push:
+    branches: [main]
+  # Recovery path. release-please emits `release_created` only once per
+  # release, so re-running a failed run publishes nothing. This input
+  # publishes an existing colony-ui tag that never reached crates.io:
+  # `gh workflow run release.yml --ref colony-ui-v0.1.7 -f tag=colony-ui-v0.1.7`.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing colony-ui tag to publish to crates.io (e.g. colony-ui-v0.1.7). Run from that same tag."
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # Push only: on a recovery dispatch the tag already exists, and running
+  # release-please would open or update a release PR as a side effect.
+  release-please:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      release_created: ${{ steps.release.outputs['crates/colony-ui--release_created'] }}
+      tag_name: ${{ steps.release.outputs['crates/colony-ui--tag_name'] }}
+    steps:
+      # No `release-type` input: when it is set, the action ignores both files.
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        id: release
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  publish:
+    name: publish colony-ui to crates.io
+    needs: release-please
+    # NOT `always()`: that would also publish after release-please FAILED.
+    if: ${{ !cancelled() && !failure() && (needs.release-please.outputs.release_created || github.event_name == 'workflow_dispatch') }}
+    runs-on: ubuntu-latest
+    # The crates.io Trusted Publisher is registered for this environment, so
+    # no other job can mint a publish token.
+    environment: crates-io
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      TAG: ${{ needs.release-please.outputs.tag_name || inputs.tag }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.TAG }}
+          persist-credentials: false
+
+      # rustup is on the runner image already; no third-party toolchain action.
+      - name: Install Rust
+        run: |
+          rustup toolchain install stable --profile minimal --no-self-update
+          rustup default stable
+
+      # A dispatch can name any ref. Publishing is irreversible, so the tag
+      # must be a colony-ui tag and name the version the crate declares.
+      - name: Tag matches the crate version
+        run: |
+          version=$(cargo metadata --no-deps --format-version 1 --locked \
+            | jq -r '.packages[] | select(.name == "colony-ui") | .version')
+          [ "$TAG" = "colony-ui-v$version" ] \
+            || { echo "::error::tag $TAG does not match colony-ui $version"; exit 1; }
+
+      # Checked before publishing, since a published version cannot be fixed:
+      # the GPL text has to travel inside the crate itself.
+      - name: The package ships its licence
+        run: |
+          cargo package -p colony-ui --list --locked | grep -qx LICENSE \
+            || { echo "::error::LICENSE is missing from the colony-ui package"; exit 1; }
+
+      - uses: rust-lang/crates-io-auth-action@c6f97d42243bad5fab37ca0427f495c86d5b1a18 # v1.0.5
+        id: auth
+
+      - name: Publish
+        run: cargo publish -p colony-ui --locked
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}

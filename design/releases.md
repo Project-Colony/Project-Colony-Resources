@@ -133,6 +133,22 @@ warning.
 
 Do not set `separate-pull-requests` to `false` for a single-package repository. Its default is `true` when the config has one package, which names the release branch `release-please--branches--main--components--<name>`. Forced to `false`, the branch loses its component, and release-please 17.x then refuses to release the merged release PR (`PR component: undefined does not match configured component`) whenever the package has a name, as Rust and Node packages do. SAM-Colony-Edition 0.7.0 was stuck this way.
 
+### Libraries published to crates.io
+
+A library, such as `colony-ui` in this repository, goes through the same
+release-please chain, with two differences. It is a release-please component
+in a workspace (`include-component-in-tag`, tags like `colony-ui-v0.1.7`, the
+`cargo-workspace` plugin so the root `Cargo.lock` moves in the release PR),
+and its tag publishes to crates.io instead of building assets. Publishing uses
+crates.io Trusted Publishing: the publish job exchanges its GitHub OIDC
+identity for a token that lives only for that job, and the crate's trusted
+publisher names the repository, `release.yml` and the `crates-io`
+environment. No registry token is stored as a secret, and no signing key is
+involved: the ed25519 signatures of section 5 are for what the launcher
+installs, and crates.io checksums what cargo downloads. See
+[`.github/workflows/release.yml`](../.github/workflows/release.yml) and
+`release-please-config.json` in this repository.
+
 ## 3. Asset naming: this is the contract
 
 Colony auto-detects which platforms a program supports **from the release asset

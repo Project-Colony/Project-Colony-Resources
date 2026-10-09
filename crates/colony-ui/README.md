@@ -6,10 +6,12 @@ strings, the user's standard preferences, the filesystem layout, and the
 [iced](https://iced.rs) widgets a Colony program's chrome and Preferences page
 are built from.
 
+<!-- x-release-please-start-version -->
 ```toml
 [dependencies]
 colony-ui = "0.1.6"
 ```
+<!-- x-release-please-end -->
 
 ```rust
 use colony_ui::preferences::StandardPreferences;
@@ -120,6 +122,17 @@ Themes included: Catppuccin, Gruvbox, Everblush, Kanagawa, Nord, Dracula,
 Solarized, Tokyo Night, Rosé Pine, One Dark, Monokai, Ayu, Everforest, Material,
 Flexoki, Nightfox, Sonokai, Oxocarbon, Night Owl, Iceberg, Horizon, Melange,
 Synthwave '84, Modus, Parchment, and a fan-made Stellar Blade character set.
+
+## Releases
+
+release-please cuts every version from the conventional commits that touch
+this crate. It keeps a release PR open, titled
+`chore(main): release colony-ui X.Y.Z`. Merging that PR bumps `Cargo.toml` and
+`Cargo.lock`, writes the
+[changelog](https://github.com/Project-Colony/Project-Colony-Resources/blob/main/crates/colony-ui/CHANGELOG.md),
+tags `colony-ui-vX.Y.Z`, and publishes the crate to crates.io through Trusted
+Publishing. Nobody bumps the version, edits the changelog or pushes a tag by
+hand.
 
 ## Privacy
 
