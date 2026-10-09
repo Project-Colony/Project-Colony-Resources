@@ -53,7 +53,9 @@ to satisfy either rule. Rewriting a published default branch breaks every
 clone and every open branch, loses the commit release-please last released
 from, and leaves published tags pointing at commits the branch no longer
 contains. A check of these rules therefore reads the history from adoption on
-(`git log --since=2026-10-09` for those repositories), not the whole log.
+(`git log --since='2026-10-09 00:00 +0000'` for those repositories), not the
+whole log. Give the time and the zone: with a bare date, git keeps the current
+time of day, so the check silently skips the commits of the adoption day itself.
 
 ### When a release goes out empty
 
