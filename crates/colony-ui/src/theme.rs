@@ -2,7 +2,7 @@
 //! every program styles its widgets with.
 //!
 //! The 57 palettes, the `(family, variant)` resolver, the picker catalog and the
-//! accent overrides are **not** written here — they are generated from
+//! accent overrides are **not** written here: they are generated from
 //! `tokens/` and pulled in by the `include!` below. Adding a theme family
 //! therefore touches no Rust at all.
 
@@ -10,7 +10,7 @@ use std::sync::RwLock;
 
 use iced::Color;
 
-/// Runtime theme palette — all semantic UI colors.
+/// Runtime theme palette: all semantic UI colors.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ThemePalette {
     // --- Backgrounds ---
@@ -77,7 +77,7 @@ pub const fn hex(h: u32) -> Color {
 }
 
 // Every palette const, `THEME_FAMILIES`, `resolve()`, `FALLBACK_PALETTE`,
-// `ACCENT_OVERRIDES` and `accent_key_to_color()`. Generated from tokens/ —
+// `ACCENT_OVERRIDES` and `accent_key_to_color()`. Generated from tokens/:
 // run `cargo run -p colony-tokens -- generate` after editing a colour.
 include!("generated/palettes.rs");
 
@@ -114,7 +114,7 @@ pub fn family(key: &str) -> Option<&'static ThemeFamilyMeta> {
 
 static ACTIVE_PALETTE: RwLock<ThemePalette> = RwLock::new(FALLBACK_PALETTE);
 
-/// User-chosen accent override. `None` means "auto" — use the theme's own.
+/// User-chosen accent override. `None` means "auto": use the theme's own.
 static ACTIVE_ACCENT: RwLock<Option<Color>> = RwLock::new(None);
 
 static HIGH_CONTRAST: RwLock<bool> = RwLock::new(false);
@@ -208,10 +208,10 @@ impl ThemePalette {
 /// Perceptual helpers on iced's [`Color`], shared so every program answers
 /// "is this surface light?" the same way.
 // `Color` is `Copy`, so taking `self` by value is both correct and cheaper than
-// a reference — the same choice `f32::is_nan(self)` makes in std.
+// a reference, the same choice `f32::is_nan(self)` makes in std.
 #[allow(clippy::wrong_self_convention)]
 pub trait ColorExt {
-    /// YIQ luminance — the perceptual weighting used throughout Colony.
+    /// YIQ luminance, the perceptual weighting used throughout Colony.
     fn luma(self) -> f32;
     /// Whether the colour reads as a light surface.
     fn is_light(self) -> bool;
@@ -227,7 +227,7 @@ impl ColorExt for Color {
     }
 }
 
-/// Pick a legible foreground — near-black or near-white — for a glyph drawn on
+/// Pick a legible foreground (near-black or near-white) for a glyph drawn on
 /// top of `bg`.
 ///
 /// Chosen by the WCAG contrast each end actually achieves, not by a luminance
@@ -278,7 +278,7 @@ pub fn contrast_ratio(a: Color, b: Color) -> f32 {
     (hi + 0.05) / (lo + 0.05)
 }
 
-/// Deterministic identity tint for a program, derived from its NAME only —
+/// Deterministic identity tint for a program, derived from its NAME only:
 /// stable across install, uninstall and machines. Buckets the name's hash into
 /// the shared accents so every program gets a distinct, palette-harmonious
 /// colour without shipping an icon.
@@ -355,7 +355,7 @@ impl Palette {
         active_palette().text_placeholder
     }
 
-    // Accent — ACCENT() is the user's override or the theme default.
+    // Accent: ACCENT() is the user's override or the theme default.
     pub fn ACCENT() -> Color {
         effective_accent()
     }
@@ -562,7 +562,7 @@ mod tests {
                     "{id}: dark theme should brighten text"
                 );
             }
-            // The surface itself must not move — only the ink and the borders.
+            // The surface itself must not move, only the ink and the borders.
             assert_eq!(boosted.bg_primary, base.bg_primary, "{id}");
         }
     }
@@ -584,7 +584,7 @@ mod tests {
 
     /// Expected buckets computed independently from Colony's hash
     /// (`h = byte + h*31`, wrapping, then `|h| % 8`) rather than by running
-    /// this implementation — otherwise the test proves nothing.
+    /// this implementation: otherwise the test proves nothing.
     const KNOWN_TINTS: &[(&str, &str)] = &[
         ("Colony", "yellow"),
         ("Eidos", "blue"),

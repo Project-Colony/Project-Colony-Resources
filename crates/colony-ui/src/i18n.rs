@@ -1,5 +1,5 @@
-//! Display strings for the shared design objects — theme families, theme
-//! variants and accents — in both shipped locales.
+//! Display strings for the shared design objects (theme families, theme
+//! variants and accents) in both shipped locales.
 //!
 //! English is the base language of every Project Colony project; French is the
 //! other UI locale. The strings are generated from `tokens/` and embedded here,
@@ -7,7 +7,7 @@
 //! them into its own locale files and letting them drift.
 //!
 //! Only the strings that name shared objects live here. A program's own
-//! vocabulary — its section titles, its button labels — stays in the program.
+//! vocabulary (its section titles, its button labels) stays in the program.
 
 use std::collections::HashMap;
 use std::sync::{OnceLock, RwLock};
@@ -82,7 +82,7 @@ fn table(locale: Locale) -> &'static HashMap<String, String> {
 /// Look up a label in the active locale.
 ///
 /// Falls back to English, then to the key itself. A missing key renders as the
-/// key — visible in the UI, which is what you want: silently rendering nothing
+/// key, visible in the UI, which is what you want: silently rendering nothing
 /// hides the bug until a user reports a blank row.
 pub fn t(key: &str) -> &'static str {
     lookup(locale(), key)

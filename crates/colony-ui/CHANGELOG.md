@@ -45,6 +45,7 @@ crate is 0.x, anything that breaks a consumer bumps the minor version.
 * `is_high_contrast` is re-exported at the crate root next to
   `set_high_contrast`.
 * The GPL-3.0 licence text ships inside the crate.
+* `examples/preferences.rs`: a complete program built from the kit.
 
 ### Fixes
 
@@ -52,7 +53,6 @@ crate is 0.x, anything that breaks a consumer bumps the minor version.
   `\u{f6e2}`, a Font Awesome codepoint JetBrainsMono Nerd Font does not
   carry, so it only rendered when a fallback font happened to have it. A test
   now holds every family glyph to the embedded font.
-* `examples/preferences.rs`: a complete program built from the kit.
 
 ## 0.1.5
 

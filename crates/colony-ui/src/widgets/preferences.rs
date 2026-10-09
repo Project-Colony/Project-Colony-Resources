@@ -823,8 +823,8 @@ mod tests {
         const CHROME: f32 = 14.0 * 2.0 + 16.0;
 
         let fonts = [
-            ("JetBrainsMono Nerd Font", crate::fonts::BYTES[0]),
-            ("OpenDyslexic", crate::fonts::BYTES[3]),
+            (fonts::APP_FAMILY, fonts::BYTES[0]),
+            (fonts::DYSLEXIA_FAMILY, fonts::BYTES[3]),
         ];
         for (font, bytes) in fonts {
             let face = ttf_parser::Face::parse(bytes, 0).unwrap();

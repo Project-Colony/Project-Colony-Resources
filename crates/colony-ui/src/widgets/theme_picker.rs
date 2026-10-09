@@ -10,7 +10,7 @@ use crate::{fonts, i18n, Typography};
 ///
 /// It renders straight from [`THEME_FAMILIES`], which is generated from
 /// `tokens/`. **Adding a theme family requires no change here and no change in
-/// the host program** — that is the entire point of the crate.
+/// the host program**: that is the entire point of the crate.
 ///
 /// A card is the variant's `swatch.bg` with a bar of its `swatch.accent` across
 /// it, the localized variant name underneath, and a check on the selected one.
@@ -84,7 +84,7 @@ where
     let bg = variant.swatch_bg_color();
     let accent = variant.swatch_accent_color();
 
-    // A bar of the accent, sitting low on a field of the background — enough
+    // A bar of the accent, sitting low on a field of the background, enough
     // for the theme to be recognisable at this size.
     let accent_bar = container(text(""))
         .width(Length::Fill)
@@ -120,7 +120,7 @@ where
         });
 
     // The mark sits on this variant's own swatch, so its legibility depends on
-    // that swatch rather than on the accent of whatever theme is active — which
+    // that swatch rather than on the accent of whatever theme is active, which
     // is what it used to be drawn in.
     let check: Element<'a, M> = if is_active {
         text(icons::CHECK)

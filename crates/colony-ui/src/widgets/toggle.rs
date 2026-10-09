@@ -7,7 +7,7 @@ use crate::Typography;
 /// A labelled on/off row: title, description underneath, pill toggle at the
 /// right. The whole row is clickable, not just the pill.
 ///
-/// The description is not the title said twice — it says what turning this on
+/// The description is not the title said twice: it says what turning this on
 /// actually does. A setting that needs a restart says so here.
 pub fn functional_toggle<'a, M>(
     typo: &Typography,

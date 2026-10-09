@@ -7,15 +7,15 @@ use crate::{fonts, Typography};
 
 /// A collapsible section: a flat header row that toggles its body.
 ///
-/// This is what keeps a preferences category readable — on arrival the user
+/// This is what keeps a preferences category readable: on arrival the user
 /// sees a short list of closed rows rather than every control at once. The
 /// header is deliberately **flat**: no card, no background except on hover, so
 /// the page reads as a list and not as a stack of boxes.
 ///
 /// The whole header is the target, not just the chevron.
 ///
-/// The host owns the expanded state — usually a `HashSet<String>` of open
-/// section keys — because it is the host that persists it.
+/// The host owns the expanded state (usually a `HashSet<String>` of open
+/// section keys) because it is the host that persists it.
 pub fn collapsible_section<'a, M>(
     typo: &Typography,
     title: &str,
