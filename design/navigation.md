@@ -93,6 +93,13 @@ near-white for whatever accent is active, and not `text_primary`: on an accent
 fill `text_primary` is below 4.5:1 on almost every theme, and on Ayu Dark it is
 1.01:1.
 
+`contrast_on(accent)` does not reach 4.5:1 everywhere either. It guarantees at
+least **4.0:1**: a mid-tone accent sits too close to the middle for near-black
+or near-white to clear 4.5:1. The worst pairing is Night Owl light on its own
+accent, at 4.21:1; the Indigo accent (4.28:1) and Gruvbox light (4.32:1) are
+the other two below 4.5:1. A test checks the 4.0:1 floor for every theme with
+every accent.
+
 Keep hover and selected visually distinct; a hover state that looks like
 selection makes a list feel broken.
 

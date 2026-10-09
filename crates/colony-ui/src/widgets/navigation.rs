@@ -79,7 +79,8 @@ where
 /// Radius 8. Selected text is `contrast_on(accent)` rather than
 /// `text_primary`: on an accent fill, `text_primary` is below 4.5:1 on almost
 /// every theme and reaches 1.01:1 on Ayu Dark, where the selected item was
-/// invisible.
+/// invisible. `contrast_on(accent)` itself guarantees at least 4.0:1, not
+/// 4.5:1: the worst pairing is Night Owl light on its own accent, at 4.21:1.
 ///
 /// Exposed so a program whose items carry more than a label (an icon, a count)
 /// can style its own button the same way.

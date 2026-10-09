@@ -82,7 +82,9 @@ the same selection rules as the main sidebar: selected gets an `accent`
 background with its label in `contrast_on(accent)`, hover gets `bg_card_hover`,
 padding `[8, 14]`, radius 8, full width. The label is not `text_primary`: on an
 accent fill that pairing is below 4.5:1 on almost every theme and reaches 1.01:1
-on Ayu Dark, where the selected category disappeared.
+on Ayu Dark, where the selected category disappeared. `contrast_on(accent)`
+reaches at least 4.0:1, not 4.5:1, on every theme and accent; the worst case is
+Night Owl light at 4.21:1 (see [navigation.md](navigation.md#selection-state)).
 
 The list is 180 wide at a text scale of 1.0 and grows with the scale. Colony's
 fixed 160 holds "Accessibility" at the default size only: at large text, or in
