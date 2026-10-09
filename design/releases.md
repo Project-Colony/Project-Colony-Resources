@@ -389,6 +389,12 @@ trusted set on machines that only trust `old`. Do not skip to N+2: anyone still
 on N-1 when `old` is dropped can no longer self-update and must reinstall by
 hand.
 
+`templates/release.yml` also trusts the key: it verifies the Colony it
+downloads against a copy embedded as a PEM, and runs nothing that fails. Update
+that PEM in the template and in every program's copy of it when Colony's
+releases start being signed with `new` (N+1), or their releases stop at the
+manifest check.
+
 ### Validating before you ship
 
 ```bash
@@ -406,7 +412,8 @@ colony validate-manifest colony.json $(tr '\n' ' ' < names.txt)
 ```
 
 It exits non-zero on any problem. `templates/release.yml` runs it on every
-release, before signing.
+release, before signing, with the latest Colony release, and only once that
+binary's signature and signed `.meta` check out.
 
 ## 6. Release profile
 
