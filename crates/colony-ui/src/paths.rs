@@ -57,10 +57,13 @@ pub const CACHE: &str = "cache";
 /// The program name reaches these functions from a manifest or a config file in
 /// the general case, and it is joined into a path that later gets written to
 /// and removed. `..` or a separator here would let it escape the Colony tree.
+/// A trailing dot or space is refused too: Windows strips them from a path
+/// component, so `Grape.` would open the same folder as `Grape`.
 fn component(name: &str) -> io::Result<&str> {
     let invalid = name.is_empty()
         || name == "."
         || name == ".."
+        || name.ends_with(['.', ' '])
         || name.contains(['/', '\\', '\0'])
         || Path::new(name).components().count() != 1
         || Path::new(name).file_name() != Some(OsStr::new(name));
@@ -69,6 +72,24 @@ fn component(name: &str) -> io::Result<&str> {
         return Err(io::Error::new(
             io::ErrorKind::InvalidInput,
             format!("{name:?} is not a safe single path component"),
+        ));
+    }
+    Ok(name)
+}
+
+/// [`component`], plus the one name a program root may not take.
+///
+/// `<data>/Colony/apps/` is the shared install root, so a program called
+/// `apps` would put its data directory on top of every installed program.
+/// The comparison ignores case because Windows and default macOS filesystems
+/// do: `Apps` lands on the same folder there. Upper-casing first also catches a
+/// non-ASCII letter that case-folds to an ASCII one, such as `appſ` (long s).
+fn program_component(name: &str) -> io::Result<&str> {
+    let name = component(name)?;
+    if name.to_uppercase().eq_ignore_ascii_case(APPS) {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            format!("{name:?} is reserved for the shared install root and cannot name a program"),
         ));
     }
     Ok(name)
@@ -99,7 +120,7 @@ pub mod locate {
         Ok(dirs::config_local_dir()
             .ok_or_else(|| missing("config"))?
             .join(VENDOR)
-            .join(component(program)?))
+            .join(program_component(program)?))
     }
 
     /// See [`super::data_dir`].
@@ -107,7 +128,7 @@ pub mod locate {
         Ok(dirs::data_local_dir()
             .ok_or_else(|| missing("data"))?
             .join(VENDOR)
-            .join(component(program)?))
+            .join(program_component(program)?))
     }
 
     /// See [`super::cache_dir`].
@@ -115,7 +136,7 @@ pub mod locate {
         let base = dirs::cache_dir()
             .ok_or_else(|| missing("cache"))?
             .join(VENDOR)
-            .join(component(program)?);
+            .join(program_component(program)?);
 
         // Linux has ~/.cache and macOS has ~/Library/Caches, but Windows has no
         // cache location at all: `dirs::cache_dir()` returns LocalAppData there,
@@ -145,6 +166,13 @@ pub mod locate {
 
 /// The program's configuration directory, created if it does not exist.
 ///
+/// # Errors
+///
+/// [`io::ErrorKind::InvalidInput`] if `program` is not a single safe path
+/// component or is the reserved [`APPS`] name in any case;
+/// [`io::ErrorKind::NotFound`] if the platform has no such directory; or the
+/// error from creating it.
+///
 /// ```no_run
 /// let prefs = colony_ui::paths::config_dir("Digger")?.join("preferences.json");
 /// # Ok::<(), std::io::Error>(())
@@ -154,11 +182,19 @@ pub fn config_dir(program: &str) -> io::Result<PathBuf> {
 }
 
 /// The program's data directory, created if it does not exist.
+///
+/// # Errors
+///
+/// As [`config_dir`].
 pub fn data_dir(program: &str) -> io::Result<PathBuf> {
     ensure(locate::data_dir(program)?)
 }
 
 /// The program's cache directory, created if it does not exist.
+///
+/// # Errors
+///
+/// As [`config_dir`].
 pub fn cache_dir(program: &str) -> io::Result<PathBuf> {
     ensure(locate::cache_dir(program)?)
 }
@@ -212,7 +248,19 @@ mod tests {
 
     #[test]
     fn a_program_name_cannot_escape_the_colony_tree() {
-        for bad in ["..", ".", "", "../../etc", "a/b", "a\\b", "with\0nul"] {
+        // A trailing dot or space does not escape, but Windows strips it, so
+        // the name would alias another folder.
+        for bad in [
+            "..",
+            ".",
+            "",
+            "../../etc",
+            "a/b",
+            "a\\b",
+            "with\0nul",
+            "Grape.",
+            "Grape ",
+        ] {
             assert!(
                 locate::config_dir(bad).is_err(),
                 "{bad:?} should be rejected as a program name"
@@ -222,6 +270,43 @@ mod tests {
                 "{bad:?} should be rejected as a repo name"
             );
         }
+    }
+
+    type Root = fn(&str) -> io::Result<PathBuf>;
+
+    const LOCATE_ROOTS: [(&str, Root); 3] = [
+        ("locate::config_dir", locate::config_dir),
+        ("locate::data_dir", locate::data_dir),
+        ("locate::cache_dir", locate::cache_dir),
+    ];
+
+    #[test]
+    fn the_install_root_name_is_reserved_in_any_case() {
+        // The creating variants reject the name before touching the disk, so
+        // calling them here creates nothing.
+        let creating: [(&str, Root); 3] = [
+            ("config_dir", config_dir),
+            ("data_dir", data_dir),
+            ("cache_dir", cache_dir),
+        ];
+        for (label, root) in LOCATE_ROOTS.into_iter().chain(creating) {
+            for reserved in ["apps", "Apps", "APPS", "apps.", "apps ", "app\u{17F}"] {
+                let err = root(reserved).expect_err(&format!("{label}({reserved:?})"));
+                assert_eq!(err.kind(), io::ErrorKind::InvalidInput, "{label}");
+            }
+        }
+        for (label, root) in LOCATE_ROOTS {
+            for good in ["Colony", "Grape"] {
+                assert!(root(good).is_ok(), "{label}({good:?})");
+            }
+        }
+    }
+
+    #[test]
+    fn an_installed_program_may_still_be_called_apps() {
+        // A repo name under apps/ is not a program root: no collision there.
+        let apps = locate::apps_dir().unwrap();
+        assert_eq!(locate::app_dir("apps").unwrap(), apps.join("apps"));
     }
 
     #[test]

@@ -97,7 +97,12 @@ rather than off `Colony/Colony/`. They belong to the ecosystem, not to
 Colony-the-launcher: a user removing the launcher should not discover their
 programs were kept inside it.
 
-`apps/` is therefore reserved: no program may be named `apps`.
+`apps/` is therefore reserved: no program may be named `apps`. The
+`colony_ui::paths` helpers enforce it: `config_dir`, `data_dir` and `cache_dir`
+(and their `paths::locate` counterparts) refuse `apps` in any case with
+`io::ErrorKind::InvalidInput`, because Windows and default macOS filesystems
+treat `Apps` as the same folder. `app_dir("apps")` stays valid: an installed
+program's repo name is not a program root.
 
 ## Use the helper, do not rebuild the path
 
@@ -128,7 +133,8 @@ Three reasons this matters more than it looks:
   is a rule nobody will remember to apply by hand, and forgetting it makes
   "clear the cache" destructive.
 - The program name is joined into a path that later gets written to and removed.
-  The helper rejects `..`, separators and empty names; hand-rolled code
+  The helper rejects `..`, separators, empty names and a trailing dot or space
+  (Windows strips those, so `Grape.` would be `Grape`); hand-rolled code
   historically did not.
 
 ## Where the ecosystem does not conform
