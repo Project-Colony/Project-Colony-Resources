@@ -171,7 +171,7 @@ pub struct Typography {
 impl Typography {
     /// The user's current text settings: [`font_scale`] and the three weights
     /// of the interface font, which is OpenDyslexic while the dyslexia font is
-    /// on (see [`fonts`](crate::fonts)).
+    /// on (see [`fonts`]).
     pub fn current() -> Self {
         Typography {
             scale: font_scale(),
