@@ -31,6 +31,18 @@ jobs:
       - name: Lints
         run: cargo clippy --all-targets -- -D warnings
 
+      # The `fonts` feature is on by default. A program that ships the font
+      # files itself turns it off, so that build has to keep compiling too.
+      - name: colony-ui without the embedded fonts
+        run: cargo clippy -p colony-ui --no-default-features --all-targets -- -D warnings
+
+      # docs.rs is where programs read the crate's API; a broken link there is a
+      # broken page.
+      - name: colony-ui docs
+        run: cargo doc -p colony-ui --no-deps
+        env:
+          RUSTDOCFLAGS: -D warnings
+
       # Proves the palettes still round-trip against the snapshot of Colony's
       # theme.rs, that both locales stay in step, and that text stays legible.
       - name: Tests

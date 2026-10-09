@@ -207,13 +207,32 @@ struct AccentsFile {
     accents: Vec<Accent>,
 }
 
-/// Every family, in picker order, plus the shared accent overrides.
+/// One shared interface string from `tokens/labels.toml`: a Preferences page
+/// title, a category name, a control and its description.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct UiLabel {
+    pub key: String,
+    pub en: String,
+    pub fr: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct LabelsFile {
+    labels: Vec<UiLabel>,
+}
+
+/// Every family, in picker order, plus the shared accent overrides and the
+/// shared interface labels.
 #[derive(Debug, Clone)]
 pub struct Tokens {
     pub families: Vec<Family>,
     /// In file order — see the warning in `tokens/accents.toml`, this order is
     /// what Colony's per-app identity tint hashes into.
     pub accents: Vec<Accent>,
+    /// In file order, which is the order they are emitted in.
+    pub labels: Vec<UiLabel>,
 }
 
 impl Tokens {
@@ -258,9 +277,16 @@ impl Tokens {
         let accents: AccentsFile = toml::from_str(&accents_src)
             .with_context(|| format!("parsing {}", accents_path.display()))?;
 
+        let labels_path = tokens_dir.join("labels.toml");
+        let labels_src = std::fs::read_to_string(&labels_path)
+            .with_context(|| format!("reading {}", labels_path.display()))?;
+        let labels: LabelsFile = toml::from_str(&labels_src)
+            .with_context(|| format!("parsing {}", labels_path.display()))?;
+
         let tokens = Tokens {
             families,
             accents: accents.accents,
+            labels: labels.labels,
         };
         tokens.validate()?;
         Ok(tokens)
@@ -357,6 +383,16 @@ impl Tokens {
             }
             if accent.label.fr.is_empty() || accent.label.en.is_empty() {
                 bail!("accent {:?} is missing a label", accent.key);
+            }
+        }
+
+        let mut label_keys: BTreeMap<&str, ()> = BTreeMap::new();
+        for label in &self.labels {
+            if label.key.is_empty() {
+                bail!("tokens/labels.toml has a label with an empty key");
+            }
+            if label_keys.insert(&label.key, ()).is_some() {
+                bail!("tokens/labels.toml declares {:?} twice", label.key);
             }
         }
 

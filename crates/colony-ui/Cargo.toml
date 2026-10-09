@@ -1,7 +1,7 @@
 [package]
 name = "colony-ui"
-version = "0.1.5"
-description = "Shared iced theme, palettes, labels and widgets for Project Colony programs"
+version = "0.1.6"
+description = "Shared iced theme, palettes, fonts, labels and preferences kit for Project Colony programs"
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
@@ -10,7 +10,25 @@ readme = "README.md"
 keywords = ["iced", "gui", "theme", "palette", "colony"]
 categories = ["gui"]
 
+[features]
+default = ["fonts"]
+# Embeds the three Colony font families (about 8 MB of TTF/OTF, see
+# assets/fonts/) so a program registers them with iced from
+# `colony_ui::fonts::BYTES`. Without it, the family names and the accessors are
+# still here and the program ships the files itself. `BYTES` is a const, so a
+# program that never names it carries none of it either way.
+fonts = []
+
 [dependencies]
 dirs.workspace = true
 iced.workspace = true
+serde.workspace = true
 serde_json.workspace = true
+
+[dev-dependencies]
+toml.workspace = true
+ttf-parser.workspace = true
+
+[[example]]
+name = "preferences"
+required-features = ["fonts"]

@@ -3,14 +3,14 @@ use iced::{Alignment, Border, Element, Length, Padding};
 
 use super::icons;
 use crate::theme::{contrast_on, Palette, THEME_FAMILIES};
-use crate::{i18n, Typography};
+use crate::{fonts, i18n, Typography};
 
 /// The whole theme picker: one row per family, each showing the family's Nerd
 /// Font glyph and localized name above a row of variant cards.
 ///
 /// It renders straight from [`THEME_FAMILIES`], which is generated from
 /// `tokens/`. **Adding a theme family requires no change here and no change in
-/// the host program** — that is the entire point of the crate.
+/// the host program**: that is the entire point of the crate.
 ///
 /// A card is the variant's `swatch.bg` with a bar of its `swatch.accent` across
 /// it, the localized variant name underneath, and a check on the selected one.
@@ -29,22 +29,29 @@ where
     for family in THEME_FAMILIES {
         let is_selected_family = selected_family == family.key;
 
-        let label = i18n::t(family.label_key);
-        let label_text = if family.icon.is_empty() {
-            label.to_string()
+        let color = if is_selected_family {
+            Palette::TEXT_PRIMARY()
         } else {
-            format!("{} {}", family.icon, label)
+            Palette::TEXT_SECONDARY()
         };
-
-        let family_label =
-            text(label_text)
+        // The glyph and the name are two texts because they are two fonts: the
+        // glyph stays in the Nerd Font while the name follows the dyslexia
+        // toggle, which has no glyphs.
+        let mut family_label = Row::new().spacing(8).align_y(Alignment::Center);
+        if !family.icon.is_empty() {
+            family_label = family_label.push(
+                text(family.icon)
+                    .size(typo.sz(13))
+                    .font(fonts::glyph_font())
+                    .color(color),
+            );
+        }
+        let family_label = family_label.push(
+            text(i18n::t(family.label_key))
                 .size(typo.sz(13))
                 .font(typo.medium)
-                .color(if is_selected_family {
-                    Palette::TEXT_PRIMARY()
-                } else {
-                    Palette::TEXT_SECONDARY()
-                });
+                .color(color),
+        );
 
         let mut variants = Row::new().spacing(8);
         for variant in family.variants {
@@ -77,7 +84,7 @@ where
     let bg = variant.swatch_bg_color();
     let accent = variant.swatch_accent_color();
 
-    // A bar of the accent, sitting low on a field of the background — enough
+    // A bar of the accent, sitting low on a field of the background, enough
     // for the theme to be recognisable at this size.
     let accent_bar = container(text(""))
         .width(Length::Fill)
@@ -113,12 +120,12 @@ where
         });
 
     // The mark sits on this variant's own swatch, so its legibility depends on
-    // that swatch rather than on the accent of whatever theme is active — which
+    // that swatch rather than on the accent of whatever theme is active, which
     // is what it used to be drawn in.
     let check: Element<'a, M> = if is_active {
         text(icons::CHECK)
             .size(typo.sz(8))
-            .font(typo.regular)
+            .font(fonts::glyph_font())
             .color(contrast_on(bg))
             .into()
     } else {

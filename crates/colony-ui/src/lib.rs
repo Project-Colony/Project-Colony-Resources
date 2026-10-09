@@ -2,67 +2,71 @@
 //!
 //! Everything here used to be copy-pasted, re-derived, or scraped out of
 //! another repository's source. A program depending on this crate gets the
-//! palettes, the theme resolver, the accent overrides, the display strings and
-//! the shared widgets — and, importantly, **stops having to change** when a
+//! palettes, the theme resolver, the accent overrides, the fonts, the display
+//! strings, the user's standard preferences and the widgets its Preferences
+//! page is built from, and, importantly, **stops having to change** when a
 //! theme family is added.
 //!
 //! ```no_run
-//! use colony_ui::{theme, widgets, Typography};
+//! use colony_ui::preferences::StandardPreferences;
+//! use colony_ui::{i18n, theme, Typography};
 //!
 //! // On startup, from the user's config:
-//! theme::set_active_theme("gruvbox", "dark");
-//! colony_ui::i18n::set_locale(colony_ui::i18n::Locale::Fr);
+//! let prefs = StandardPreferences::default(); // or deserialized from the file
+//! prefs.apply();
+//! i18n::set_locale(i18n::Locale::from_tag("fr"));
 //!
-//! // Then style widgets from the active palette:
-//! let bg = theme::Palette::BG_PRIMARY();
+//! // Then style widgets from the active palette, sized and set in the user's
+//! // font:
+//! let typo = Typography::current();
+//! let title = iced::widget::text(i18n::t("settings_title"))
+//!     .size(typo.sz(22))
+//!     .font(typo.bold)
+//!     .color(theme::Palette::TEXT_PRIMARY());
+//! # let _: iced::Element<'_, ()> = title.into();
 //! ```
 //!
+//! | Module | What it holds |
+//! |---|---|
+//! | [`theme`] | palettes, the active theme, accents, high contrast, contrast helpers |
+//! | [`typography`] | the two text-size preferences, [`font_scale`], [`sz`], [`Typography`] |
+//! | [`fonts`] | the three fonts, the accessor that honours the dyslexia toggle, the font files |
+//! | [`motion`] | reduced motion and the effects that obey it |
+//! | [`preferences`] | [`StandardPreferences`](preferences::StandardPreferences): load, apply, update |
+//! | [`widgets`] | identity button, navigation, the Preferences page and its categories |
+//! | [`i18n`] | every shared label, English and French |
+//! | [`paths`] | `Colony/<Program>/` config, data and cache directories |
+//!
 //! The colours themselves live in `tokens/` at the repository root and are
-//! generated into this crate — see the repository README.
+//! generated into this crate; see the repository README.
 
+pub mod fonts;
 pub mod i18n;
+pub mod motion;
 pub mod paths;
+pub mod preferences;
 pub mod theme;
+pub mod typography;
 pub mod widgets;
 
 pub use theme::{
     accent_key_to_color, active_palette, app_tint, contrast_on, contrast_ratio, effective_accent,
-    hex, resolve, set_active_accent, set_active_theme, set_high_contrast, AccentOverride, ColorExt,
-    Palette, ThemeFamilyMeta, ThemePalette, ThemeVariantMeta, ACCENT_OVERRIDES, FALLBACK_PALETTE,
-    THEME_FAMILIES,
+    hex, is_high_contrast, resolve, set_active_accent, set_active_theme, set_high_contrast,
+    AccentOverride, ColorExt, Palette, ThemeFamilyMeta, ThemePalette, ThemeVariantMeta,
+    ACCENT_OVERRIDES, FALLBACK_PALETTE, THEME_FAMILIES,
 };
 
-use iced::Font;
+pub use fonts::{is_dyslexia_font, set_dyslexia_font, ui_font, ui_font_bold, ui_font_medium};
+pub use motion::{effects_enabled, is_reduced_motion, set_effects, set_reduced_motion};
+pub use typography::{
+    font_scale, font_size, set_font_size, set_text_size, sz, text_size, FontSize, TextSize,
+    Typography,
+};
 
-/// What a shared widget needs to know about the host program's text.
-///
-/// Colony scales every size through one accessor so the two independent user
-/// preferences — Appearance → Typography and Accessibility → Reading — can
-/// multiply. A widget in this crate cannot reach the host's state, so the host
-/// passes this in.
-#[derive(Debug, Clone, Copy)]
-pub struct Typography {
-    /// The product of every font-size preference. 1.0 is unscaled.
-    pub scale: f32,
-    pub regular: Font,
-    pub medium: Font,
-    pub bold: Font,
-}
-
-impl Typography {
-    /// Scale a base size the way the host program does.
-    pub fn sz(&self, base: u16) -> f32 {
-        (base as f32 * self.scale).round()
-    }
-}
-
-impl Default for Typography {
-    fn default() -> Self {
-        Typography {
-            scale: 1.0,
-            regular: Font::DEFAULT,
-            medium: Font::DEFAULT,
-            bold: Font::DEFAULT,
-        }
-    }
+/// The globals (theme, accent, high contrast, fonts, motion, sizes) are
+/// process-wide, so the unit tests that set them must not run concurrently.
+#[cfg(test)]
+pub(crate) fn test_lock() -> std::sync::MutexGuard<'static, ()> {
+    static GLOBALS: std::sync::Mutex<()> = std::sync::Mutex::new(());
+    GLOBALS.lock().unwrap_or_else(|e| e.into_inner())
 }

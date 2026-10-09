@@ -1,6 +1,6 @@
 //! Exercises the crate the way a Colony program does, through its public API
 //! only. If this file needs a change to keep compiling, every consumer needs
-//! that change too — which makes it the crate's compatibility contract.
+//! that change too, which makes it the crate's compatibility contract.
 
 use colony_ui::i18n::{self, Locale};
 use colony_ui::widgets::{accent_picker, collapsible_section, functional_toggle, theme_picker};
@@ -58,7 +58,7 @@ fn the_catalog_is_enough_to_build_a_picker_without_touching_the_crate() {
 
     // Lower bounds, not exact counts: the point of the catalog is that families
     // get added without a consumer changing, so a test that pins the number
-    // would have to be edited every time one is — and would be the only thing
+    // would have to be edited every time one is, and would be the only thing
     // standing in the way.
     assert!(families >= 25, "families were removed from the catalog");
     assert!(variants >= 57, "variants were removed from the catalog");
@@ -142,8 +142,8 @@ fn a_program_gets_a_stable_identity_tint_without_shipping_an_icon() {
 }
 
 /// A check mark drawn on a swatch has to be visible on it. Both pickers used a
-/// colour that does not depend on what it sits on — white for the accent dot,
-/// the active theme's accent for the variant card — and four of the eight
+/// colour that does not depend on what it sits on (white for the accent dot,
+/// the active theme's accent for the variant card) and four of the eight
 /// accents are light enough that the white mark fell below 3:1, yellow reaching
 /// 2.31:1.
 #[test]

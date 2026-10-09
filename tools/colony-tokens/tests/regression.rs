@@ -407,3 +407,48 @@ fn generated_is_up_to_date_with_tokens() {
         problems.join("\n  ")
     );
 }
+
+#[test]
+fn the_preferences_skeleton_ships_in_both_locales() {
+    let root = colony_tokens::repo_root().expect("repository root");
+    let tokens = Tokens::load(&root.join("tokens")).expect("tokens load");
+    let locales = colony_tokens::emit::i18n::render(&tokens).expect("labels render");
+
+    // The user-facing word is Preferences (design/navigation.md), and General's
+    // description carries the no-Save-button contract (design/settings-page.md).
+    assert_eq!(locales.en["settings_title"], "Preferences");
+    assert_eq!(locales.fr["settings_title"], "Préférences");
+    assert_eq!(
+        locales.en["settings_general_desc"],
+        "Preferences are saved automatically."
+    );
+
+    for label in &tokens.labels {
+        assert!(
+            locales.en.get(&label.key).is_some() && locales.fr.get(&label.key).is_some(),
+            "{} is missing from a locale",
+            label.key
+        );
+        assert!(
+            !label.en.contains("Settings") && !label.en.contains("settings"),
+            "{}: the user-facing word is Preferences, not Settings",
+            label.key
+        );
+    }
+}
+
+#[test]
+fn a_shared_label_cannot_rename_a_theme() {
+    let root = colony_tokens::repo_root().expect("repository root");
+    let mut tokens = Tokens::load(&root.join("tokens")).expect("tokens load");
+
+    // A theme's name lives next to its colours. A second, different string for
+    // the same key is how two names for one object start to drift.
+    let key = tokens.families[0].label_key.clone();
+    tokens.labels.push(colony_tokens::model::UiLabel {
+        key,
+        en: "Something else".into(),
+        fr: "Autre chose".into(),
+    });
+    assert!(colony_tokens::emit::i18n::render(&tokens).is_err());
+}

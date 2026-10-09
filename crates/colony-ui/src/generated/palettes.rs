@@ -3560,7 +3560,7 @@ pub const THEME_FAMILIES: &[ThemeFamilyMeta] = &[
     ThemeFamilyMeta {
         key: "dracula",
         label_key: "settings_theme_dracula",
-        icon: "\u{f6e2}",
+        icon: "\u{eefe}",
         variants: DRACULA_VARIANTS,
     },
     ThemeFamilyMeta {

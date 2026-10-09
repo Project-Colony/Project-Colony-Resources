@@ -1,0 +1,287 @@
+# Shared interface labels - Project Colony
+#
+# Source of truth. Edit here, then run `cargo run -p colony-tokens -- generate`.
+# Never edit anything under generated/ by hand.
+#
+# These are the strings of the Preferences skeleton that every Colony program
+# shares: the page title, the three mandatory categories, and every Appearance
+# and Accessibility control colony-ui draws. A program's own vocabulary (its
+# Storage category, its Startup section) stays in the program.
+#
+# English is the canonical string and is written first; the French is a
+# translation of it. Both are required. Key naming follows design/i18n.md:
+# settings_cat_<category>, settings_section_<section>, settings_<name> and
+# settings_<name>_desc for a control and its description.
+#
+# The user-facing word is "Preferences", never "Settings" (design/navigation.md).
+# The `settings_` prefix is the key convention, not something a user reads.
+
+# The page
+
+[[labels]]
+key = "settings_title"
+en = "Preferences"
+fr = "Préférences"
+
+[[labels]]
+key = "settings_close"
+en = "Close"
+fr = "Fermer"
+
+[[labels]]
+key = "theme_applied"
+en = "Theme applied."
+fr = "Thème appliqué."
+
+# Categories: the first three are fixed, About comes last
+
+[[labels]]
+key = "settings_cat_general"
+en = "General"
+fr = "Général"
+
+[[labels]]
+key = "settings_general_desc"
+en = "Preferences are saved automatically."
+fr = "Les préférences sont enregistrées automatiquement."
+
+[[labels]]
+key = "settings_cat_appearance"
+en = "Appearance"
+fr = "Apparence"
+
+[[labels]]
+key = "settings_appearance_desc"
+en = "Adjust the theme, accents, text and visual effects."
+fr = "Ajustez le thème, les accents, le texte et les effets visuels."
+
+[[labels]]
+key = "settings_cat_accessibility"
+en = "Accessibility"
+fr = "Accessibilité"
+
+[[labels]]
+key = "settings_accessibility_desc"
+en = "Make the interface easier to see, read and use."
+fr = "Rendez l'interface plus facile à voir, à lire et à utiliser."
+
+[[labels]]
+key = "settings_cat_about"
+en = "About"
+fr = "À propos"
+
+# Appearance > Theme
+
+[[labels]]
+key = "settings_section_theme"
+en = "Theme"
+fr = "Thème"
+
+[[labels]]
+key = "settings_theme_desc"
+en = "Applies immediately to the whole interface."
+fr = "S'applique immédiatement à toute l'interface."
+
+# Appearance > Colors
+
+[[labels]]
+key = "settings_section_colors"
+en = "Colors & accents"
+fr = "Couleurs & accents"
+
+[[labels]]
+key = "settings_colors_desc"
+en = "Pick an accent, or keep the one the theme was designed with."
+fr = "Choisissez un accent, ou gardez celui du thème."
+
+[[labels]]
+key = "settings_auto_accent"
+en = "Auto accent from background"
+fr = "Accent automatique selon le fond"
+
+[[labels]]
+key = "settings_auto_accent_desc"
+en = "Uses the theme's own accent instead of the one picked above."
+fr = "Utilise l'accent du thème plutôt que celui choisi ci-dessus."
+
+[[labels]]
+key = "settings_default_accent"
+en = "Theme accent"
+fr = "Accent du thème"
+
+# Appearance > Typography
+
+[[labels]]
+key = "settings_section_typography"
+en = "Typography"
+fr = "Typographie"
+
+[[labels]]
+key = "settings_typography_desc"
+en = "The interface font and its base size."
+fr = "La police de l'interface et sa taille de base."
+
+[[labels]]
+key = "settings_font_family"
+en = "Font"
+fr = "Police"
+
+[[labels]]
+key = "settings_font_family_desc"
+en = "Switches to OpenDyslexic when the dyslexia-friendly font is on."
+fr = "Passe à OpenDyslexic quand la police adaptée à la dyslexie est activée."
+
+[[labels]]
+key = "settings_font_size"
+en = "Text size"
+fr = "Taille du texte"
+
+[[labels]]
+key = "settings_font_size_desc"
+en = "Base size of every text in the interface."
+fr = "Taille de base de tous les textes de l'interface."
+
+[[labels]]
+key = "settings_font_size_small"
+en = "Small"
+fr = "Petit"
+
+[[labels]]
+key = "settings_font_size_default"
+en = "Default"
+fr = "Par défaut"
+
+[[labels]]
+key = "settings_font_size_large"
+en = "Large"
+fr = "Grand"
+
+[[labels]]
+key = "settings_font_size_xlarge"
+en = "Extra large"
+fr = "Très grand"
+
+# Appearance > Effects
+
+[[labels]]
+key = "settings_section_effects"
+en = "Effects"
+fr = "Effets"
+
+[[labels]]
+key = "settings_effects_desc"
+en = "Visual extras. Always off while Reduce motion is on."
+fr = "Extras visuels. Toujours désactivés quand Réduire les animations est activé."
+
+[[labels]]
+key = "settings_animations"
+en = "Animations"
+fr = "Animations"
+
+[[labels]]
+key = "settings_animations_desc"
+en = "Animated transitions and fades."
+fr = "Transitions et fondus animés."
+
+# Appearance > Preview
+
+[[labels]]
+key = "settings_section_preview"
+en = "Preview"
+fr = "Aperçu"
+
+[[labels]]
+key = "settings_preview_desc"
+en = "A live sample of your current choices."
+fr = "Un aperçu en direct de vos choix actuels."
+
+[[labels]]
+key = "settings_preview_card"
+en = "Preview card"
+fr = "Carte d'aperçu"
+
+[[labels]]
+key = "settings_preview_body"
+en = "Body text looks like this."
+fr = "Le texte courant ressemble à ceci."
+
+[[labels]]
+key = "settings_preview_button"
+en = "Button"
+fr = "Bouton"
+
+# Accessibility > Vision
+
+[[labels]]
+key = "settings_section_vision"
+en = "Vision"
+fr = "Vision"
+
+[[labels]]
+key = "settings_vision_desc"
+en = "Options that make the interface easier to see."
+fr = "Options pour rendre l'interface plus lisible."
+
+[[labels]]
+key = "settings_high_contrast"
+en = "High contrast"
+fr = "Contraste élevé"
+
+[[labels]]
+key = "settings_high_contrast_desc"
+en = "Increases the contrast of text and borders."
+fr = "Augmente le contraste du texte et des bordures."
+
+[[labels]]
+key = "settings_dyslexia_font"
+en = "Dyslexia-friendly font"
+fr = "Police adaptée à la dyslexie"
+
+[[labels]]
+key = "settings_dyslexia_font_desc"
+en = "Replaces the interface font with OpenDyslexic."
+fr = "Remplace la police de l'interface par OpenDyslexic."
+
+# Accessibility > Motion
+
+[[labels]]
+key = "settings_section_motion"
+en = "Motion"
+fr = "Mouvement"
+
+[[labels]]
+key = "settings_motion_desc"
+en = "Calm the interface down."
+fr = "Apaisez l'interface."
+
+[[labels]]
+key = "settings_reduce_motion"
+en = "Reduce motion"
+fr = "Réduire les animations"
+
+[[labels]]
+key = "settings_reduce_motion_desc"
+en = "Turns off every animation and transition."
+fr = "Désactive toutes les animations et transitions."
+
+# Accessibility > Reading
+
+[[labels]]
+key = "settings_section_reading"
+en = "Reading"
+fr = "Lecture"
+
+[[labels]]
+key = "settings_reading_desc"
+en = "Reading comfort options."
+fr = "Options de confort de lecture."
+
+[[labels]]
+key = "settings_text_size_a11y"
+en = "Text size"
+fr = "Taille du texte"
+
+[[labels]]
+key = "settings_text_size_a11y_desc"
+en = "Scales all text. Multiplies with the size chosen in Appearance."
+fr = "Agrandit tout le texte. Se multiplie avec la taille choisie dans Apparence."

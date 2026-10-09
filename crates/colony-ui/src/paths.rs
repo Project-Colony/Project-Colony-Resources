@@ -1,6 +1,6 @@
 //! Where a Colony program keeps its files, on every platform.
 //!
-//! Every program used to work this out for itself, and they disagreed — three
+//! Every program used to work this out for itself, and they disagreed: three
 //! different `dirs` calls for what was meant to be the same directory, which on
 //! Linux all collapse to `~/.config` and hide the disagreement until someone
 //! runs the program on Windows. This module answers it once.
@@ -9,7 +9,7 @@
 //!
 //! Everything a Colony program owns lives under a `Colony/<Program>/` pair: the
 //! organisation, then the program. `<Program>` is the display name, capitalised
-//! as the program spells it — `Colony`, `Digger`, `Grape`, `Eidos`.
+//! as the program spells it: `Colony`, `Digger`, `Grape`, `Eidos`.
 //!
 //! | Kind | Linux | Windows | macOS |
 //! |---|---|---|---|
@@ -17,18 +17,18 @@
 //! | [`data_dir`] | `~/.local/share/Colony/<P>/` | `%LOCALAPPDATA%\Colony\<P>\` | `~/Library/Application Support/Colony/<P>/` |
 //! | [`cache_dir`] | `~/.cache/Colony/<P>/` | `%LOCALAPPDATA%\Colony\<P>\cache\` | `~/Library/Caches/Colony/<P>/` |
 //!
-//! On Windows and macOS, config and data are the **same directory** — those
+//! On Windows and macOS, config and data are the **same directory**: those
 //! platforms do not draw the distinction Linux does. Keep the two apart by
 //! sub-directory (`preferences/`, `apps/`), never by relying on the roots
 //! differing, or a file will silently collide on two platforms out of three.
 //!
 //! # Which one
 //!
-//! - [`config_dir`] — what the user chose, and what they would want to keep or
+//! - [`config_dir`]: what the user chose, and what they would want to keep or
 //!   copy to another machine: preferences, credentials, custom paths.
-//! - [`data_dir`] — what the program produced and cannot re-derive: installed
+//! - [`data_dir`]: what the program produced and cannot re-derive: installed
 //!   binaries, databases, history.
-//! - [`cache_dir`] — what the program can rebuild by asking again. Deleting it
+//! - [`cache_dir`]: what the program can rebuild by asking again. Deleting it
 //!   must never lose anything but time.
 //!
 //! When in doubt: if losing it would annoy the user, it is not cache.
@@ -49,7 +49,7 @@ pub const VENDOR: &str = "Colony";
 pub const APPS: &str = "apps";
 
 /// Sub-directory that isolates the cache on platforms where the cache root is
-/// shared with config and data — Windows.
+/// shared with config and data: Windows.
 pub const CACHE: &str = "cache";
 
 /// Reject anything that is not a single, safe path component.
@@ -88,7 +88,7 @@ fn ensure(path: PathBuf) -> io::Result<PathBuf> {
 
 /// Paths without the side effect of creating them.
 ///
-/// Use these to *show* a path — an About screen, a log line, a FAQ table.
+/// Use these to *show* a path: an About screen, a log line, a FAQ table.
 /// Displaying where preferences would live should not bring the directory into
 /// existence.
 pub mod locate {
@@ -200,7 +200,7 @@ mod tests {
 
     #[test]
     fn installed_programs_are_a_sibling_of_the_per_program_dirs() {
-        // apps/ hangs off Colony/, NOT off Colony/Colony/ — an installed
+        // apps/ hangs off Colony/, NOT off Colony/Colony/: an installed
         // program does not live inside the launcher.
         let apps = locate::apps_dir().unwrap();
         assert!(
@@ -266,7 +266,7 @@ mod tests {
     }
 
     /// On Windows and macOS `config_local_dir` and `data_local_dir` are the same
-    /// folder, so the two roots coincide. That is expected — it is why the
+    /// folder, so the two roots coincide. That is expected: it is why the
     /// layout separates config from data by sub-directory rather than by root.
     #[cfg(not(target_os = "linux"))]
     #[test]

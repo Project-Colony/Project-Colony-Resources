@@ -112,6 +112,12 @@ let tmp   = paths::cache_dir("Digger")?.join("metrics.bin");
 These create the directory. To *show* a path without bringing it into existence
 — an About screen, a log line — use `paths::locate::*`, which are pure.
 
+What goes in the preferences file is the program's own config struct. Its
+Appearance and Accessibility part is `colony_ui::preferences::StandardPreferences`,
+embedded with `#[serde(flatten)]`; it does no I/O, so the file is read and
+written by the program, at the path above. See
+[settings-page.md](settings-page.md).
+
 Three reasons this matters more than it looks:
 
 - **`dirs::config_dir()` and `dirs::config_local_dir()` are identical on Linux

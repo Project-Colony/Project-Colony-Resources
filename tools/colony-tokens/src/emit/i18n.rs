@@ -3,6 +3,10 @@
 //! They live inside the crate rather than under the top-level `generated/`
 //! because `cargo package` only ships files under the crate root.
 //!
+//! Two sources feed them: the names of the shared design objects (theme
+//! families, variants, accents), declared next to their colours, and the
+//! shared interface strings of the Preferences skeleton in `tokens/labels.toml`.
+//!
 //! Label keys are deliberately shared across families (`settings_theme_light` is
 //! used by a dozen of them), so the same key must always carry the same string.
 //! Conflicts are a hard error rather than a last-writer-wins surprise.
@@ -34,6 +38,11 @@ pub fn render(tokens: &Tokens) -> Result<Locales> {
     for accent in &tokens.accents {
         insert(&mut fr, &accent.label_key, &accent.label.fr, "fr")?;
         insert(&mut en, &accent.label_key, &accent.label.en, "en")?;
+    }
+
+    for label in &tokens.labels {
+        insert(&mut fr, &label.key, &label.fr, "fr")?;
+        insert(&mut en, &label.key, &label.en, "en")?;
     }
 
     // Colony's `fr_and_en_have_identical_key_sets` test exists for a reason;
