@@ -6,6 +6,13 @@ release-please writes this file from the conventional commits, starting after
 Notable changes to the `colony-ui` crate. Versions follow semver; while the
 crate is 0.x, anything that breaks a consumer bumps the minor version.
 
+## [0.1.7](https://github.com/Project-Colony/Project-Colony-Resources/compare/colony-ui-v0.1.6...colony-ui-v0.1.7) (2026-10-09)
+
+
+### Fixes
+
+* **colony-ui:** refuse the reserved apps name for program directories ([#16](https://github.com/Project-Colony/Project-Colony-Resources/issues/16)) ([8d04ef6](https://github.com/Project-Colony/Project-Colony-Resources/commit/8d04ef6ef21dc7c5e405251556be1169beb806ab))
+
 ## 0.1.6
 
 ### Features
