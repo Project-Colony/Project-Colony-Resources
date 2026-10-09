@@ -1,5 +1,8 @@
 # Changelog
 
+release-please writes this file from the conventional commits, starting after
+0.1.6; never edit it by hand. The entries up to 0.1.6 are historical.
+
 Notable changes to the `colony-ui` crate. Versions follow semver; while the
 crate is 0.x, anything that breaks a consumer bumps the minor version.
 

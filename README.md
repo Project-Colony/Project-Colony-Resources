@@ -58,9 +58,11 @@ Colony shipped before the import; see [Guarantees](#guarantees).
 
 One dependency:
 
+<!-- x-release-please-start-version -->
 ```toml
 colony-ui = "0.1.6"
 ```
+<!-- x-release-please-end -->
 
 ```rust
 use colony_ui::preferences::StandardPreferences;
@@ -230,6 +232,24 @@ The preferences kit (`StandardPreferences`, the fonts, the navigation and
 Preferences page widgets) is new in 0.1.6 and not adopted by any program yet:
 Colony, the reference it was extracted from, still draws its own page. It is
 covered by unit tests and a compiled example, not yet by a program in daily use.
+
+## Releasing colony-ui
+
+Nothing about a `colony-ui` release is done by hand. Conventional commits that
+touch `crates/colony-ui/` feed a release PR,
+`chore(main): release colony-ui X.Y.Z`, which release-please keeps open and up
+to date. Merging it bumps the crate's version in `Cargo.toml` and `Cargo.lock`,
+writes [`crates/colony-ui/CHANGELOG.md`](crates/colony-ui/CHANGELOG.md),
+updates the version in both READMEs, tags `colony-ui-vX.Y.Z` and publishes the
+crate to crates.io from that tag, through Trusted Publishing
+([`.github/workflows/release.yml`](.github/workflows/release.yml)). Do not bump
+the version, edit the changelog or push a tag yourself.
+
+If publishing fails after the tag exists, fix the cause, then publish that tag:
+
+```bash
+gh workflow run release.yml --ref colony-ui-vX.Y.Z -f tag=colony-ui-vX.Y.Z
+```
 
 ## Licence
 
