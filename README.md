@@ -1,4 +1,4 @@
-# Project Colony — Resources
+# Project Colony Resources
 
 The single place where Project Colony's shared design decisions are written down:
 the theme palettes, the accent colours, the UI conventions every Colony program
@@ -7,7 +7,7 @@ is expected to follow.
 Before this repo, each of those lived in whichever program happened to implement
 it first, and everything else pointed at it. SphereCord, for instance, downloaded
 Colony's `src/ui/theme.rs` over HTTP and parsed the Rust source with a regex to
-recover the palettes — and its companion request for `src/i18n.rs` had already
+recover the palettes, and its companion request for `src/i18n.rs` had already
 gone stale, because Colony split that file into `src/i18n/{fr,en}.rs`. That is
 the class of breakage this repo exists to end.
 
@@ -20,7 +20,7 @@ generated/       never edit this        ← what every program consumes
 ```
 
 A colour is written down exactly once, in `tokens/`. Every consumer reads a
-generated artifact in the format it actually wants — Rust, JSON, CSS — instead of
+generated artifact in the format it actually wants (Rust, JSON, CSS) instead of
 re-deriving it from another program's source file.
 
 ```bash
@@ -46,7 +46,7 @@ Colony shipped before the import; see [Guarantees](#guarantees).
 | `generated/css/colony-*.css` | one stylesheet per theme, plus a bundle |
 | `generated/palette.schema.json` | JSON Schema validating `tokens/families/*.toml` |
 | `generated/colony.schema.json` | JSON Schema validating a program's `colony.json` |
-| `design/*.md` | the conventions — layout, filesystem, navigation, settings, theming, type, i18n, releases, dependencies, docs |
+| `design/*.md` | the conventions: layout, filesystem, navigation, settings, theming, type, i18n, releases, dependencies, docs |
 | `manifests/examples/*.json` | working `colony.json` files for each shape |
 | `templates/` | release workflow (signing through the shared workflow), release-please and Dependabot configs, README skeletons |
 | `crates/colony-ui/` | the crate programs depend on: theme, fonts, labels, preferences, widgets |
@@ -91,7 +91,7 @@ way: the identity button, a sidebar, and the whole Preferences page.
 |---|---|
 | `ThemePalette` + one const per variant | the palette shape and every theme, e.g. `ThemePalette::GRUVBOX_DARK` |
 | `set_active_theme` / `active_palette` / `Palette::*` | the active theme, and the screaming-case accessors Colony's widgets already use |
-| `THEME_FAMILIES` | the ordered picker catalog — glyph, labels, swatches, modes |
+| `THEME_FAMILIES` | the ordered picker catalog: glyph, labels, swatches, modes |
 | `resolve` / `FALLBACK_PALETTE` | config → palette, degrading instead of failing on an unknown theme |
 | `ACCENT_OVERRIDES` / `accent_key_to_color` / `set_active_accent` | the eight accents and the user override |
 | `set_high_contrast` / `with_high_contrast` | derived, so no theme ships a high-contrast twin |
@@ -129,8 +129,8 @@ element, or by adding the matching `.colony-theme-*` class:
 ```
 
 The variables are neutral (`--colony-bg-primary`, `--colony-text-primary`, …).
-Mapping them onto a host application's own variable names — Discord's
-`--background-base-*`, say — stays in that program's repo. The values are ours;
+Mapping them onto a host application's own variable names (Discord's
+`--background-base-*`, say) stays in that program's repo. The values are ours;
 the mapping is theirs.
 
 ## Changing a colour
@@ -138,13 +138,13 @@ the mapping is theirs.
 1. Edit the field in `tokens/families/<family>.toml`.
 2. Run `cargo run -p colony-tokens -- generate`.
 3. Run `cargo test`. The round-trip test will fail, listing exactly which values
-   moved — confirm that diff is the one you meant.
+   moved; confirm that diff is the one you meant.
 4. Re-cut the snapshot only when it is: see
    `tools/colony-tokens/tests/fixtures/colony-theme-rs.snapshot`.
 5. Commit `tokens/` and `generated/` together. They are never allowed to drift;
    `cargo run -p colony-tokens -- generate` followed by a dirty tree is a bug.
 
-Adding a whole theme family — a character set, a brand — is a different job with
+Adding a whole theme family (a character set, a brand) is a different job with
 its own rules. Read [design/theming.md](design/theming.md) first.
 
 ## Guarantees
@@ -162,7 +162,7 @@ its own rules. Read [design/theming.md](design/theming.md) first.
   reordering it would silently re-colour every icon on every machine.
 - **Text stays legible.** `text_primary` clears 4.5:1 against `bg_primary` and
   `text_muted` clears 3:1, on every theme. There is exactly one documented
-  exception — Solarized Light, whose `#657b83` on `#fdf6e3` is upstream
+  exception: Solarized Light, whose `#657b83` on `#fdf6e3` is upstream
   Solarized's own `base00` on `base3`. The test also fails if that exception
   list goes stale.
 - **Both locales stay in step.** Every label carries an `fr` and an `en` string,
@@ -194,22 +194,22 @@ of `design/releases.md`.
 
 Four rules apply across the organisation:
 
-- **[design/repository-layout.md](design/repository-layout.md) — crates and
+- **[design/repository-layout.md](design/repository-layout.md): crates and
   directories are arranged the same way everywhere.** `crates/<prefix>-<role>/`
   with role names that already mean something across the ecosystem, one version
   for the whole workspace, a mandatory one-line `description` per crate, and a
   `src/` where a directory earns its existence by holding more than one file.
-- **[design/dependencies.md](design/dependencies.md) — everything is on its
+- **[design/dependencies.md](design/dependencies.md): everything is on its
   latest release, always.** At creation, at every change, and on the weekly
   automated pass. Versions are pinned in full in the manifest so staleness shows
   up in a diff instead of hiding in the lockfile.
-- **[design/filesystem.md](design/filesystem.md) — every program writes to
+- **[design/filesystem.md](design/filesystem.md): every program writes to
   `Colony/<Program>/`.** Config, data and cache, on all three platforms, with
   Windows on `AppData\Local` rather than Roaming. `colony_ui::paths` computes
   it so nobody rebuilds the path by hand.
-- **[design/documentation.md](design/documentation.md) — the README and `docs/`
+- **[design/documentation.md](design/documentation.md): the README and `docs/`
   are laid out the same way everywhere.** `docs/` is sorted by *who is reading*
-  — `guide/`, `internals/`, `project/` — behind a `docs/README.md` index, and
+  (`guide/`, `internals/`, `project/`) behind a `docs/README.md` index, and
   the README answers what/why/how-to-get-it in that order.
 
 These four are what make an unfamiliar repository cheap to work in: most of the
@@ -242,7 +242,7 @@ SIL Open Font License 1.1, whose texts ship next to them in
 
 A consequence worth stating plainly: a program that links `colony-ui` will have
 to be GPL-3.0-or-later too. If that ever becomes the wrong trade for the shared
-*values* — the palettes and conventions in `tokens/`, `generated/` and `design/`,
-which are data rather than logic — relicensing those directories more permissively
+*values* (the palettes and conventions in `tokens/`, `generated/` and `design/`,
+which are data rather than logic), relicensing those directories more permissively
 while keeping `tools/` and `crates/` copyleft is the change to make, and it is
 easier to make before there are outside contributors than after.
