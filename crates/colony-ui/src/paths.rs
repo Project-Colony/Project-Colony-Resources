@@ -57,10 +57,13 @@ pub const CACHE: &str = "cache";
 /// The program name reaches these functions from a manifest or a config file in
 /// the general case, and it is joined into a path that later gets written to
 /// and removed. `..` or a separator here would let it escape the Colony tree.
+/// A trailing dot or space is refused too: Windows strips them from a path
+/// component, so `Grape.` would open the same folder as `Grape`.
 fn component(name: &str) -> io::Result<&str> {
     let invalid = name.is_empty()
         || name == "."
         || name == ".."
+        || name.ends_with(['.', ' '])
         || name.contains(['/', '\\', '\0'])
         || Path::new(name).components().count() != 1
         || Path::new(name).file_name() != Some(OsStr::new(name));
@@ -78,11 +81,12 @@ fn component(name: &str) -> io::Result<&str> {
 ///
 /// `<data>/Colony/apps/` is the shared install root, so a program called
 /// `apps` would put its data directory on top of every installed program.
-/// The comparison ignores ASCII case because Windows and default macOS
-/// filesystems do: `Apps` lands on the same folder there.
+/// The comparison ignores case because Windows and default macOS filesystems
+/// do: `Apps` lands on the same folder there. Upper-casing first also catches a
+/// non-ASCII letter that case-folds to an ASCII one, such as `appſ` (long s).
 fn program_component(name: &str) -> io::Result<&str> {
     let name = component(name)?;
-    if name.eq_ignore_ascii_case(APPS) {
+    if name.to_uppercase().eq_ignore_ascii_case(APPS) {
         return Err(io::Error::new(
             io::ErrorKind::InvalidInput,
             format!("{name:?} is reserved for the shared install root and cannot name a program"),
@@ -165,7 +169,7 @@ pub mod locate {
 /// # Errors
 ///
 /// [`io::ErrorKind::InvalidInput`] if `program` is not a single safe path
-/// component or is the reserved [`APPS`] name in any ASCII case;
+/// component or is the reserved [`APPS`] name in any case;
 /// [`io::ErrorKind::NotFound`] if the platform has no such directory; or the
 /// error from creating it.
 ///
@@ -244,7 +248,19 @@ mod tests {
 
     #[test]
     fn a_program_name_cannot_escape_the_colony_tree() {
-        for bad in ["..", ".", "", "../../etc", "a/b", "a\\b", "with\0nul"] {
+        // A trailing dot or space does not escape, but Windows strips it, so
+        // the name would alias another folder.
+        for bad in [
+            "..",
+            ".",
+            "",
+            "../../etc",
+            "a/b",
+            "a\\b",
+            "with\0nul",
+            "Grape.",
+            "Grape ",
+        ] {
             assert!(
                 locate::config_dir(bad).is_err(),
                 "{bad:?} should be rejected as a program name"
@@ -274,7 +290,7 @@ mod tests {
             ("cache_dir", cache_dir),
         ];
         for (label, root) in LOCATE_ROOTS.into_iter().chain(creating) {
-            for reserved in ["apps", "Apps", "APPS"] {
+            for reserved in ["apps", "Apps", "APPS", "apps.", "apps ", "app\u{17F}"] {
                 let err = root(reserved).expect_err(&format!("{label}({reserved:?})"));
                 assert_eq!(err.kind(), io::ErrorKind::InvalidInput, "{label}");
             }
