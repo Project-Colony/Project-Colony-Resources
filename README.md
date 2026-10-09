@@ -40,6 +40,7 @@ Colony shipped before the import; see [Guarantees](#guarantees).
 |---|---|
 | `tokens/families/*.toml` | one file per theme family, every variant a full palette |
 | `tokens/accents.toml` | the 8 accent overrides, order-sensitive |
+| `tokens/labels.toml` | the shared Preferences strings, English and French |
 | `crates/colony-ui/src/generated/` | palettes and labels, embedded in the crate so they ship with it |
 | `generated/themes.json` | one bundle for every non-Rust consumer |
 | `generated/css/colony-*.css` | one stylesheet per theme, plus a bundle |
@@ -48,7 +49,7 @@ Colony shipped before the import; see [Guarantees](#guarantees).
 | `design/*.md` | the conventions — layout, filesystem, navigation, settings, theming, type, i18n, releases, dependencies, docs |
 | `manifests/examples/*.json` | working `colony.json` files for each shape |
 | `templates/` | release workflow, release-please config, signing script |
-| `crates/colony-ui/` | the crate programs depend on — theme, labels, widgets |
+| `crates/colony-ui/` | the crate programs depend on: theme, fonts, labels, preferences, widgets |
 | `tools/colony-tokens/` | the generator and its tests |
 
 ## Consuming this repo
@@ -62,18 +63,27 @@ colony-ui = "0.1"
 ```
 
 ```rust
-use colony_ui::{i18n, theme, widgets, Typography};
+use colony_ui::preferences::StandardPreferences;
+use colony_ui::widgets::PreferencesView;
+use colony_ui::{i18n, theme, Typography};
 
-// At startup, from the user's config — two strings, nothing else:
-theme::set_active_theme("gruvbox", "dark");
+// At startup: the user's standard preferences, part of the program's own
+// config file, put into effect in one call. An unknown theme or a bad value
+// falls back to its default instead of failing the load.
+config.standard.apply(); // a StandardPreferences
 i18n::set_locale(i18n::Locale::from_tag(&user_language));
 
-// Then style anything from the active palette:
+// Style anything from the active palette, sized and set in the user's font:
+let typo = Typography::current();
 let bg = theme::Palette::BG_PRIMARY();
 
-// And build the preferences page out of shared widgets:
-widgets::theme_picker(&typo, &family, &variant, |f, v| Message::SelectTheme(f, v))
+// And build the Preferences page out of the shared kit:
+let kit = PreferencesView::new(typo, &config.standard, &expanded, Message::Preference, Message::ToggleSection);
+let appearance = kit.appearance();
 ```
+
+`crates/colony-ui/examples/preferences.rs` is a complete program built this
+way: the identity button, a sidebar, and the whole Preferences page.
 
 `colony-ui` gives you:
 
@@ -86,17 +96,21 @@ widgets::theme_picker(&typo, &family, &variant, |f, v| Message::SelectTheme(f, v
 | `ACCENT_OVERRIDES` / `accent_key_to_color` / `set_active_accent` | the eight accents and the user override |
 | `set_high_contrast` / `with_high_contrast` | derived, so no theme ships a high-contrast twin |
 | `app_tint` / `contrast_on` / `ColorExt` | identity tints and the shared "is this light?" answer |
-| `i18n::t` | theme and accent labels, both locales, embedded |
+| `preferences::StandardPreferences` | theme, accent, text sizes, high contrast, dyslexia font, motion: load, `apply`, `update` |
+| `typography::*` / `sz` / `Typography` | the two text-size preferences, their product, and the scaling helper |
+| `fonts::*` | the three fonts, embedded, and the accessor that honours the dyslexia toggle |
+| `motion::*` | reduced motion, and `effects_enabled` for every animation to check |
+| `i18n::t` | every shared label (themes, accents, the Preferences page), both locales, embedded |
 | `paths::*` | `Colony/<Program>/` config, data and cache dirs on all three platforms |
-| `widgets::*` | collapsible section, functional toggle, theme picker, accent picker |
+| `widgets::*` | identity button, sidebar items, the Preferences page, its categories and sections, theme and accent pickers |
 
-**A new theme family reaches every program with zero code changes** — no match
+**A new theme family reaches every program with zero code changes**: no match
 arm, no picker entry, no locale edit. Add the TOML, regenerate, bump the
 dependency.
 
-The crate needs to know how the host scales text, since it cannot reach the
-host's state — pass a [`Typography`] with the product of the user's font-size
-preferences.
+The shared widgets take a [`Typography`] rather than reading the host's state;
+`Typography::current()` carries the product of the user's two text-size
+preferences and the font the dyslexia toggle selects.
 
 ### Everything else
 
@@ -212,10 +226,19 @@ its hand-maintained palette constants are gone, replaced by this crate. A
 program that still ships its own copy of the palettes migrates by depending on
 `colony-ui` and deleting that copy.
 
+The preferences kit (`StandardPreferences`, the fonts, the navigation and
+Preferences page widgets) is new in 0.1.6 and not adopted by any program yet:
+Colony, the reference it was extracted from, still draws its own page. It is
+covered by unit tests and a compiled example, not yet by a program in daily use.
+
 ## Licence
 
 GPL-3.0-or-later, matching the rest of the Project Colony organisation. See
 [LICENSE](LICENSE).
+
+The fonts embedded in `colony-ui` are not ours and keep their own licence, the
+SIL Open Font License 1.1, whose texts ship next to them in
+[`crates/colony-ui/fonts/`](crates/colony-ui/fonts/).
 
 A consequence worth stating plainly: a program that links `colony-ui` will have
 to be GPL-3.0-or-later too. If that ever becomes the wrong trade for the shared

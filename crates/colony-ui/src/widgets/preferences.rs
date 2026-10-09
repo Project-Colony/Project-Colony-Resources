@@ -728,9 +728,7 @@ where
     where
         M: 'a,
     {
-        let body = Column::with_children(controls)
-            .spacing(0)
-            .width(Length::Fill);
+        let body = Column::with_children(controls).width(Length::Fill);
         collapsible_section(
             &self.typo,
             i18n::t(title_key),

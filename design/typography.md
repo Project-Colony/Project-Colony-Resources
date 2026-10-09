@@ -2,7 +2,8 @@
 
 ## Fonts
 
-Three, and only three. Values from Colony's `src/state.rs`.
+Three, and only three. The names, the files and the accessor live in
+`colony_ui::fonts`.
 
 | Role | Family | Used for |
 |---|---|---|
@@ -12,18 +13,33 @@ Three, and only three. Values from Colony's `src/state.rs`.
 
 The application font ships in Regular, Medium and Bold. Requesting a weight the
 family does not have gets you a synthesized one, which looks wrong next to the
-real weights — stick to those three.
+real weights: stick to those three. The accessors only offer those three.
 
 The dyslexia font is a **whole-application swap**, not a per-widget option. A
 program that hardcodes the application font anywhere will show a seam the moment
-the user enables it. Route every font lookup through one accessor.
+the user enables it. Route every font lookup through one accessor:
+`colony_ui::ui_font()`, `ui_font_medium()` and `ui_font_bold()` return OpenDyslexic
+while `set_dyslexia_font(true)` is in effect, and `Typography::current()` carries
+all three to the shared widgets.
+
+The files ship inside `colony-ui` (feature `fonts`, on by default), with their
+SIL Open Font License texts in `crates/colony-ui/fonts/`. Register them with
+iced once, at startup:
+
+```rust
+colony_ui::fonts::BYTES
+    .into_iter()
+    .fold(iced::application(boot, update, view), |app, font| app.font(font))
+    .default_font(colony_ui::ui_font())
+    .run()
+```
 
 ## Sizing
 
 Never write a raw pixel size. Every size goes through the scaling helper:
 
 ```rust
-text("Colony").size(self.sz(30))
+text("Colony").size(typo.sz(30))   // typo = Typography::current()
 ```
 
 `sz(base)` returns `round(base × font_scale())`, and `font_scale()` is the
@@ -31,12 +47,17 @@ product of two independent user preferences:
 
 | Preference | Where | Values |
 |---|---|---|
-| Font size | Settings → Appearance → Typography | small 0.85, default 1.0, large 1.2 |
-| Text size | Settings → Accessibility → Reading | small 0.85, default 1.0, large 1.2, xlarge 1.4 |
+| Font size | Preferences → Appearance → Typography | small 0.85, default 1.0, large 1.2 |
+| Text size | Preferences → Accessibility → Reading | small 0.85, default 1.0, large 1.2, xlarge 1.4 |
 
 They **multiply**. A user on `large` typography and `xlarge` accessibility text
 is at 1.68×, and the layout has to survive that. Test at the extremes: 0.7225×
 and 1.68×.
+
+In `colony_ui::typography` they are `FontSize` and `TextSize`, set with
+`set_font_size` and `set_text_size` (or both at once by
+`StandardPreferences::apply`), and read back through `font_scale()`, `sz()` and
+`Typography::current()`.
 
 ### The base scale in practice
 
@@ -48,15 +69,16 @@ Sizes observed in Colony's chrome, as a starting point rather than a law:
 | 22 | the settings page title |
 | 14 | the gear glyph next to the app name |
 | 13 | category buttons, list headers, secondary controls |
-| 10 | the keyboard hint — the quietest text in the window |
+| 10 | the keyboard hint, the quietest text in the window |
 
 Pair size with the palette's text ramp rather than inventing greys: a heading is
 `text_primary` at a larger size, a hint is `text_dimmest` at a smaller one.
 
 ## Icons
 
-Nerd Font glyphs are written as codepoints, not pasted characters — pasted glyphs
-do not survive every editor, terminal and diff tool intact.
+Nerd Font glyphs are written as codepoints, not pasted characters: pasted glyphs
+do not survive every editor, terminal and diff tool intact. The ones the shared
+widgets draw are in `colony_ui::widgets::icons`.
 
 In `tokens/`, a family's icon is a bare lowercase hex codepoint:
 
@@ -65,7 +87,7 @@ icon = "f0f4"   # Nerd Font codepoint
 ```
 
 The generator turns that into `"\u{f0f4}"` in the Rust output. An empty string
-means the family has no glyph, which is allowed — Gruvbox has none.
+means the family has no glyph, which is allowed: Gruvbox has none.
 
 Choosing a glyph: pick something that says what the family *is*, not what it
 looks like. Catppuccin gets a coffee cup, Everblush a leaf, Kanagawa a torii,
@@ -76,3 +98,7 @@ its neighbours.
 Verify a codepoint renders in JetBrainsMono Nerd Font before committing it. A
 missing glyph shows as a tofu box, and it will be tofu on every user's machine,
 not just yours.
+
+A glyph outside the Nerd Font range is drawn in Font Awesome:
+`colony_ui::fonts::icon_font()` for the solid set, `icon_font_regular()` for
+the outlined one.
