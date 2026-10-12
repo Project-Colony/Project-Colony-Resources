@@ -3,7 +3,7 @@
 Every Project Colony repository is arranged the same way, so that finding a thing
 does not require reading the whole tree first. This matters more than it sounds:
 most of the cost of changing unfamiliar code is locating what to change, and a
-predictable layout removes that cost entirely — for a person returning after six
+predictable layout removes that cost entirely: for a person returning after six
 months, for a new contributor, and for an assistant asked to make a change in a
 repository it has never seen.
 
@@ -16,7 +16,7 @@ Both are correct. The question is whether there is a real boundary.
 **One crate** when there is one program and one process. Colony is this: a single
 binary, subsystems as directories under `src/`.
 
-**A workspace** when a boundary genuinely exists — a separate process, a different
+**A workspace** when a boundary genuinely exists: a separate process, a different
 build target, or a library that something else really does consume. Eidos has 17
 crates because it really does ship a CLI, a GUI, a FUSE daemon and a launch
 shim, all sharing a core.
@@ -32,7 +32,7 @@ two pieces have different lifetimes, different consumers, or different targets.
 ├── Cargo.toml            [workspace] + [workspace.package] + [workspace.dependencies]
 ├── Cargo.lock            committed
 ├── crates/
-│   ├── <prefix>/         the main binary — bare prefix, no suffix
+│   ├── <prefix>/         the main binary: bare prefix, no suffix
 │   ├── <prefix>-core/    domain logic, the fewest dependencies of anything here
 │   ├── <prefix>-proto/   wire types shared across a process boundary
 │   ├── <prefix>-gui/     the iced frontend
@@ -44,11 +44,11 @@ two pieces have different lifetimes, different consumers, or different targets.
 └── colony.json
 ```
 
-`<prefix>` is the program's short lowercase name — `eidos`, `cfc`, `vn`, `xion`.
+`<prefix>` is the program's short lowercase name: `eidos`, `cfc`, `vn`, `xion`.
 Every crate in the workspace carries it, so a crate name is unambiguous in a
 `cargo` error message, in a dependency tree, and in a search across all repos.
 
-Role suffixes that already mean something across the ecosystem — reuse them
+Role suffixes that already mean something across the ecosystem. Reuse them
 rather than inventing a synonym:
 
 | Suffix | What lives there |
@@ -93,13 +93,13 @@ The `description` is per-crate and mandatory. One line saying what this crate is
 for. It is what `cargo tree` shows and what tells the next person whether they
 are in the right file, and it is the cheapest documentation in the repository.
 
-Per-crate `README.md` files are *not* the convention — none of the repos have
+Per-crate `README.md` files are *not* the convention: none of the repos have
 them, and they rot. The crate description plus `docs/internals/architecture.md`
 carry that weight.
 
 A single version across the workspace is deliberate. Eidos states the reason in a
 comment worth copying: the version reaches users in the About dialog, in the
-`Application-Version` header of every Nexus API call, and in the log header — so
+`Application-Version` header of every Nexus API call, and in the log header, so
 a crate left behind at `0.0.0` would be telling a third party something untrue.
 
 ## Platform-specific crates
@@ -113,7 +113,7 @@ default-members = ["crates/xion-proto", "crates/xion-console"]
 
 and build the excluded crates explicitly, with `--target`, from the justfile or
 Makefile. Without this, `cargo test` at the root fails on the developer's own
-machine for reasons that have nothing to do with their change — and a test
+machine for reasons that have nothing to do with their change, and a test
 command people learn to avoid is a test suite that stops running.
 
 ## Inside `src/`
@@ -139,7 +139,7 @@ GitHub; `state.rs` is one file because there is one thing to say about state.
 
 Put `types.rs` next to the code that owns the types, not in a repo-wide `types`
 crate. `github/types.rs` holds the wire shapes `github/` deserializes, and its
-doc comment says "no behaviour lives here" — which is what keeps it honest.
+doc comment says "no behaviour lives here", which is what keeps it honest.
 
 ## File size
 
@@ -155,7 +155,7 @@ to be split. For calibration, the largest files in Colony today:
 `theme.rs` is the cautionary one, and the reason this repository exists: 100 KB
 of hand-maintained colour constants that another repository ended up downloading
 and regex-parsing because there was no better way to reach them. It is now
-generated from `tokens/`. `settings.rs` at 64 KB is the next candidate — its
+generated from `tokens/`. `settings.rs` at 64 KB is the next candidate: its
 sections are independent and would read better as `ui/settings/{general,
 appearance,accessibility}.rs`.
 
@@ -168,9 +168,9 @@ Nothing at the root that a reader has to skip past. Directories only:
 
 | Directory | When |
 |---|---|
-| `crates/` or `src/` | always — one or the other, never both |
+| `crates/` or `src/` | always, one or the other, never both |
 | `assets/` | fonts, brand images, icons |
-| `docs/` | beyond a few screens of prose — see [documentation.md](documentation.md) |
+| `docs/` | beyond a few screens of prose, see [documentation.md](documentation.md) |
 | `packaging/` | AUR PKGBUILDs, `.desktop` files, systemd units |
 | `scripts/` | generators, dev helpers (release signing is the shared workflow's job, see [releases.md](releases.md#5-signing)) |
 | `config/` | data files the program embeds or reads at runtime |
@@ -181,7 +181,7 @@ A repository that is not Rust keeps its code in its ecosystem's equivalent of
 one directory per package, as in Project-Colony/nix.
 
 Root *files* are listed in [documentation.md](documentation.md). Where the
-program writes at **runtime** — config, data and cache on each platform — is
+program writes at **runtime** (config, data and cache on each platform) is
 [filesystem.md](filesystem.md); none of it belongs in the repository.
 
 ### The exception: this repository
@@ -208,6 +208,6 @@ Project-Colony-Resources is not a program, and its layout says so:
 3. Inherit `version`, `license`, `repository`, `edition` from the workspace.
 4. Write the `description`. One line, what it is for.
 5. Dependencies at their latest release, declared in `[workspace.dependencies]`
-   and inherited — see [dependencies.md](dependencies.md).
+   and inherited, see [dependencies.md](dependencies.md).
 6. If it changes how the program is built or laid out, say so in
    `docs/internals/architecture.md` in the same commit.

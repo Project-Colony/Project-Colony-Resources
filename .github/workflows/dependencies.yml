@@ -2,7 +2,7 @@ name: Dependencies
 
 # Deliberately NOT a pull-request gate. Checking currency on every PR would turn
 # any unrelated change red the moment a transitive dependency publishes a patch,
-# which trains everyone to ignore a red build — the opposite of the point.
+# which trains everyone to ignore a red build, the opposite of the point.
 #
 # Weekly, plus on demand. Dependabot does the bumping; this is the alarm that
 # rings when its PRs are piling up unmerged.

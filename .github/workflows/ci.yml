@@ -169,3 +169,25 @@ jobs:
                 END { exit bad }
               '
           echo "every action is pinned to one commit"
+
+  # The organisation writes hyphens, colons, commas and parentheses, never an
+  # en or em dash, in code, docs and generated files alike. The licence texts
+  # are quoted verbatim and stay exactly as published.
+  dashes:
+    name: no en or em dashes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: No U+2013 or U+2014 outside the licence texts
+        run: |
+          # The two characters as raw UTF-8 bytes, so neither this file nor the
+          # runner's locale has to contain or understand them. -I skips binaries.
+          if git grep -nIF -e "$(printf '\342\200\223')" -e "$(printf '\342\200\224')" \
+               -- . ':(exclude,glob)**/LICENSE' ':(exclude,glob)**/OFL.txt'; then
+            echo "::error::en or em dash found above. Use a hyphen, colon, comma or parentheses instead."
+            exit 1
+          fi
+          echo "no en or em dash"

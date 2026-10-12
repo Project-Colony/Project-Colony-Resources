@@ -1,4 +1,4 @@
-# Stellar Blade — Project Colony theme family
+# Stellar Blade: Project Colony theme family
 #
 # Source of truth. Edit here, then run `cargo run -p colony-tokens -- generate`.
 # Never edit anything under generated/ by hand.
@@ -25,7 +25,7 @@ const = "STELLAR_EVE"  # Rust const name, kept stable for Colony
 label_key = "settings_theme_stellar_blade_eve"
 mode = "light"
 notes = """
-Green ink on white-grey ceramic — her Planet Diving Suit. A light theme on
+Green ink on white-grey ceramic: her Planet Diving Suit. A light theme on
 purpose: a dark theme can never say "white".
 """
 
@@ -172,7 +172,7 @@ key = "lily"
 const = "STELLAR_LILY"  # Rust const name, kept stable for Colony
 label_key = "settings_theme_stellar_blade_lily"
 mode = "dark"
-notes = "Strict gold-on-black duotone. No brown tint — the gold must stay gold."
+notes = "Strict gold-on-black duotone. No brown tint: the gold must stay gold."
 
 [variants.label]
 fr = "Lily"
@@ -316,7 +316,7 @@ label_key = "settings_theme_stellar_blade_kaya"
 mode = "dark"
 notes = """
 Lavender ink on deep violet. Her khaki coat is demoted to the success role
-rather than becoming a second surface — two saturated materials side by side
+rather than becoming a second surface: two saturated materials side by side
 clashed and were rejected.
 """
 

@@ -6,10 +6,10 @@
 
 This is not a preference or a nice-to-have. It applies:
 
-- when a repository is created — start on the current version of everything, never
+- when a repository is created: start on the current version of everything, never
   on whatever a tutorial or an older sibling repo happened to use;
-- when a feature is added — bring the tree current first, then write the feature;
-- when a bug is fixed — same;
+- when a feature is added: bring the tree current first, then write the feature;
+- when a bug is fixed: same;
 - on the weekly automated pass, whether or not anything else is happening.
 
 There is no "we'll upgrade later". Later is how a two-line bump becomes a
@@ -20,7 +20,7 @@ week-long migration.
 An upgrade is cheap in proportion to how recently you last did one. A crate
 skipped for six months is a changelog you have to read, an API you have to
 relearn, and a set of behaviour changes you have to distinguish from your own
-bugs — all at once, usually while trying to ship something else. Doing it weekly
+bugs, all at once, usually while trying to ship something else. Doing it weekly
 means each step is small enough to be boring.
 
 The second reason is the supply chain. A dependency you have not updated is a
@@ -37,7 +37,7 @@ toml = "1.1.4"
 ```
 
 Not `"1.0"`. Cargo would happily resolve `"1.0"` to the newest 1.x, so a
-floating minor *looks* current forever while the lockfile quietly ages — and the
+floating minor *looks* current forever while the lockfile quietly ages, and the
 manifest, which is what a human reads, stops telling the truth. Writing the full
 version means staleness shows up in a diff, and `cargo update` produces a change
 somebody has to look at.
@@ -54,7 +54,7 @@ the flexibility a floating lock would buy.
 ## Automation
 
 `templates/dependabot.yml`: weekly, grouped so a routine week is one PR rather
-than fifteen. It covers both Cargo and GitHub Actions — a stale action is the
+than fifteen. It covers both Cargo and GitHub Actions: a stale action is the
 same problem as a stale crate, with more privileges.
 
 Dependabot opening a PR is not the same as the rule being followed. The PR still
@@ -64,7 +64,7 @@ applying.
 ## Toolchain
 
 Declare `rust-version` in `Cargo.toml` and mean it. It is a promise about who can
-build the program, so it belongs in CI — an untested floor is a guess.
+build the program, so it belongs in CI: an untested floor is a guess.
 
 Move it forward deliberately, when a language feature is worth it, not by
 accident because a dependency raised its own floor.
@@ -103,7 +103,7 @@ keeps the same step working on the Windows and macOS legs.
 
 Colony pins actions by commit SHA with the version in a trailing comment, and
 lets Dependabot bump both together. That is the right posture for any workflow
-holding `contents: write` — a release workflow can sign and publish, so a
+holding `contents: write`. A release workflow can sign and publish, so a
 compromised tag in a third-party action is a compromised release.
 
 The workflow template in this repository ships pinned the same way, including
@@ -134,7 +134,7 @@ cargo update
 cargo test
 ```
 
-If the tests pass, commit — `chore(deps): update dependencies`, with the
+If the tests pass, commit as `chore(deps): update dependencies`, with the
 notable jumps in the body. If they fail, fix them *now*: a failing upgrade you
 postpone is the exact thing this page exists to prevent, and it will not be
 smaller next week.

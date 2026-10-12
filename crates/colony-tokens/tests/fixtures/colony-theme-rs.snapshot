@@ -7,7 +7,7 @@
 // This file is a TEST FIXTURE, never compiled into anything. `regression.rs`
 // parses it and asserts that every palette regenerated from tokens/ still has
 // exactly the same 38 values, and that the (family, variant) resolver still maps
-// to the same constants. If that test fails, a colour changed — which is fine
+// to the same constants. If that test fails, a colour changed, which is fine
 // when intended, and requires updating this snapshot deliberately.
 //
 // 57 palette constants, 57 resolver arms.

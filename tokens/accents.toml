@@ -1,11 +1,11 @@
-# Accent overrides — Project Colony
+# Accent overrides: Project Colony
 #
 # Source of truth. Edit here, then run `cargo run -p colony-tokens -- generate`.
 # Never edit anything under generated/ by hand.
 #
 # These eight colours are palette-independent: they are what the user can pick in
 # Settings → Appearance → Colors to override the active theme's own accent.
-# "Auto" is not listed here — it is the absence of an override, i.e. fall back to
+# "Auto" is not listed here: it is the absence of an override, i.e. fall back to
 # the theme's `accent_blue`.
 #
 # ORDER IS LOAD-BEARING. Colony derives each installed app's identity tint by

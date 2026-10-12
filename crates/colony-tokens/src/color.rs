@@ -5,7 +5,7 @@ use std::fmt;
 use serde::de::{self, Deserialize, Deserializer};
 use serde::Serialize;
 
-/// An opaque sRGB colour. Stored as `0xRRGGBB` so equality is exact and cheap —
+/// An opaque sRGB colour. Stored as `0xRRGGBB` so equality is exact and cheap:
 /// palettes are compared byte-for-byte in the regression test.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Color(pub u32);
@@ -19,7 +19,7 @@ impl Color {
         )
     }
 
-    /// `#rrggbb`, always lowercase — the canonical form used everywhere we emit.
+    /// `#rrggbb`, always lowercase, the canonical form used everywhere we emit.
     pub fn to_css_hex(self) -> String {
         format!("#{:06x}", self.0)
     }
