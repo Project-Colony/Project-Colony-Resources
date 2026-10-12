@@ -77,8 +77,9 @@ pub const fn hex(h: u32) -> Color {
 }
 
 // Every palette const, `THEME_FAMILIES`, `resolve()`, `FALLBACK_PALETTE`,
-// `ACCENT_OVERRIDES` and `accent_key_to_color()`. Generated from tokens/:
-// run `cargo run -p colony-tokens -- generate` after editing a colour.
+// `ACCENT_OVERRIDES`, `accent_key_to_color()` and the `contrast_on()` ends.
+// Generated from tokens/: run `cargo run -p colony-tokens -- generate` after
+// editing a colour.
 include!("generated/palettes.rs");
 
 impl ThemeVariantMeta {
@@ -236,18 +237,8 @@ impl ColorExt for Color {
 /// 2.34:1 check mark where near-black gives 5.9:1. Comparing the two ends is
 /// both simpler and exact.
 pub fn contrast_on(bg: Color) -> Color {
-    const INK: Color = Color {
-        r: 0.08,
-        g: 0.08,
-        b: 0.10,
-        a: 1.0,
-    };
-    const PAPER: Color = Color {
-        r: 0.97,
-        g: 0.98,
-        b: 1.0,
-        a: 1.0,
-    };
+    const INK: Color = hex(CONTRAST_INK);
+    const PAPER: Color = hex(CONTRAST_PAPER);
     if contrast_ratio(INK, bg) >= contrast_ratio(PAPER, bg) {
         INK
     } else {

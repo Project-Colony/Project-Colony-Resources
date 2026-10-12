@@ -95,6 +95,11 @@ pub fn render(tokens: &Tokens, labels: &Locales) -> Value {
         "fields": fields,
         // Order is load-bearing; see tokens/accents.toml.
         "accents": accents,
+        // The label colours colony-ui's contrast_on() picks between.
+        "contrastEnds": {
+            "ink": tokens.contrast.ink.to_css_hex(),
+            "paper": tokens.contrast.paper.to_css_hex(),
+        },
         "families": families,
         // The same tables colony-ui embeds, so a non-Rust GUI reads the theme,
         // accent and Preferences strings from here instead of copying them.

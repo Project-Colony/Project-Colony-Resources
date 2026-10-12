@@ -12,6 +12,7 @@
 //   - `THEME_FAMILIES`, the ordered catalog the Settings picker renders
 //   - `resolve(family, variant)` and `FALLBACK_PALETTE`, the config lookup
 //   - `ACCENT_OVERRIDES` and `accent_key_to_color(key)`, the accent picker
+//   - `CONTRAST_INK` and `CONTRAST_PAPER`, the ends `contrast_on()` picks from
 
 impl ThemePalette {
     /// Catppuccin · Latte.
@@ -3819,3 +3820,9 @@ pub fn accent_key_to_color(key: &str) -> Option<Color> {
         .find(|a| a.key == key)
         .map(|a| hex(a.color))
 }
+
+/// The near-black label colour `contrast_on()` picks for a light surface.
+const CONTRAST_INK: u32 = 0x14141a;
+
+/// The near-white label colour `contrast_on()` picks for a dark surface.
+const CONTRAST_PAPER: u32 = 0xf7faff;
