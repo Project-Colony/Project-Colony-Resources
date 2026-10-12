@@ -17,11 +17,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f # master, 2026-10-09
         with:
-          toolchain: stable
-          components: clippy, rustfmt
+          persist-credentials: false
+
+      # rustup is on every GitHub-hosted runner image: no third-party action to
+      # pin, and nothing for Dependabot to lose track of.
+      - name: Install Rust
+        run: |
+          rustup toolchain install stable --profile minimal -c rustfmt,clippy --no-self-update
+          rustup default stable
 
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
 
@@ -63,13 +67,15 @@ jobs:
   # colony-ui. Without this job nothing ever builds on it, and it drifts.
   #
   # RUSTUP_TOOLCHAIN is what pins the cargo invocations: it outranks both the
-  # rustup default the toolchain action sets and any rust-toolchain.toml. The
-  # rustc check makes a pin that silently stopped working fail loudly.
+  # runner's rustup default and any rust-toolchain.toml. The rustc check makes
+  # a pin that silently stopped working fail loudly.
   msrv:
     name: MSRV
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Read the declared MSRV
         id: msrv
@@ -79,9 +85,8 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "RUSTUP_TOOLCHAIN=$version" >> "$GITHUB_ENV"
 
-      - uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f # master, 2026-10-09
-        with:
-          toolchain: ${{ steps.msrv.outputs.version }}
+      - name: Install Rust ${{ steps.msrv.outputs.version }}
+        run: rustup toolchain install "$RUSTUP_TOOLCHAIN" --profile minimal --no-self-update
 
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
@@ -92,3 +97,75 @@ jobs:
           rustc --version | grep -q "^rustc ${RUSTUP_TOOLCHAIN}[. ]" \
             || { echo "::error::expected rustc ${RUSTUP_TOOLCHAIN}, got $(rustc --version)"; exit 1; }
           cargo check --locked --all-targets
+
+  # The job above runs every test on Linux. colony-ui's paths module takes other
+  # branches on Windows and macOS (the Windows cache directory must not be the
+  # config directory), and those tests only run on those platforms.
+  colony-ui:
+    name: colony-ui tests (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Rust
+        shell: bash
+        run: |
+          rustup toolchain install stable --profile minimal --no-self-update
+          rustup default stable
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+
+      - name: Tests
+        run: cargo test -p colony-ui --locked
+
+  # Dependabot moves the pins in .github/workflows/ but never reads templates/,
+  # and programs copy their release workflow from templates/. Every `uses:` in
+  # both must be a full commit SHA with its version in a trailing comment, and
+  # an action pinned in two places must be pinned at the same commit, so a
+  # Dependabot bump fails here until the template is bumped in the same PR.
+  # The template's call to the shared workflow names "organisation pin"
+  # instead of a version: it moves only as design/releases.md describes.
+  pins:
+    name: action pins
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Every action is pinned, at one commit everywhere
+        run: |
+          grep -nE '^[[:space:]]*(-[[:space:]]+)?uses:' .github/workflows/*.yml templates/*.yml \
+            | awk '
+                {
+                  split($1, loc, ":"); file = loc[1]; line = loc[2]
+                  match($0, /uses:[[:space:]]*[^[:space:]#]+/)
+                  ref = substr($0, RSTART, RLENGTH); sub(/uses:[[:space:]]*/, "", ref)
+                  comment = $0; sub(/^[^#]*/, "", comment)
+                }
+                ref ~ /^\.\// { next }
+                {
+                  at = index(ref, "@"); action = substr(ref, 1, at - 1); sha = substr(ref, at + 1)
+                }
+                at == 0 || length(sha) != 40 || sha ~ /[^0-9a-f]/ {
+                  printf "::error file=%s,line=%s::%s is not pinned to a full commit SHA\n", file, line, ref
+                  bad = 1; next
+                }
+                comment !~ /^#[[:space:]]*v[0-9]/ && action !~ /^Project-Colony\/Project-Colony-Resources\// {
+                  printf "::error file=%s,line=%s::%s needs its version in a trailing comment (# vX.Y.Z)\n", file, line, action
+                  bad = 1
+                }
+                action in first && pin[action] != sha {
+                  printf "::error file=%s,line=%s::%s is pinned at %s here but at %s in %s\n", file, line, action, sha, pin[action], first[action]
+                  bad = 1; next
+                }
+                !(action in first) { pin[action] = sha; first[action] = file ":" line }
+                END { exit bad }
+              '
+          echo "every action is pinned to one commit"

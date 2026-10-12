@@ -69,6 +69,21 @@ build the program, so it belongs in CI — an untested floor is a guess.
 Move it forward deliberately, when a language feature is worth it, not by
 accident because a dependency raised its own floor.
 
+In CI, install Rust with `rustup`, which every GitHub-hosted runner image
+already carries:
+
+```yaml
+- name: Install Rust
+  shell: bash
+  run: |
+    rustup toolchain install stable --profile minimal --no-self-update
+    rustup default stable
+```
+
+A third-party toolchain action is one more pin to keep current, and one that
+publishes no versions to bump has nothing Dependabot can move. `shell: bash`
+keeps the same step working on the Windows and macOS legs.
+
 ## GitHub Actions
 
 Colony pins actions by commit SHA with the version in a trailing comment, and
@@ -81,6 +96,12 @@ its call to the shared signing workflow. Copy it with the pins intact and add
 the `github-actions` entry from `templates/dependabot.yml`, so the action SHAs
 keep moving after you adopt them. Dependabot does not read `templates/`, so
 the pins there are bumped by hand, to the current release of each action.
+
+This repository's CI keeps those hand bumps honest: its `action pins` job
+fails when any `uses:` in `.github/workflows/` or `templates/` is not a full
+commit SHA with its version in a trailing comment, or when one action is pinned
+at two different commits. A Dependabot PR that bumps an action the template
+also uses goes red until the template is bumped in the same PR.
 
 ## Where the ecosystem stands
 
