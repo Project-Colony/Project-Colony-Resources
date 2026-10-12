@@ -6,7 +6,7 @@
 #   build legs (upload-artifact)  ->  sign-and-publish (this file)
 #
 # The release must already exist as a DRAFT for the tag (release-please plus
-# the draft hold in templates/release.yml). This workflow then:
+# the draft hold in templates/sign-and-publish-caller.yml). This workflow then:
 #
 #   preflight     checks the inputs and that the tag is still a draft
 #   authenticode  sends each Windows file to SignPath and takes back the
@@ -192,7 +192,7 @@ jobs:
       matrix:
         asset: ${{ fromJSON(needs.preflight.outputs.windows) }}
     steps:
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: ${{ inputs.artifact-pattern }}
           path: build
@@ -283,14 +283,14 @@ jobs:
     steps:
       # No checkout: nothing from the calling repository runs in the job that
       # holds the signing key.
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: ${{ inputs.artifact-pattern }}
           path: dist
           merge-multiple: true
 
       - if: env.SIGNPATH == 'true'
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: signpath-signed-*
           path: signed
@@ -332,12 +332,13 @@ jobs:
               print(f"{path}: Authenticode signature present ({size} bytes)")
           PY
 
-      # Same output as templates/sign-release.sh, over the final bytes:
+      # Over the final bytes:
       #   <asset>.sig       ed25519 over the asset
       #   <asset>.meta      version=<tag>\nasset=<name>\nsha256=<hex>\n
       #   <asset>.meta.sig  ed25519 over the .meta
       # The .meta format is the contract Colony verifies (design/releases.md
-      # section 5); change it there and in sign-release.sh, or not at all.
+      # section 5, ReleaseMetadata in Colony's src/signing.rs); change it there
+      # and here together, or not at all.
       - name: Sign with the organisation key
         env:
           KEY: ${{ secrets.COLONY_SIGNING_KEY_PEM }}

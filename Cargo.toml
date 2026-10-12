@@ -1,5 +1,9 @@
 [workspace]
-resolver = "2"
+# Resolver 3 is resolver 2 plus rust-version-aware resolution: `cargo update`
+# picks the newest release of each crate that still builds on rust-version
+# below, so a transitive crate raising its own floor cannot move ours by
+# accident. See design/dependencies.md, "Toolchain".
+resolver = "3"
 members = ["crates/colony-ui", "crates/colony-tokens"]
 
 [workspace.package]
@@ -12,21 +16,21 @@ rust-version = "1.88"
 
 [workspace.dependencies]
 # Pinned to the current release, not a floating minor. Staleness has to be
-# visible here, in the manifest, rather than hidden in the lockfile — see
+# visible here, in the manifest, rather than hidden in the lockfile: see
 # design/dependencies.md.
 anyhow = "1.0.104"
 serde = { version = "1.0.229", features = ["derive"] }
-serde_json = { version = "1.0.151", features = ["preserve_order"] }
-toml = "1.1.4"
+serde_json = { version = "1.0.154", features = ["preserve_order"] }
+toml = "1.1.8"
 # Test-only: reads the embedded font files to check the names, weights and
 # glyphs colony-ui relies on. Already in the tree under iced.
 ttf-parser = "0.25.1"
 
 # The shared UI baseline. Declared here so every Colony program that depends on
-# colony-ui inherits the same iced, instead of each repo drifting on its own —
+# colony-ui inherits the same iced, instead of each repo drifting on its own,
 # which is how D1Gg2r ended up on 0.13 while everything else moved to 0.14.
 iced = "0.14.0"
 
 # Platform-standard directories. The Colony filesystem layout is defined on top
-# of it in colony-ui's `paths` module — see design/filesystem.md.
-dirs = "6.0.0"
+# of it in colony-ui's `paths` module: see design/filesystem.md.
+dirs = "7.0.0"

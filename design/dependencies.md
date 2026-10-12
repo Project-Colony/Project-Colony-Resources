@@ -69,6 +69,21 @@ build the program, so it belongs in CI — an untested floor is a guess.
 Move it forward deliberately, when a language feature is worth it, not by
 accident because a dependency raised its own floor.
 
+Make the lockfile keep that promise too: resolve with `resolver = "3"`. It
+picks, for each crate, the newest release whose own `rust-version` is not above
+yours, so `cargo update` never pulls in a transitive crate that needs a newer
+toolchain than the one you declare; raise `rust-version` and the next update
+takes those releases. Edition 2024 turns it on by default. On edition 2021,
+set it in `[workspace]`, or in `[package]` for a single crate:
+
+```toml
+[workspace]
+resolver = "3"
+```
+
+"Latest release" in the rule above means the latest release that builds on
+your declared `rust-version`.
+
 In CI, install Rust with `rustup`, which every GitHub-hosted runner image
 already carries:
 
