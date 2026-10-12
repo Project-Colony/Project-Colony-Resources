@@ -30,8 +30,8 @@ Inside the content area, drawn with Colony's categories:
 │ Appearance   │  Preferences are saved            │
 │ Accessibility│  automatically.                   │
 │ Storage      │                                   │
-│ About        │    Startup                     ›  │
-│ Shortcuts    │    Language                    ›  │
+│ Shortcuts    │    Startup                     ›  │
+│ About        │    Language                    ›  │
 │              │    Updates                     ›  │
 └──────────────┴───────────────────────────────────┘
 ```

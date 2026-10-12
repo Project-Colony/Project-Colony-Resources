@@ -3,7 +3,7 @@
 //! `tokens/` was imported from Project Colony's launcher, so the palettes it
 //! produces must still be the palettes Colony shipped. These tests parse the
 //! verbatim snapshot in `fixtures/` and compare it against what the generator
-//! produces today — const by const, field by field.
+//! produces today, const by const, field by field.
 //!
 //! When a colour is changed on purpose, this test fails on exactly the entries
 //! that moved. Re-cut the snapshot only when that diff is the intended one.
@@ -233,7 +233,7 @@ fn every_colony_palette_survives_the_round_trip() {
         .collect();
     assert_eq!(
         declared, accounted,
-        "INTENTIONAL_CHANGES is stale — an entry no longer describes a real change"
+        "INTENTIONAL_CHANGES is stale: an entry no longer describes a real change"
     );
 }
 
@@ -339,7 +339,7 @@ fn accent_overrides_match_colony_in_value_and_order() {
 
     assert_eq!(
         actual, expected,
-        "accent overrides drifted from Colony — per-app identity tints would change"
+        "accent overrides drifted from Colony: per-app identity tints would change"
     );
 }
 
@@ -392,7 +392,7 @@ fn text_is_legible_on_every_theme() {
         .collect();
     assert_eq!(
         declared, exceptions_hit,
-        "CONTRAST_EXCEPTIONS is stale — an entry listed there now passes"
+        "CONTRAST_EXCEPTIONS is stale: an entry listed there now passes"
     );
 }
 
@@ -403,7 +403,7 @@ fn generated_is_up_to_date_with_tokens() {
     let problems = colony_tokens::check(&root).expect("check");
     assert!(
         problems.is_empty(),
-        "generated/ is out of date — run `cargo run -p colony-tokens -- generate`:\n  {}",
+        "generated/ is out of date: run `cargo run -p colony-tokens -- generate`:\n  {}",
         problems.join("\n  ")
     );
 }

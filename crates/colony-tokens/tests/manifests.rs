@@ -1,5 +1,5 @@
 //! The example `colony.json` manifests are documentation, and documentation
-//! that does not compile is worse than none — a program author copies one of
+//! that does not compile is worse than none: a program author copies one of
 //! these, so each must be a manifest Colony would actually accept.
 
 use std::collections::BTreeSet;

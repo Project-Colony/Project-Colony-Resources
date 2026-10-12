@@ -8,7 +8,7 @@ on; where they disagree, the choice below is the one to follow going forward.
 
 | File | Always? | What it is |
 |---|---|---|
-| `README.md` | yes | the front door — see below |
+| `README.md` | yes | the front door, see below |
 | `LICENSE` | yes | GPL-3.0-or-later, same text as the rest of the org |
 | `colony.json` | for programs | the launcher manifest, see [releases.md](releases.md) |
 | `CHANGELOG.md` | for programs | written by release-please, never by hand |
@@ -23,7 +23,7 @@ belong there, and how crates are arranged inside them, are in
 ## The README
 
 The front door is for someone who has never heard of the project. It answers
-"what is this, why would I want it, how do I get it" — in that order, before any
+"what is this, why would I want it, how do I get it", in that order, before any
 detail.
 
 ```markdown
@@ -65,7 +65,7 @@ Notes on each part:
 - **The header block** is centred, with a logo that has a light and a dark
   variant via `prefers-color-scheme`. A project without a logo skips the
   `<picture>` and keeps the bold tagline.
-- **Badges** — licence, the Colony category, supported platforms. Add AUR badges
+- **Badges**: licence, the Colony category, supported platforms. Add AUR badges
   where packages exist. Badges are navigation, not decoration; if a badge links
   nowhere useful, drop it.
 - **The Status blockquote** is not optional and not marketing. Say what is
@@ -97,7 +97,7 @@ Notes on each part:
 The base language of every Project Colony project is **English**: the README,
 `docs/`, source code, identifiers, code comments, and commit messages.
 
-French is not a second documentation language — it is one of the two **UI
+French is not a second documentation language: it is one of the two **UI
 locales** a program ships, which is a different thing entirely and is covered in
 [i18n.md](i18n.md). A user reads French in the running program; anyone reading
 the repository reads English.
@@ -105,11 +105,16 @@ the repository reads English.
 This is not a preference about which language is better. It is that a repository
 with English source, English commits and a French README makes a reader switch
 languages to follow one thread, and that a public repository reaches people who
-read neither by default — English is the one that costs the fewest of them.
+read neither by default; English is the one that costs the fewest of them.
 
 Two repositories predate this and are the outliers: **Grape** and **VN-Moteur**
 have French READMEs, and VN-Moteur's `docs/` is French throughout. Translate
 them when either is next worked on; do not machine-translate, rewrite.
+
+Write a hyphen, a colon, a comma or parentheses where an en or em dash would
+go, in code, comments, docs, commit messages and generated files alike. Licence
+texts quoted verbatim are the only exception. This repository's CI fails on
+either dash outside them.
 
 ## `docs/`
 
@@ -121,7 +126,7 @@ Three audiences, three directories:
 
 ```
 docs/
-├── README.md      the index — every page, one line each, grouped by audience
+├── README.md      the index: every page, one line each, grouped by audience
 ├── guide/         someone USING the program
 ├── internals/     someone READING or CHANGING the code
 └── project/       someone asking WHY it exists and where it stands
@@ -134,7 +139,7 @@ docs/
 | `project/` | `landscape.md` (the problem and the alternatives), `status.md` (the done/remaining ledger), any study that drove a decision |
 
 `docs/README.md` is the index and the first thing anyone opens. One table per
-audience, one line per page, and that line says what the page answers — not what
+audience, one line per page, and that line says what the page answers, not what
 it is called:
 
 ```markdown
@@ -168,7 +173,7 @@ what the git log is for.
 
 **A repository small enough not to need three directories does not need them.**
 Three files at `docs/` root is fine. What is not fine is growing past that
-without an index — the moment someone has to `ls` to find a page, `docs/README.md`
+without an index: the moment someone has to `ls` to find a page, `docs/README.md`
 is overdue.
 
 ## Keeping it honest

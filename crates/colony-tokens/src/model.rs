@@ -1,7 +1,7 @@
 //! The token model: what a theme family, a variant and a palette *are*.
 //!
 //! This file is the schema. Adding a field to `palette!` below is the only way
-//! to add a field to the Colony palette — every emitter derives its output from
+//! to add a field to the Colony palette: every emitter derives its output from
 //! `Palette::FIELDS`, so a new field reaches Rust, JSON, CSS and the docs at once.
 
 use std::collections::BTreeMap;
@@ -30,7 +30,7 @@ impl Field {
 /// Field order here IS the order emitted everywhere downstream.
 macro_rules! palette {
     ($( $group:literal => [ $($field:ident),* $(,)? ] ),* $(,)?) => {
-        /// A full Colony palette. Every field is required — a partial palette is
+        /// A full Colony palette. Every field is required: a partial palette is
         /// a bug, not a feature, so `deny_unknown_fields` catches typos too.
         #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
         #[serde(deny_unknown_fields)]
@@ -80,7 +80,7 @@ palette! {
     "modal" => [bg_modal_section, border_subtle, divider],
 }
 
-/// A localized display string. Every label must exist in **both** locales —
+/// A localized display string. Every label must exist in **both** locales:
 /// Colony has a test that fails when a key is present in one locale only.
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -117,7 +117,7 @@ impl Mode {
 #[serde(deny_unknown_fields)]
 pub struct Variant {
     pub key: String,
-    /// Rust const name in Colony's `theme.rs`. Stable identifier — renaming one
+    /// Rust const name in Colony's `theme.rs`. Stable identifier: renaming one
     /// is a breaking change for every consumer that pins it.
     #[serde(rename = "const")]
     pub const_name: String,
@@ -125,7 +125,7 @@ pub struct Variant {
     pub mode: Mode,
     pub label: Label,
     pub swatch: Swatch,
-    /// Why this palette looks the way it does — the material, the ink, which
+    /// Why this palette looks the way it does: the material, the ink, which
     /// colour was demoted and why. Design intent that used to live in a code
     /// comment or in someone's head. Optional, but write it for anything whose
     /// colours are not self-explanatory.
@@ -135,7 +135,7 @@ pub struct Variant {
 }
 
 impl Variant {
-    /// `gruvbox-dark` — the slug used for CSS filenames and selectors.
+    /// `gruvbox-dark`: the slug used for CSS filenames and selectors.
     pub fn slug(&self, family: &Family) -> String {
         format!(
             "{}-{}",
@@ -160,7 +160,7 @@ pub struct Family {
     /// Nerd Font codepoint as bare lowercase hex (`f0f4`), or empty for none.
     pub icon: String,
     pub label: Label,
-    /// Provenance and licensing context for the family as a whole — where the
+    /// Provenance and licensing context for the family as a whole: where the
     /// colours came from, and anything a port needs to know before shipping it.
     #[serde(default)]
     pub notes: Option<String>,
@@ -228,7 +228,7 @@ struct LabelsFile {
 #[derive(Debug, Clone)]
 pub struct Tokens {
     pub families: Vec<Family>,
-    /// In file order — see the warning in `tokens/accents.toml`, this order is
+    /// In file order. As the warning in `tokens/accents.toml` says, this order is
     /// what Colony's per-app identity tint hashes into.
     pub accents: Vec<Accent>,
     /// In file order, which is the order they are emitted in.
