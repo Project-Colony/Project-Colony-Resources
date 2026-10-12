@@ -176,6 +176,10 @@ Nothing at the root that a reader has to skip past. Directories only:
 | `config/` | data files the program embeds or reads at runtime |
 | `reference/` | third-party material kept for study; never compiled |
 
+A repository that is not Rust keeps its code in its ecosystem's equivalent of
+`src/`, under the same one-or-the-other rule. For a Nix flake that is `pkgs/`,
+one directory per package, as in Project-Colony/nix.
+
 Root *files* are listed in [documentation.md](documentation.md). Where the
 program writes at **runtime** — config, data and cache on each platform — is
 [filesystem.md](filesystem.md); none of it belongs in the repository.
