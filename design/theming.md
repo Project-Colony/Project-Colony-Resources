@@ -6,7 +6,7 @@ How a Colony palette is built, and how to add a new theme family.
 
 A palette is 38 colours in eight role groups. The authoritative list — names,
 order, groups — is the `palette!` macro in
-`tools/colony-tokens/src/model.rs`; `generated/palette.schema.json` is its
+`crates/colony-tokens/src/model.rs`; `generated/palette.schema.json` is its
 machine-readable form.
 
 | Group | Fields | What they are |

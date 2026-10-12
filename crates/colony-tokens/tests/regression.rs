@@ -438,6 +438,37 @@ fn the_preferences_skeleton_ships_in_both_locales() {
 }
 
 #[test]
+fn themes_json_carries_the_labels_colony_ui_embeds() {
+    let root = colony_tokens::repo_root().expect("repository root");
+    let tokens = Tokens::load(&root.join("tokens")).expect("tokens load");
+    let artifacts = colony_tokens::plan(&tokens).expect("plan");
+    let artifact = |name: &str| -> serde_json::Value {
+        let found = artifacts
+            .iter()
+            .find(|a| a.path.ends_with(name))
+            .unwrap_or_else(|| panic!("{name} is part of the plan"));
+        serde_json::from_str(&found.contents).expect("valid JSON")
+    };
+
+    // A web or Tauri GUI reads exactly the tables colony_ui::i18n embeds, so the
+    // two kinds of program cannot show different strings for one key.
+    let labels = &artifact("themes.json")["labels"];
+    assert_eq!(labels["en"], artifact("labels.en.json"));
+    assert_eq!(labels["fr"], artifact("labels.fr.json"));
+
+    let keys = |locale: &str| -> BTreeSet<String> {
+        labels[locale]
+            .as_object()
+            .unwrap_or_else(|| panic!("labels.{locale} is an object"))
+            .keys()
+            .cloned()
+            .collect()
+    };
+    assert_eq!(keys("en"), keys("fr"), "en and fr label key sets differ");
+    assert!(keys("en").contains("settings_title"));
+}
+
+#[test]
 fn a_shared_label_cannot_rename_a_theme() {
     let root = colony_tokens::repo_root().expect("repository root");
     let mut tokens = Tokens::load(&root.join("tokens")).expect("tokens load");
