@@ -76,9 +76,7 @@ Colony as the worked example:
 
 ~/.local/share/Colony/            data
 ├── Colony/
-│   ├── repo-docs/<repo>/
-│   ├── repo-icons/<repo>/icon.png
-│   └── update-staging/
+│   └── colony.log
 └── apps/                         ← shared, see below
     └── <repo>/
         ├── <binary>
@@ -87,7 +85,10 @@ Colony as the worked example:
 
 ~/.cache/Colony/Colony/           cache
 ├── repos_cache.json
-└── scan_cache.json
+├── scan_cache.json
+├── repo-docs/<repo>/
+├── repo-icons/<repo>/icon.png
+└── update-staging/
 ```
 
 ### `apps/` is deliberately a sibling
@@ -141,17 +142,14 @@ Three reasons this matters more than it looks:
 
 Current state, so a migration is a decision rather than a discovery:
 
-| Program | What | Should be |
-|---|---|---|
-| **Colony** | uses `dirs::config_dir()` → **Roaming** on Windows | `config_local_dir()` → Local |
-| **Colony** | caches in `<config>/Colony/Colony/cache/` | `<cache>/Colony/Colony/`; on Windows this lands in the same place once the root moves to Local, so only Linux and macOS actually move the files |
-| **Colony** | `docs/faq.md` and `docs/architecture.md` document `~/.config/colony/preferences.json`; the code writes `~/.config/Colony/Colony/preferences/preferences.json` | fix the docs |
-| **Digger** | `history.db` in `<data>/digger/`, lowercase, no `Colony/` level | `<data>/Colony/Digger/` |
-| **Grape** | `logs/` and `history.json` inside the config directory | `<data>/Colony/Grape/` |
-| **Eidos** | `~/.config/eidos/`, lowercase, no `Colony/` level at all | `<config>/Colony/Eidos/` |
+| Program | What | Should be | Checked |
+|---|---|---|---|
+| **Digger** | `history.db` in `<data>/digger/`, lowercase, no `Colony/` level | `<data>/Colony/Digger/` | 2026-08-24 |
 
-Only Digger and Grape get the Windows root right today. Colony, the reference
-implementation, does not.
+Colony, Grape and Eidos conform as of 2026-10-12. Each resolves its roots
+through `colony_ui::paths` and carries its older layout over at startup by the
+rules below: Colony in `persistence::migrate_legacy_paths`, Grape in
+`config::migrate`, Eidos in the `eidos-paths` crate.
 
 ### Migrating a program
 

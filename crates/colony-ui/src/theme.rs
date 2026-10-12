@@ -1,7 +1,7 @@
 //! The Colony palette: its shape, the active-theme state, and the accessors
 //! every program styles its widgets with.
 //!
-//! The 57 palettes, the `(family, variant)` resolver, the picker catalog and the
+//! The palettes, the `(family, variant)` resolver, the picker catalog and the
 //! accent overrides are **not** written here: they are generated from
 //! `tokens/` and pulled in by the `include!` below. Adding a theme family
 //! therefore touches no Rust at all.
