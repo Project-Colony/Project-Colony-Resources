@@ -68,7 +68,7 @@ Colony shipped before the import; see [Guarantees](#guarantees).
 | `manifests/examples/*.json` | working `colony.json` files for each shape |
 | `templates/` | release workflow (signing through the shared workflow), release-please and Dependabot configs, README skeletons |
 | `crates/colony-ui/` | the crate programs depend on: theme, fonts, labels, preferences, widgets |
-| `tools/colony-tokens/` | the generator and its tests |
+| `crates/colony-tokens/` | the generator and its tests; never published |
 
 ## Design rules
 
@@ -157,7 +157,21 @@ preferences and the font the dyslexia toggle selects.
 
 Read `generated/themes.json`. It carries the families, variants, every field
 of every palette, the light/dark mode, the picker swatches, the accent list, the
-per-field CSS variable names, and the computed contrast ratios.
+per-field CSS variable names, the computed contrast ratios, and the shared
+labels: every theme, accent and Preferences string `colony_ui::i18n` has, in
+English and French, under the same keys.
+
+```js
+const bundle = await (await fetch("generated/themes.json")).json();
+const lang = navigator.language.startsWith("fr") ? "fr" : "en";
+const t = (key) => bundle.labels[lang][key] ?? bundle.labels.en[key] ?? key;
+
+t("settings_title");         // "Preferences" or "Préférences"
+t("settings_theme_gruvbox"); // a theme family's name
+```
+
+Take the strings from there rather than copying them into the program's own
+locale files; see [design/i18n.md](design/i18n.md#labels-owned-by-this-repo).
 
 Web and Electron programs can skip the JSON and load the stylesheets directly.
 Apply a theme by setting `data-colony-theme="<family>-<variant>"` on a root
@@ -181,7 +195,7 @@ the mapping is theirs.
 3. Run `cargo test`. The round-trip test will fail, listing exactly which values
    moved; confirm that diff is the one you meant.
 4. Re-cut the snapshot only when it is: see
-   `tools/colony-tokens/tests/fixtures/colony-theme-rs.snapshot`.
+   `crates/colony-tokens/tests/fixtures/colony-theme-rs.snapshot`.
 5. Commit `tokens/` and `generated/` together. They are never allowed to drift;
    `cargo run -p colony-tokens -- generate` followed by a dirty tree is a bug.
 
@@ -207,7 +221,8 @@ its own rules. Read [design/theming.md](design/theming.md) first.
   Solarized's own `base00` on `base3`. The test also fails if that exception
   list goes stale.
 - **Both locales stay in step.** Every label carries an `fr` and an `en` string,
-  and a key reused across families must carry the same string each time.
+  a key reused across families must carry the same string each time, and
+  `generated/themes.json` carries exactly the tables `colony-ui` embeds.
 - **`generated/` matches `tokens/`.** The same check CI runs, so a forgotten
   `generate` fails locally first.
 
@@ -317,5 +332,5 @@ A consequence worth stating plainly: a program that links `colony-ui` will have
 to be GPL-3.0-or-later too. If that ever becomes the wrong trade for the shared
 *values* (the palettes and conventions in `tokens/`, `generated/` and `design/`,
 which are data rather than logic), relicensing those directories more permissively
-while keeping `tools/` and `crates/` copyleft is the change to make, and it is
+while keeping `crates/` copyleft is the change to make, and it is
 easier to make before there are outside contributors than after.

@@ -6,6 +6,8 @@ edition.workspace = true
 license.workspace = true
 repository.workspace = true
 rust-version.workspace = true
+# A build tool for this repository. Only colony-ui is released.
+publish = false
 
 [dependencies]
 anyhow.workspace = true

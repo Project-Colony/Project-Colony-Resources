@@ -38,9 +38,11 @@ pub fn plan(tokens: &Tokens) -> Result<Vec<Artifact>> {
         contents: emit::rust::render(tokens),
     });
 
+    let locales = emit::i18n::render(tokens)?;
+
     out.push(Artifact {
         path: PathBuf::from("generated/themes.json"),
-        contents: to_json(&emit::json::render(tokens)),
+        contents: to_json(&emit::json::render(tokens, &locales)),
     });
 
     for (family, variant) in tokens.variants() {
@@ -67,7 +69,6 @@ pub fn plan(tokens: &Tokens) -> Result<Vec<Artifact>> {
         contents: to_json(&emit::manifest_schema::render()),
     });
 
-    let locales = emit::i18n::render(tokens)?;
     out.push(Artifact {
         path: PathBuf::from("crates/colony-ui/src/generated/labels.fr.json"),
         contents: to_json(&locales.fr),
@@ -218,7 +219,7 @@ pub fn repo_root() -> Result<PathBuf> {
     let root = manifest
         .ancestors()
         .nth(2)
-        .context("cannot locate the repository root above tools/colony-tokens")?
+        .context("cannot locate the repository root above crates/colony-tokens")?
         .to_path_buf();
     if !root.join("tokens").is_dir() {
         bail!("{} does not contain a tokens/ directory", root.display());

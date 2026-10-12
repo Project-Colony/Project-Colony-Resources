@@ -76,7 +76,7 @@ version = "1.4.1"      # x-release-please-version
 license = "GPL-3.0-or-later"
 repository = "https://github.com/Project-Colony/<Repo>"
 edition = "2021"
-rust-version = "1.80"
+rust-version = "1.88"
 ```
 
 ```toml
@@ -179,6 +179,23 @@ Nothing at the root that a reader has to skip past. Directories only:
 Root *files* are listed in [documentation.md](documentation.md). Where the
 program writes at **runtime** — config, data and cache on each platform — is
 [filesystem.md](filesystem.md); none of it belongs in the repository.
+
+### The exception: this repository
+
+Project-Colony-Resources is not a program, and its layout says so:
+
+- `tokens/`, `generated/`, `manifests/`, `templates/` and `design/` are allowed
+  at its root. They are what this repository exists to publish, not support
+  material for a binary.
+- There is no main binary, so there is no bare `crates/colony/`. The two crates
+  share the `colony` prefix: `crates/colony-ui/` is the library programs depend
+  on, and `crates/colony-tokens/` is the generator that reads `tokens/` and
+  writes `generated/`.
+- Only `colony-ui` is versioned and published, with its own version and its own
+  release-please component. `colony-tokens` is `publish = false` and never
+  released. That is why this workspace's `[workspace.package]` carries no shared
+  `version` and no `x-release-please-version` marker: there is no single
+  workspace version to keep.
 
 ## When you add a crate
 
