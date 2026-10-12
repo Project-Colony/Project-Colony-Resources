@@ -205,6 +205,15 @@ pub struct Accent {
 #[serde(deny_unknown_fields)]
 struct AccentsFile {
     accents: Vec<Accent>,
+    contrast: ContrastEnds,
+}
+
+/// The near-black and near-white label colours `contrast_on()` picks between.
+#[derive(Debug, Clone, Copy, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ContrastEnds {
+    pub ink: Color,
+    pub paper: Color,
 }
 
 /// One shared interface string from `tokens/labels.toml`: a Preferences page
@@ -231,6 +240,8 @@ pub struct Tokens {
     /// In file order. As the warning in `tokens/accents.toml` says, this order is
     /// what Colony's per-app identity tint hashes into.
     pub accents: Vec<Accent>,
+    /// The label colours `contrast_on()` picks between, from `tokens/accents.toml`.
+    pub contrast: ContrastEnds,
     /// In file order, which is the order they are emitted in.
     pub labels: Vec<UiLabel>,
 }
@@ -286,6 +297,7 @@ impl Tokens {
         let tokens = Tokens {
             families,
             accents: accents.accents,
+            contrast: accents.contrast,
             labels: labels.labels,
         };
         tokens.validate()?;

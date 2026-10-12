@@ -84,3 +84,11 @@ color = "#d4a030"
 [accents.label]
 fr = "Ambre"
 en = "Amber"
+
+# The label colours colony_ui::theme::contrast_on() picks between for text and
+# marks drawn on an accent or a picker swatch: whichever of the two contrasts
+# more with what sits under it. Palette-independent, like the accents above.
+# Web programs read them as --colony-ink and --colony-paper.
+[contrast]
+ink = "#14141a"
+paper = "#f7faff"

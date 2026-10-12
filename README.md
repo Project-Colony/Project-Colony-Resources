@@ -183,6 +183,12 @@ element, or by adding the matching `.colony-theme-*` class:
 <body data-colony-theme="gruvbox-dark">
 ```
 
+`colony-accents.css` also carries `--colony-ink` and `--colony-paper`, the
+near-black and near-white label colours `colony_ui::theme::contrast_on()` picks
+between. For text on an accent or a swatch, use whichever of the two contrasts
+more with it, and read them from there (or from `contrastEnds` in
+`themes.json`) instead of copying the values.
+
 The variables are neutral (`--colony-bg-primary`, `--colony-text-primary`, …).
 Mapping them onto a host application's own variable names (Discord's
 `--background-base-*`, say) stays in that program's repo. The values are ours;

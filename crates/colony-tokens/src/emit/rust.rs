@@ -24,6 +24,7 @@ const HEADER: &str = "\
 //   - `THEME_FAMILIES`, the ordered catalog the Settings picker renders
 //   - `resolve(family, variant)` and `FALLBACK_PALETTE`, the config lookup
 //   - `ACCENT_OVERRIDES` and `accent_key_to_color(key)`, the accent picker
+//   - `CONTRAST_INK` and `CONTRAST_PAPER`, the ends `contrast_on()` picks from
 ";
 
 pub fn render(tokens: &Tokens) -> String {
@@ -77,6 +78,19 @@ pub fn accent_key_to_color(key: &str) -> Option<Color> {
 }
 ",
     );
+
+    out.push_str(
+        "
+/// The near-black label colour `contrast_on()` picks for a light surface.
+const CONTRAST_INK: u32 = ",
+    );
+    let _ = writeln!(out, "{};", tokens.contrast.ink.to_rust_hex());
+    out.push_str(
+        "
+/// The near-white label colour `contrast_on()` picks for a dark surface.
+const CONTRAST_PAPER: u32 = ",
+    );
+    let _ = writeln!(out, "{};", tokens.contrast.paper.to_rust_hex());
 }
 
 fn render_palettes(out: &mut String, tokens: &Tokens) {

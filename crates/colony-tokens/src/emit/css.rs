@@ -54,11 +54,22 @@ pub fn render_accents(tokens: &Tokens) -> String {
         " * Palette-independent. Load alongside a theme; \"auto\" means no override,"
     );
     let _ = writeln!(out, " * i.e. keep the theme's own --colony-accent-blue.");
+    let _ = writeln!(out, " *");
+    let _ = writeln!(
+        out,
+        " * --colony-ink and --colony-paper are the label colours for text drawn on an"
+    );
+    let _ = writeln!(
+        out,
+        " * accent: use whichever contrasts more, as colony-ui's contrast_on() does."
+    );
     let _ = writeln!(out, " */");
     let _ = writeln!(out, ":root {{");
     for accent in &tokens.accents {
         let _ = writeln!(out, "  --colony-accent-{}: {};", accent.key, accent.color);
     }
+    let _ = writeln!(out, "  --colony-ink: {};", tokens.contrast.ink);
+    let _ = writeln!(out, "  --colony-paper: {};", tokens.contrast.paper);
     let _ = writeln!(out, "}}");
     out
 }
