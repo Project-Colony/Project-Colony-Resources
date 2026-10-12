@@ -57,6 +57,16 @@ contains. A check of these rules therefore reads the history from adoption on
 whole log. Give the time and the zone: with a bare date, git keeps the current
 time of day, so the check silently skips the commits of the adoption day itself.
 
+One exception, in Project-Colony/nix only. Its update workflow commits
+`sources.json` and `flake.lock` straight to `main` as `github-actions[bot]`,
+under a `chore:` subject and without a pull request. Those commits are
+generated data, not changes anyone wrote: the workflow builds every package on
+both architectures before committing, and its publish job refuses to commit
+any other file. Every change a person makes there, the updater and the
+workflows included, still lands through a squash-merged pull request. A check
+of that repository leaves the bot's commits out:
+`git log --since='2026-10-09 00:00 +0000' --perl-regexp --author='^(?!github-actions\[bot\])'`.
+
 ### When a release goes out empty
 
 `gh` in a job with no `actions/checkout` has no git remote to infer the
@@ -453,6 +463,12 @@ copy of it when Colony's releases start being signed with `new` (N+1), or their
 releases stop at the manifest check. The public key in the
 `## Code signing policy` section of `templates/program/README.md` and of every
 program's README changes at the same time.
+
+`scripts/update.sh` in Project-Colony/nix keeps a copy of the key list too,
+`RELEASE_PUBLIC_KEYS`, because it verifies the release of every program it
+packages before recording its hash. Add `new` there at N, alongside Colony's
+list, and drop `old` at N+2. It fails closed, so a program released with a key
+it does not list is never bumped in the Nix packages.
 
 ### Validating before you ship
 
