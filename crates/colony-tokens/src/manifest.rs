@@ -7,7 +7,7 @@
 //!
 //! These types mirror `ColonyManifest` in Colony's `src/github/types.rs`. They
 //! live here so the contract is versioned in one place and the JSON Schema in
-//! `generated/colony.schema.json` is derived rather than hand-written — the
+//! `generated/colony.schema.json` is derived rather than hand-written, the
 //! same discipline the palettes get.
 
 use std::collections::BTreeMap;
@@ -18,7 +18,7 @@ use serde::{Deserialize, Serialize};
 /// Where a program is filed in the launcher's category list.
 ///
 /// Colony matches these case-insensitively after trimming, and warns-and-ignores
-/// anything it does not recognize — an unknown category means the program is
+/// anything it does not recognize: an unknown category means the program is
 /// simply never filtered into a section, which is easy to miss. Validate here
 /// instead.
 pub const CATEGORIES: &[Category] = &[
@@ -55,7 +55,7 @@ impl Category {
             .find(|c| c.canonical == value || c.aliases.contains(&value.as_str()))
     }
 
-    /// Every accepted spelling, canonical first — what the schema enumerates.
+    /// Every accepted spelling, canonical first: what the schema enumerates.
     pub fn all_spellings() -> Vec<&'static str> {
         let mut out = Vec::new();
         for category in CATEGORIES {
@@ -117,7 +117,7 @@ pub struct ColonyManifest {
     /// applies. Being stricter here is the point of validating at all.
     #[serde(rename = "$schema", default, skip_serializing_if = "Option::is_none")]
     pub schema: Option<String>,
-    /// Display name in the launcher. Free-form — this is the only field the
+    /// Display name in the launcher. Free-form: this is the only field the
     /// user actually reads, so it may differ from the repository name.
     pub name: String,
     pub category: String,
@@ -151,7 +151,7 @@ impl ColonyManifest {
 
         if Category::resolve(&self.category).is_none() {
             bail!(
-                "unknown category {:?} — Colony ignores it and the program is \
+                "unknown category {:?}: Colony ignores it and the program is \
                  filed nowhere. Valid: {}",
                 self.category,
                 CATEGORIES
@@ -165,7 +165,7 @@ impl ColonyManifest {
         for platform in &self.platforms {
             if !PLATFORMS.contains(&platform.as_str()) {
                 bail!(
-                    "unknown platform {platform:?} — valid: {}",
+                    "unknown platform {platform:?}; valid: {}",
                     PLATFORMS.join(", ")
                 );
             }
@@ -174,7 +174,7 @@ impl ColonyManifest {
         for (platform, entry) in &self.release_files {
             if !PLATFORMS.contains(&platform.as_str()) {
                 bail!(
-                    "releaseFiles has an unknown platform key {platform:?} — valid: {}",
+                    "releaseFiles has an unknown platform key {platform:?}; valid: {}",
                     PLATFORMS.join(", ")
                 );
             }

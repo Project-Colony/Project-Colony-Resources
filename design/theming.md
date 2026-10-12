@@ -4,8 +4,8 @@ How a Colony palette is built, and how to add a new theme family.
 
 ## The 38 fields
 
-A palette is 38 colours in eight role groups. The authoritative list — names,
-order, groups — is the `palette!` macro in
+A palette is 38 colours in eight role groups. The authoritative list (names,
+order, groups) is the `palette!` macro in
 `crates/colony-tokens/src/model.rs`; `generated/palette.schema.json` is its
 machine-readable form.
 
@@ -20,7 +20,7 @@ machine-readable form.
 | error | `error`, `error_light`, `error_bg`, `btn_danger_bg`, `btn_danger_hover`, `btn_trash{_hover,_pressed}` | |
 | modal | `bg_modal_section`, `border_subtle`, `divider` | |
 
-`accent_blue` is named for history, not for hue — it is *the* accent, whatever
+`accent_blue` is named for history, not for hue: it is *the* accent, whatever
 colour it happens to be. Rose Pine's is pink.
 
 ## Duotone: one material, one ink
@@ -31,11 +31,11 @@ should not be regressed.
 
 **One surface material, one ink.**
 
-- **Surfaces** — every background comes from a single material of the subject:
+- **Surfaces**: every background comes from a single material of the subject:
   carbon black, white ceramic, deep violet. They form a coherent depth ramp:
   sidebar (deepest) → primary → card → card_hover → card_pressed, each step
   slightly lighter in a dark theme, slightly darker in a light one.
-- **The ink** — the subject's signature colour, applied to **all** text as a
+- **The ink**: the subject's signature colour, applied to **all** text as a
   ramp (primary → secondary → muted → dim) **and** to the accent. The ink is
   what the user actually reads. That is where identity lives; a signature colour
   hidden in a border is a signature colour nobody will ever see.
@@ -45,12 +45,12 @@ Corollaries, each learned the hard way:
 - **If the subject is white or very light, build a light theme.** A dark theme
   can never say "white".
 - **With two or three colours**, surfaces take the darkest/most material one, the
-  most luminous becomes the accent, and the third is demoted to a small role —
+  most luminous becomes the accent, and the third is demoted to a small role,
   a status colour. Two big saturated materials side by side clash. A khaki
   sidebar against lavender chat was tried and rejected; the khaki became
   `success` instead.
 - **Status colours stay recognizable.** Success reads green-ish, warning
-  amber-ish, error red-ish — tinted toward the theme's world, but never so far
+  amber-ish, error red-ish, tinted toward the theme's world, but never so far
   that an error stops looking like an error. A signature colour *may* take one of
   these roles, which is exactly how Kaya's khaki and Tachy's teal are used.
 - **Near-black tinted backgrounds read as plain black** and will be rejected.
@@ -72,7 +72,7 @@ exception cannot be quietly added and forgotten.
 ## Adding a theme family
 
 1. **Create `tokens/families/<key>.toml`.** The file name must equal the `key`.
-   Give it an unused `order` — that is its position in the picker.
+   Give it an unused `order`: that is its position in the picker.
 2. **Write the palette.** All 38 fields, lowercase `#rrggbb`. Derive the fields
    that are not part of the core identity:
    - `text_dimmer` / `text_dimmest` continue the text ramp; `text_placeholder`
@@ -88,7 +88,7 @@ exception cannot be quietly added and forgotten.
      lightened; `btn_trash_hover` / `_pressed` are a strong red, darker when
      pressed.
    - `divider` equals `border_subtle`.
-3. **Set `mode`.** It must agree with `bg_primary`'s luminance — the generator
+3. **Set `mode`.** It must agree with `bg_primary`'s luminance; the generator
    refuses the file otherwise.
 4. **Pick the swatch.** `bg` and `accent` are what the picker card shows. Choose
    the two colours that make the theme recognizable at 40 pixels.
@@ -103,7 +103,7 @@ exception cannot be quietly added and forgotten.
 Palettes are not copyrightable, and there are no official colour codes for game
 characters. Derive them from screenshots: read the hair, the suit, the glow, the
 material. Mark the family fan-made and unofficial in its `notes`, and ship no
-game art — the colours, not the assets.
+game art: the colours, not the assets.
 
 `tokens/families/stellar_blade.toml` is the worked example: EVE (green ink on
 white-grey ceramic, light), Tachy (amber ink and orange accent on carbon-navy),
@@ -114,5 +114,5 @@ Lily (strict gold-on-black), Enya (white ceramic, ice-blue sheen), Kaya
 
 They validate by **seeing**, not by reading hex lists. Render swatches or a UI
 mockup first, ship it, then iterate live. Expect direction like "I can't see
-colour X" — that means the colour is buried in a rarely-visible variable. Move it
+colour X": that means the colour is buried in a rarely-visible variable. Move it
 to the text or the accent; do not merely saturate it where it is.

@@ -1,4 +1,4 @@
-# Monokai Pro — Project Colony theme family
+# Monokai Pro: Project Colony theme family
 #
 # Source of truth. Edit here, then run `cargo run -p colony-tokens -- generate`.
 # Never edit anything under generated/ by hand.

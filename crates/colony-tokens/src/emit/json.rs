@@ -1,4 +1,4 @@
-//! `generated/themes.json` — the machine-readable bundle every non-Rust
+//! `generated/themes.json`: the machine-readable bundle every non-Rust
 //! consumer reads instead of scraping Rust source.
 
 use serde_json::{json, Map, Value};

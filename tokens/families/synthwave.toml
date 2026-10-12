@@ -1,4 +1,4 @@
-# Synthwave '84 — Project Colony theme family
+# Synthwave '84: Project Colony theme family
 #
 # Source of truth. Edit here, then run `cargo run -p colony-tokens -- generate`.
 # Never edit anything under generated/ by hand.

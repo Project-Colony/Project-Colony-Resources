@@ -1,4 +1,4 @@
-# Rosé Pine — Project Colony theme family
+# Rosé Pine: Project Colony theme family
 #
 # Source of truth. Edit here, then run `cargo run -p colony-tokens -- generate`.
 # Never edit anything under generated/ by hand.

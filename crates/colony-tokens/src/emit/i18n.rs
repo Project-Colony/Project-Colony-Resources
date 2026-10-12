@@ -1,4 +1,4 @@
-//! `crates/colony-ui/src/generated/labels.{fr,en}.json` — display strings.
+//! `crates/colony-ui/src/generated/labels.{fr,en}.json`: display strings.
 //!
 //! They live inside the crate rather than under the top-level `generated/`
 //! because `cargo package` only ships files under the crate root.
@@ -50,7 +50,7 @@ pub fn render(tokens: &Tokens) -> Result<Locales> {
     let fr_keys: Vec<&String> = fr.keys().collect();
     let en_keys: Vec<&String> = en.keys().collect();
     if fr_keys != en_keys {
-        bail!("fr and en label key sets differ — every label needs both locales");
+        bail!("fr and en label key sets differ: every label needs both locales");
     }
 
     Ok(Locales {

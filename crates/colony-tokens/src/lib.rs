@@ -1,4 +1,4 @@
-//! Reads `tokens/` — the source of truth — and produces everything in `generated/`.
+//! Reads `tokens/`, the source of truth, and produces everything in `generated/`.
 //!
 //! Nothing in this crate ships to users. It exists so that a colour is written
 //! down exactly once, in `tokens/families/<family>.toml`, and every consumer
@@ -24,7 +24,7 @@ pub struct Artifact {
     pub contents: String,
 }
 
-/// Build every artifact from the loaded tokens. Pure — no I/O, so `check` and
+/// Build every artifact from the loaded tokens. Pure (no I/O), so `check` and
 /// `generate` cannot disagree about what the output should be.
 pub fn plan(tokens: &Tokens) -> Result<Vec<Artifact>> {
     let mut out = Vec::new();
