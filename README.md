@@ -1,4 +1,10 @@
+<div align="center">
+
 # Project Colony Resources
+
+**Shared design tokens, rules, templates and the colony-ui crate every Project Colony program builds on.**
+
+</div>
 
 The single place where Project Colony's shared design decisions are written down:
 the theme palettes, the accent colours, the UI conventions every Colony program
@@ -10,6 +16,18 @@ Colony's `src/ui/theme.rs` over HTTP and parsed the Rust source with a regex to
 recover the palettes, and its companion request for `src/i18n.rs` had already
 gone stale, because Colony split that file into `src/i18n/{fr,en}.rs`. That is
 the class of breakage this repo exists to end.
+
+> **Status:** `colony-ui` is published on crates.io, and Colony uses its
+> palettes and its `paths` module: Colony's hand-maintained palette constants
+> are gone. The preferences kit new in 0.1.6 (`StandardPreferences`, the fonts,
+> the navigation and Preferences page widgets) is adopted by no program yet;
+> Colony still draws its own page, so the kit is proven by unit tests and a
+> compiled example, not by a program in daily use. CI runs the `paths` tests on
+> Linux, Windows and macOS. `colony-ui` releases now go through release-please
+> and crates.io Trusted Publishing; that path has not published yet, because
+> 0.1.7 waits on the Trusted Publisher registration on crates.io. The SignPath
+> path of the shared signing workflow is wired but unused: the organisation
+> secret and variable it needs do not exist yet.
 
 ## How it works
 
@@ -51,6 +69,24 @@ Colony shipped before the import; see [Guarantees](#guarantees).
 | `templates/` | release workflow (signing through the shared workflow), release-please and Dependabot configs, README skeletons |
 | `crates/colony-ui/` | the crate programs depend on: theme, fonts, labels, preferences, widgets |
 | `crates/colony-tokens/` | the generator and its tests; never published |
+
+## Design rules
+
+`design/` is this repository's product rather than its documentation, so it
+sits at the top level instead of under `docs/`. One page per question:
+
+| Page | What it answers |
+|---|---|
+| [repository-layout.md](design/repository-layout.md) | how a repository and its crates are arranged and named |
+| [filesystem.md](design/filesystem.md) | where a program keeps its config, data and cache, on all three platforms |
+| [navigation.md](design/navigation.md) | how a program is laid out, and how the user reaches its settings |
+| [settings-page.md](design/settings-page.md) | what every Preferences page contains, and in what order |
+| [theming.md](design/theming.md) | how a palette is built, and how to add a theme family |
+| [typography.md](design/typography.md) | which fonts and text sizes a program uses, and where its icons come from |
+| [i18n.md](design/i18n.md) | which languages a program ships, and how its strings are named and written |
+| [releases.md](design/releases.md) | how a program is versioned, built, signed and picked up by the launcher |
+| [dependencies.md](design/dependencies.md) | how crates, the toolchain and action pins stay on their latest release |
+| [documentation.md](design/documentation.md) | how the README and `docs/` are laid out |
 
 ## Consuming this repo
 
@@ -109,6 +145,9 @@ way: the identity button, a sidebar, and the whole Preferences page.
 **A new theme family reaches every program with zero code changes**: no match
 arm, no picker entry, no locale edit. Add the TOML, regenerate, bump the
 dependency.
+
+A program that still ships its own copy of the palettes migrates by depending
+on `colony-ui` and deleting that copy.
 
 The shared widgets take a [`Typography`] rather than reading the host's state;
 `Typography::current()` carries the product of the user's two text-size
@@ -236,18 +275,6 @@ you can predict removes that cost outright.
 `templates/program/` holds a README and a `docs/README.md` skeleton to start
 from.
 
-## Status
-
-`colony-ui` is published on crates.io, and Colony itself has migrated to it:
-its hand-maintained palette constants are gone, replaced by this crate. A
-program that still ships its own copy of the palettes migrates by depending on
-`colony-ui` and deleting that copy.
-
-The preferences kit (`StandardPreferences`, the fonts, the navigation and
-Preferences page widgets) is new in 0.1.6 and not adopted by any program yet:
-Colony, the reference it was extracted from, still draws its own page. It is
-covered by unit tests and a compiled example, not yet by a program in daily use.
-
 ## Releasing colony-ui
 
 Nothing about a `colony-ui` release is done by hand. Conventional commits that
@@ -266,7 +293,33 @@ If publishing fails after the tag exists, fix the cause, then publish that tag:
 gh workflow run release.yml --ref colony-ui-vX.Y.Z -f tag=colony-ui-vX.Y.Z
 ```
 
-## Licence
+## Code signing policy
+
+This repository ships no binaries, so there is nothing here to sign. `colony-ui`
+is published to crates.io only from CI, by
+[`.github/workflows/release.yml`](.github/workflows/release.yml) on a
+release-please tag, with a short-lived token that crates.io mints for that
+workflow through Trusted Publishing; no registry token is stored anywhere.
+
+The programs built on these resources are signed by the shared
+[sign-and-publish workflow](.github/workflows/sign-and-publish.yml) with the
+organisation's ed25519 release key, in a job that builds nothing. How that
+works: [design/releases.md](design/releases.md#5-signing). How a program
+documents it and how to verify a download:
+[templates/program/README.md](templates/program/README.md#code-signing-policy).
+
+## Privacy
+
+`colony-ui` and `colony-tokens` collect nothing, store nothing and send
+nothing, and neither makes a network call. The only thing `colony-ui` does to
+the disk is create the directories `paths::config_dir`, `data_dir`,
+`cache_dir`, `apps_dir` and `app_dir` return, under
+`<platform root>/Colony/`; what goes inside them is up to the program.
+`colony-tokens` reads `tokens/`, and writes `generated/` and
+`crates/colony-ui/src/generated/` in this repository's checkout, deleting the
+stale files it finds there.
+
+## License
 
 GPL-3.0-or-later, matching the rest of the Project Colony organisation. See
 [LICENSE](LICENSE).

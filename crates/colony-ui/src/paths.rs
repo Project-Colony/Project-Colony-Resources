@@ -215,10 +215,17 @@ mod tests {
 
     #[test]
     fn every_root_nests_under_the_vendor_then_the_program() {
+        let mut cache = locate::cache_dir("Digger").unwrap();
+        if cfg!(windows) {
+            // Windows adds `cache` below the program directory, checked by
+            // windows_isolates_the_cache_under_the_shared_root.
+            assert!(cache.ends_with(CACHE), "{cache:?}");
+            cache.pop();
+        }
         for path in [
             locate::config_dir("Digger").unwrap(),
             locate::data_dir("Digger").unwrap(),
-            locate::cache_dir("Digger").unwrap(),
+            cache,
         ] {
             let tail: Vec<_> = path
                 .components()
