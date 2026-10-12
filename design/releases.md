@@ -347,7 +347,10 @@ sign-and-publish:
 `619460ff4dc0049f129955f0988d368427b9eedb`, which is the one the template names.
 The pin moves only when `sign-and-publish.yml` itself changes, and then the
 template and every caller move to the new commit together. A commit to this
-repository that does not touch the workflow is no reason to move it. That is
+repository that does not touch the workflow is no reason to move it, and
+neither is a routine action bump inside it on its own: that bump reaches the
+callers with the next change that moves the pin, unless it fixes a security
+advisory, which moves the pin by itself. That is
 why `templates/dependabot.yml` tells Dependabot to ignore this repository: it
 would otherwise propose the newest commit of `main` to each caller on its own.
 
