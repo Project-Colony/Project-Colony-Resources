@@ -4,11 +4,13 @@ Every Colony program's settings page has the same skeleton. A user who has
 configured one should not have to relearn anything to configure the next.
 
 Reference implementation: the preferences kit in `colony-ui`
-(`colony_ui::widgets`, `colony_ui::preferences`), ported from Colony's
-`src/ui/settings.rs` and cross-checked against Digger (`src/ui.rs`) and Grape
-(`src/ui/app/preferences/`), which is where the per-program variations below
-come from. `crates/colony-ui/examples/preferences.rs` builds a complete page
-with it. How the user *gets* here is in [navigation.md](navigation.md).
+(`colony_ui::widgets`, `colony_ui::preferences`), ported from Colony's page and
+cross-checked against Digger (repository `D1Gg2r`, `src/ui/settings/`) and
+Grape (`src/ui/app/preferences/`), which is where the per-program variations
+below come from. Colony (`src/ui/settings.rs`) and Spotter
+(`src/views/preferences.rs`) now build their pages from it, and
+`crates/colony-ui/examples/preferences.rs` builds a complete page with it. How
+the user *gets* here is in [navigation.md](navigation.md).
 
 **A Rust/iced program builds this page from the kit rather than copying it.**
 Every measurement on this page is what the kit draws, so a program that calls it
@@ -86,10 +88,11 @@ on Ayu Dark, where the selected category disappeared. `contrast_on(accent)`
 reaches at least 4.0:1, not 4.5:1, on every theme and accent; the worst case is
 Night Owl light at 4.21:1 (see [navigation.md](navigation.md#selection-state)).
 
-The list is 180 wide at a text scale of 1.0 and grows with the scale. Colony's
-fixed 160 holds "Accessibility" at the default size only: at large text, or in
-OpenDyslexic, it no longer fits on one line. A test measures every standard
-category name, in both locales and both fonts, at all twelve size combinations.
+The list is 180 wide at a text scale of 1.0 and grows with the scale. The fixed
+160 Colony used before the kit held "Accessibility" at the default size only:
+at large text, or in OpenDyslexic, it no longer fit on one line. A test
+measures every standard category name, in both locales and both fonts, at all
+twelve size combinations.
 
 ## The categories
 
@@ -105,17 +108,18 @@ category name, in both locales and both fonts, at all twelve size combinations.
 `widgets::ABOUT_CATEGORY` the key of About.
 
 After those come the program's own, and **About last** where it exists. That
-tail is genuinely per-program. What the three do today:
+tail is genuinely per-program. What each program does today:
 
-| | Colony | Digger | Grape |
-|---|---|---|---|
-| 1-3 | General, Appearance, Accessibility | General, Appearance, Accessibility | General, Appearance, Accessibility |
-| then | Storage, Shortcuts | Language | Audio |
-| last | About | About | none |
+| | Colony | Spotter | Digger | Grape |
+|---|---|---|---|---|
+| 1-3 | General, Appearance, Accessibility | General, Appearance, Accessibility | General, Appearance, Accessibility | General, Appearance, Accessibility |
+| then | Storage, Shortcuts | Library, Imports | Language | Audio |
+| last | About | none | About | none |
 
 A program adds a category when it has a domain to configure that does not fit
-the first three: Grape has audio devices and an equalizer, Digger gives language
-its own tab rather than burying it in General as Colony does. It does not rename
+the first three: Grape has audio devices and an equalizer, Spotter its game
+library and what follows a library import, and Digger gives language its own tab
+rather than putting it in General as Colony and Spotter do. It does not rename
 one of the first three into something else. Omitting is fine; repurposing is
 not.
 

@@ -20,14 +20,14 @@ the class of breakage this repo exists to end.
 > **Status:** `colony-ui` is published on crates.io, and Colony uses its
 > palettes and its `paths` module: Colony's hand-maintained palette constants
 > are gone. The preferences kit new in 0.1.6 (`StandardPreferences`, the fonts,
-> the navigation and Preferences page widgets) is adopted by no program yet;
-> Colony still draws its own page, so the kit is proven by unit tests and a
-> compiled example, not by a program in daily use. CI runs the `paths` tests on
-> Linux, Windows and macOS. `colony-ui` releases now go through release-please
-> and crates.io Trusted Publishing; that path has not published yet, because
-> 0.1.7 waits on the Trusted Publisher registration on crates.io. The SignPath
-> path of the shared signing workflow is wired but unused: the organisation
-> secret and variable it needs do not exist yet.
+> the navigation and Preferences page widgets) is in daily use: Colony and
+> Spotter build their Preferences page, and the identity button that opens it,
+> from the kit on `colony-ui` 0.1.6. CI runs the `paths` tests on Linux,
+> Windows and macOS. `colony-ui` releases now go through release-please and
+> crates.io Trusted Publishing; that path has not published yet, because 0.1.7
+> waits on the Trusted Publisher registration on crates.io. The SignPath path
+> of the shared signing workflow is wired but unused: the organisation secret
+> and variable it needs do not exist yet.
 
 ## How it works
 
