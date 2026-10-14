@@ -144,20 +144,23 @@ doc comment says "no behaviour lives here", which is what keeps it honest.
 ## File size
 
 There is no hard limit, but a file you navigate by scrolling is a module asking
-to be split. For calibration, the largest files in Colony today:
+to be split. For calibration, the three largest files in Colony when this page
+was written (2026-08), and what became of them by 2026-10-14:
 
-| | |
-|---|---|
-| `src/ui/theme.rs` | 100 KB |
-| `src/ui/settings.rs` | 64 KB |
-| `src/download.rs` | 52 KB |
+| | Then | Now |
+|---|---|---|
+| `src/ui/theme.rs` | 100 KB | 4 KB |
+| `src/ui/settings.rs` | 64 KB | 18.6 KB |
+| `src/download.rs` | 52 KB | split into `src/download/`, six files |
 
 `theme.rs` is the cautionary one, and the reason this repository exists: 100 KB
 of hand-maintained colour constants that another repository ended up downloading
-and regex-parsing because there was no better way to reach them. It is now
-generated from `tokens/`. `settings.rs` at 64 KB is the next candidate: its
-sections are independent and would read better as `ui/settings/{general,
-appearance,accessibility}.rs`.
+and regex-parsing because there was no better way to reach them. The palettes
+are now generated from `tokens/` and ship in `colony-ui`; what is left is a
+re-export and Colony's own button styling. `settings.rs` shrank because the
+page frame, Appearance and Accessibility now come from the `colony-ui`
+preferences kit, leaving Colony's own sections and categories. The largest file
+in Colony today is `src/persistence.rs`, at 62 KB.
 
 Data does not belong in source files. A table that a human maintains and a
 machine reads is a data file plus a generator, not a `const` array.

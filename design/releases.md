@@ -146,13 +146,16 @@ Do not set `separate-pull-requests` to `false` for a single-package repository. 
 ### Libraries published to crates.io
 
 A library, such as `colony-ui` in this repository, goes through the same
-release-please chain, with two differences. It is a release-please component
+release-please chain, with three differences. It is a release-please component
 in a workspace (`include-component-in-tag`, tags like `colony-ui-v0.1.7`, the
-`cargo-workspace` plugin so the root `Cargo.lock` moves in the release PR),
-and its tag publishes to crates.io instead of building assets. Publishing uses
-crates.io Trusted Publishing: the publish job exchanges its GitHub OIDC
-identity for a token that lives only for that job, and the crate's trusted
-publisher names the repository, `release.yml` and the `crates-io`
+`cargo-workspace` plugin so the root `Cargo.lock` moves in the release PR).
+While it is 0.x it sets `bump-minor-pre-major: true`, where the template says
+`false`: a breaking change then bumps the minor version (0.1.x to 0.2.0), which
+is what cargo treats as incompatible for a 0.x crate, instead of jumping to
+1.0.0. And its tag publishes to crates.io instead of building assets.
+Publishing uses crates.io Trusted Publishing: the publish job exchanges its
+GitHub OIDC identity for a token that lives only for that job, and the crate's
+trusted publisher names the repository, `release.yml` and the `crates-io`
 environment. No registry token is stored as a secret, and no signing key is
 involved: the ed25519 signatures of section 5 are for what the launcher
 installs, and crates.io checksums what cargo downloads. See

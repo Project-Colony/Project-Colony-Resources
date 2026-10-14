@@ -140,16 +140,18 @@ Three reasons this matters more than it looks:
 
 ## Where the ecosystem does not conform
 
-Current state, so a migration is a decision rather than a discovery:
+Current state, so a migration is a decision rather than a discovery: no
+program checked is off the layout today.
 
-| Program | What | Should be | Checked |
-|---|---|---|---|
-| **Digger** | `history.db` in `<data>/digger/`, lowercase, no `Colony/` level | `<data>/Colony/Digger/` | 2026-08-24 |
-
-Colony, Grape and Eidos conform as of 2026-10-12. Each resolves its roots
-through `colony_ui::paths` and carries its older layout over at startup by the
-rules below: Colony in `persistence::migrate_legacy_paths`, Grape in
-`config::migrate`, Eidos in the `eidos-paths` crate.
+Colony, Grape and Eidos conform as of 2026-10-12, Digger (repository `D1Gg2r`)
+and Spotter as of 2026-10-14. Each resolves its roots through
+`colony_ui::paths` and carries its older layout over at startup by the rules
+below: Colony in `persistence::migrate_legacy_paths`, Grape in
+`config::migrate`, Eidos in the `eidos-paths` crate, Spotter in
+`paths::migrate`. Digger keeps `history.db` in `<data>/Colony/Digger/` and its
+preferences in `<config>/Colony/Digger/`; `History::migrate_legacy_db` copies
+the database, with its WAL sidecars, from the lowercase `<data>/digger/` it used
+before, and leaves the original where it was.
 
 ### Migrating a program
 
