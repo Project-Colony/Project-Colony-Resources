@@ -61,6 +61,20 @@ Dependabot opening a PR is not the same as the rule being followed. The PR still
 has to be merged, and the week it is ignored is the week the rule stopped
 applying.
 
+A repository without Cargo drops the `cargo` entry and adds the one for its own
+ecosystem instead (`npm`, and so on), with the same schedule.
+
+One exception, in Project-Colony/nix only. Its `.github/dependabot.yml` keeps
+the `github-actions` entry and has no `nix` entry, although Dependabot supports
+that ecosystem (version updates of `flake.lock` inputs, public repositories).
+Its update workflow already keeps `flake.lock` current: any run that bumps no
+app and finds the pinned nixpkgs more than 7 days old runs `nix flake update`,
+builds every package on both architectures, and commits only once they all
+build. Nothing waits for a merge there, so the rule is followed without a pull
+request. A `nix` entry would add a second writer of `flake.lock`, and every one
+of those commits would leave its open pull request stale. A check of that
+repository expects the `github-actions` entry alone.
+
 ## Toolchain
 
 Declare `rust-version` in `Cargo.toml` and mean it. It is a promise about who can
