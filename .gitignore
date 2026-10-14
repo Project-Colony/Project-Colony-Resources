@@ -2,3 +2,6 @@
 # consumers can read the artifacts straight from a checkout without a toolchain.
 /target
 **/*.rs.bk
+
+# Claude Code scratch state
+.claude/worktrees/
