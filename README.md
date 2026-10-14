@@ -10,13 +10,6 @@ The single place where Project Colony's shared design decisions are written down
 the theme palettes, the accent colours, the UI conventions every Colony program
 is expected to follow.
 
-Before this repo, each of those lived in whichever program happened to implement
-it first, and everything else pointed at it. SphereCord, for instance, downloaded
-Colony's `src/ui/theme.rs` over HTTP and parsed the Rust source with a regex to
-recover the palettes, and its companion request for `src/i18n.rs` had already
-gone stale, because Colony split that file into `src/i18n/{fr,en}.rs`. That is
-the class of breakage this repo exists to end.
-
 > **Status:** `colony-ui` is published on crates.io, and Colony uses its
 > palettes and its `paths` module: Colony's hand-maintained palette constants
 > are gone. The preferences kit new in 0.1.6 (`StandardPreferences`, the fonts,
@@ -29,7 +22,22 @@ the class of breakage this repo exists to end.
 > of the shared signing workflow is wired but unused: the organisation secret
 > and variable it needs do not exist yet.
 
-## How it works
+## Why Project Colony Resources
+
+Before this repo, each palette, accent and convention lived in whichever
+program happened to implement it first, and everything else pointed at it.
+SphereCord, for instance, downloaded Colony's `src/ui/theme.rs` over HTTP and
+parsed the Rust source with a regex to recover the palettes, and its companion
+request for `src/i18n.rs` had already gone stale, because Colony split that
+file into `src/i18n/{fr,en}.rs`. That is the class of breakage this repo exists
+to end.
+
+## What it does
+
+It keeps every shared colour, label and convention in one source, and
+generates from it what each kind of program consumes.
+
+### How it works
 
 ```
 tokens/          you edit this          ← the source of truth
@@ -52,7 +60,7 @@ cargo test
 `cargo test` proves the generated palettes still match, colour for colour, what
 Colony shipped before the import; see [Guarantees](#guarantees).
 
-## What's in here
+### What's in here
 
 | Path | What it is |
 |---|---|
@@ -70,25 +78,10 @@ Colony shipped before the import; see [Guarantees](#guarantees).
 | `crates/colony-ui/` | the crate programs depend on: theme, fonts, labels, preferences, widgets |
 | `crates/colony-tokens/` | the generator and its tests; never published |
 
-## Design rules
+## Installation
 
-`design/` is this repository's product rather than its documentation, so it
-sits at the top level instead of under `docs/`. One page per question:
-
-| Page | What it answers |
-|---|---|
-| [repository-layout.md](design/repository-layout.md) | how a repository and its crates are arranged and named |
-| [filesystem.md](design/filesystem.md) | where a program keeps its config, data and cache, on all three platforms |
-| [navigation.md](design/navigation.md) | how a program is laid out, and how the user reaches its settings |
-| [settings-page.md](design/settings-page.md) | what every Preferences page contains, and in what order |
-| [theming.md](design/theming.md) | how a palette is built, and how to add a theme family |
-| [typography.md](design/typography.md) | which fonts and text sizes a program uses, and where its icons come from |
-| [i18n.md](design/i18n.md) | which languages a program ships, and how its strings are named and written |
-| [releases.md](design/releases.md) | how a program is versioned, built, signed and picked up by the launcher |
-| [dependencies.md](design/dependencies.md) | how crates, the toolchain and action pins stay on their latest release |
-| [documentation.md](design/documentation.md) | how the README and `docs/` are laid out |
-
-## Consuming this repo
+Nothing here is installed on its own. A Rust program depends on the
+`colony-ui` crate; any other program reads the generated JSON or CSS.
 
 ### Rust / iced programs
 
@@ -99,6 +92,8 @@ One dependency:
 colony-ui = "0.1.6"
 ```
 <!-- x-release-please-end -->
+
+`colony-ui` needs Rust 1.88 or newer, its declared `rust-version`.
 
 ```rust
 use colony_ui::preferences::StandardPreferences;
@@ -193,6 +188,30 @@ The variables are neutral (`--colony-bg-primary`, `--colony-text-primary`, …).
 Mapping them onto a host application's own variable names (Discord's
 `--background-base-*`, say) stays in that program's repo. The values are ours;
 the mapping is theirs.
+
+## Documentation
+
+`design/` is this repository's product rather than its documentation, so it
+sits at the top level instead of under `docs/`. One page per question:
+
+| Page | What it answers |
+|---|---|
+| [repository-layout.md](design/repository-layout.md) | how a repository and its crates are arranged and named |
+| [filesystem.md](design/filesystem.md) | where a program keeps its config, data and cache, on all three platforms |
+| [navigation.md](design/navigation.md) | how a program is laid out, and how the user reaches its settings |
+| [settings-page.md](design/settings-page.md) | what every Preferences page contains, and in what order |
+| [theming.md](design/theming.md) | how a palette is built, and how to add a theme family |
+| [typography.md](design/typography.md) | which fonts and text sizes a program uses, and where its icons come from |
+| [i18n.md](design/i18n.md) | which languages a program ships, and how its strings are named and written |
+| [releases.md](design/releases.md) | how a program is versioned, built, signed and picked up by the launcher |
+| [dependencies.md](design/dependencies.md) | how crates, the toolchain and action pins stay on their latest release |
+| [documentation.md](design/documentation.md) | how the README and `docs/` are laid out |
+
+Beyond the design pages:
+
+- [templates/README.md](templates/README.md): what each template is and where it is copied to.
+- [crates/colony-ui/README.md](crates/colony-ui/README.md): the crate's own page, also shown on crates.io.
+- [SECURITY.md](SECURITY.md): how to report a vulnerability.
 
 ## Changing a colour
 
