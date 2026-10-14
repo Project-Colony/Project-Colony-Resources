@@ -6,6 +6,18 @@ release-please writes this file from the conventional commits, starting after
 Notable changes to the `colony-ui` crate. Versions follow semver; while the
 crate is 0.x, anything that breaks a consumer bumps the minor version.
 
+## [0.1.7](https://github.com/Project-Colony/Project-Colony-Resources/compare/colony-ui-v0.1.6...colony-ui-v0.1.7) (2026-10-14)
+
+
+### Fixes
+
+* **colony-ui:** refuse the reserved apps name for program directories ([#16](https://github.com/Project-Colony/Project-Colony-Resources/issues/16)) ([8d04ef6](https://github.com/Project-Colony/Project-Colony-Resources/commit/8d04ef6ef21dc7c5e405251556be1169beb806ab))
+
+
+### Internals
+
+* **tokens:** generate the contrast_on label colours and export them as --colony-ink and --colony-paper ([#25](https://github.com/Project-Colony/Project-Colony-Resources/issues/25)) ([c19a39d](https://github.com/Project-Colony/Project-Colony-Resources/commit/c19a39d6e85f4c62e0ce961f76a92c51adbc441a))
+
 ## 0.1.6
 
 ### Features
