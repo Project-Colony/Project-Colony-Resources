@@ -335,7 +335,7 @@ sign-and-publish:
   permissions:
     actions: read     # SignPath downloads the unsigned artifact with the job token
     contents: write   # drafts, uploads, publishing
-  uses: Project-Colony/Project-Colony-Resources/.github/workflows/sign-and-publish.yml@619460ff4dc0049f129955f0988d368427b9eedb # organisation pin
+  uses: Project-Colony/Project-Colony-Resources/.github/workflows/sign-and-publish.yml@1973616f4deb2182855decf446d8e2d78ad7aa29 # organisation pin
   with:
     tag: ${{ needs.release-please.outputs.tag_name || inputs.tag }}
     assets: "grape-linux grape-windows.exe grape-macos grape-macos-x86"
@@ -347,7 +347,7 @@ sign-and-publish:
 ```
 
 **The pin.** Every caller pins the shared workflow at the same commit,
-`619460ff4dc0049f129955f0988d368427b9eedb`, which is the one the template names.
+`1973616f4deb2182855decf446d8e2d78ad7aa29`, which is the one the template names.
 The pin moves only when `sign-and-publish.yml` itself changes, and then the
 template and every caller move to the new commit together. A commit to this
 repository that does not touch the workflow is no reason to move it, and
