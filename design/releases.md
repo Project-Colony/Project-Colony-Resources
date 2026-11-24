@@ -621,7 +621,7 @@ At the top of the `release-please` job, before the release-please step:
         id: app
         uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
-          app-id: ${{ vars.COLONY_BOT_APP_ID }}
+          client-id: ${{ vars.COLONY_BOT_CLIENT_ID }}
           private-key: ${{ secrets.COLONY_BOT_PRIVATE_KEY }}
           permission-contents: write
           permission-pull-requests: write
@@ -634,10 +634,12 @@ and under `with:` of the `googleapis/release-please-action` step:
           token: ${{ steps.app.outputs.token }}
 ```
 
-"Hold the release as a draft" keeps `github.token`. The App id is the
-organisation variable `COLONY_BOT_APP_ID`. The `COLONY_BOT_PRIVATE_KEY`
-organisation secret is visible to this repository and the 20 programs only, so
-a new program has to be added to that list.
+"Hold the release as a draft" keeps `github.token`. The step reads the App's
+client id from the organisation variable `COLONY_BOT_CLIENT_ID`. The
+organisation variable `COLONY_BOT_APP_ID` holds the numeric App id; v3.3.0 of
+the action deprecates its `app-id` input, so no workflow reads it any more. The
+`COLONY_BOT_PRIVATE_KEY` organisation secret is visible to this repository and
+the 20 programs only, so a new program has to be added to that list.
 
 weekly-merge.yml runs every 30 minutes from Sunday 16:07 to Monday 11:37,
 Brussels time. GitHub applies the time zone, so the hour follows summer time. A
