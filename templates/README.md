@@ -8,10 +8,10 @@ placeholders, commit. The reasoning behind them is in
 |---|---|---|
 | `program/README.md` | repo root | fill the placeholders, see [design/documentation.md](../design/documentation.md) |
 | `program/docs/README.md` | `docs/README.md` | delete the rows you do not have |
-| `sign-and-publish-caller.yml` | `.github/workflows/release.yml` | replace `{{APP_NAME}}` with the binary name, lowercase |
+| `sign-and-publish-caller.yml` | `.github/workflows/release.yml` | replace `{{APP_NAME}}` with the binary name, lowercase; give the repository access to the `COLONY_BOT_PRIVATE_KEY` and `COLONY_SIGNING_KEY_PEM` organisation secrets |
 | `release-please-config.json` | repo root | usually nothing |
 | `.release-please-manifest.json` | repo root | set the starting version |
-| `dependabot.yml` | `.github/dependabot.yml` | nothing, then merge the PRs it opens |
+| `dependabot.yml` | `.github/dependabot.yml` | once the ruleset requires the CI checks, add the repository to `WEEKLY_MERGE_REPOS` (see [design/dependencies.md](../design/dependencies.md), "Automatic merges"); merge the `actions` group and the majors by hand |
 
 A `colony.json` to copy is in [`manifests/examples/`](../manifests/examples/).
 Start from `minimal.json` unless your release assets cannot follow the naming

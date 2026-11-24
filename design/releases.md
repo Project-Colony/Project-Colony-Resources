@@ -33,7 +33,7 @@ changelog from them.
 | `perf:` | patch bump | Performance |
 | `refactor:` | patch bump | Internals |
 | `docs:` | patch bump | Documentation |
-| `chore:`, `test:`, `ci:` | patch bump | hidden |
+| `chore:`, `test:`, `ci:` | no bump, and no release PR on their own | hidden |
 | `feat!:` or a `BREAKING CHANGE:` footer | major bump | Features |
 
 Write the body for the person reading `git log` in a year, not for the diff:
@@ -536,7 +536,9 @@ should be the thing that keeps you honest about it.
    `templates/`.
 3. `.github/workflows/release.yml` from `templates/sign-and-publish-caller.yml`,
    with `{{APP_NAME}}` replaced by the binary name. Keep every pin, the shared
-   workflow's included.
+   workflow's included. Give the repository access to the
+   `COLONY_BOT_PRIVATE_KEY` organisation secret: release-please gets its token
+   from it, and without it the release-please job fails on every push to main.
 4. Signing: nothing to copy. The shared workflow signs every release with
    `COLONY_SIGNING_KEY_PEM`, which the repository must be allowed to read (see
    §8, step 3). The README gets `## Code signing policy` and `## Privacy` from
@@ -564,9 +566,10 @@ repository at a time: nothing here requires coordinating a flag day.
 2. Delete `scripts/sign-release.sh`, and any other signing step outside the
    shared workflow: nothing runs them any more, and a stale copy invites
    someone to wire it back into a build job.
-3. Confirm the repository can read the `COLONY_SIGNING_KEY_PEM` organisation
-   secret. It is restricted to Project-Colony repositories, so a new or renamed
-   repository has to be added to that list.
+3. Confirm the repository can read the `COLONY_SIGNING_KEY_PEM` and
+   `COLONY_BOT_PRIVATE_KEY` organisation secrets. Each is restricted to a list
+   of Project-Colony repositories, so a new or renamed repository has to be
+   added to both lists.
 4. Release. The first signed release publishes `.sig`, `.meta` and `.meta.sig`
    for every asset.
 5. Only now, if it is not already set, add `"signed": true` to `colony.json`.
@@ -593,3 +596,107 @@ template naming a secret that does not exist and skipping Windows signing
 entirely, neither visible from either side. The in-build signing template that
 came next kept the key in the same job as the compiler, and was retired for
 that reason.
+
+## The Sunday release
+
+Programs release on Sunday afternoon when their release pull request is green.
+Merging the release pull request still tags the release. The program's
+release.yml still builds it, signs it through sign-and-publish at the
+organisation pin, and publishes it.
+
+release-please runs with a colony-release-bot token (snippet below), not
+GITHUB_TOKEN. A release pull request written with GITHUB_TOKEN gets CI runs
+that wait for approval and never report. One written by the App gets normal CI.
+The release workflow template carries the step, and so does this repository's
+own release.yml, although colony-ui's release pull request is still merged by
+hand. Artemis and Raven push their Cargo.lock sync commit with the same token
+for the same reason. Eidos keeps EIDOS_RELEASE_TOKEN.
+
+At the top of the `release-please` job, before the release-please step:
+
+```yaml
+      # release-please writes the release pull request with the App token:
+      # one written with GITHUB_TOKEN gets CI runs that wait for approval.
+      - name: Get a colony-release-bot token
+        id: app
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          app-id: ${{ vars.COLONY_BOT_APP_ID }}
+          private-key: ${{ secrets.COLONY_BOT_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+          permission-issues: write
+```
+
+and under `with:` of the `googleapis/release-please-action` step:
+
+```yaml
+          token: ${{ steps.app.outputs.token }}
+```
+
+"Hold the release as a draft" keeps `github.token`. The App id is the
+organisation variable `COLONY_BOT_APP_ID`. The `COLONY_BOT_PRIVATE_KEY`
+organisation secret is visible to this repository and the 20 programs only, so
+a new program has to be added to that list.
+
+weekly-merge.yml runs every 30 minutes from Sunday 16:07 to Monday 11:37,
+Brussels time. GitHub applies the time zone, so the hour follows summer time. A
+scheduled run can start hours late. The workflow takes its mode from the
+schedule entry that fired, not from the clock, so a late run still behaves as a
+Sunday run.
+
+For each program in `WEEKLY_RELEASE_REPOS`, a run squash-merges the release
+pull request when all of these hold:
+
+- exactly one release pull request is open (label `autorelease: pending`);
+- colony-release-bot opened it from its own branch, it is not a draft, and its
+  commits come from release-please or the Cargo.lock sync;
+- every required check passed;
+- the program has no Release run queued or running, and its last release
+  finished;
+- fewer than `WEEKLY_RELEASE_CAP` programs (default 4) are building a release.
+
+A program skipped by one run is tried again 30 minutes later. Colony is merged
+last, because the other release builds download Colony's latest release: a run
+merges it only when no other listed program has a Release run going or a
+release pull request waiting for its checks. Colony's release also pushes
+colony-bin to the AUR, so that push runs unattended too. The cap keeps release
+builds from taking all 20 concurrent job slots and the macOS slots of the
+organisation.
+
+No release pull request means no release. A week with only chore, test or ci
+commits opens none.
+
+Lin releases Eidos by hand. Project-Colony-Resources releases colony-ui by hand
+until crates.io Trusted Publishing is registered: merging its release pull
+request would create a tag and a GitHub release, then fail to publish.
+Overdrive has no release-please. The workflow refuses to release any of the
+three. To skip one program for a week, add it to `WEEKLY_RELEASE_HOLD`.
+
+A program with SignPath on needs someone to approve its signing request within
+5 hours ("Shared signing workflow", the manual approval), and the window runs
+overnight. Keep such a program out of `WEEKLY_RELEASE_REPOS`, or add it to
+`WEEKLY_RELEASE_HOLD` for a week when nobody can approve.
+
+The workflow reads four variables of this repository (Settings > Secrets and
+variables > Actions > Variables), each a comma-separated list with no spaces:
+
+| Variable | Meaning |
+|---|---|
+| `WEEKLY_MERGE_REPOS` | Repositories where Dependabot groups merge. This is also the token scope. Empty means the job does nothing. |
+| `WEEKLY_RELEASE_REPOS` | Repositories whose release pull request merges on Sunday. Each one must also be in `WEEKLY_MERGE_REPOS`. |
+| `WEEKLY_RELEASE_HOLD` | Optional. Repositories to skip this week. |
+| `WEEKLY_RELEASE_CAP` | Optional. Default 4. |
+
+Problems go to the issue "Weekly merge: needs attention" in this repository,
+assigned to MotherSphere. A comment is posted when the list changes, and the
+issue closes when the list is empty. Typical items:
+
+- a red release pull request;
+- a release pull request not opened by the App;
+- a draft release older than three hours, with the recovery command
+  `gh workflow run release.yml -R Project-Colony/<repo> --ref vX.Y.Z -f tag=vX.Y.Z`;
+- a release pull request merged but never tagged, with the command to re-run
+  that Release run.
+
+Programs do not call weekly-merge.yml, so "The pin" does not apply to it.

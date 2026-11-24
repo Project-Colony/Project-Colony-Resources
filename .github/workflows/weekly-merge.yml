@@ -1,0 +1,299 @@
+name: Weekly merge
+
+# Every day except Monday, squash-merges green Dependabot minor, patch and
+# security group pull requests. From Sunday 16:07 to Monday 11:37,
+# squash-merges each program's green release pull request, with at most
+# WEEKLY_RELEASE_CAP release builds at once. Merges use the colony-release-bot
+# token so the push to main starts release.yml. Rules: design/dependencies.md
+# "Automatic merges" and design/releases.md "The Sunday release".
+on:
+  schedule:
+    # Not Monday, which is inside the release window. Sunday comes last in the
+    # list: "0,2-6" would contain "* * 0" and turn on RELEASE below.
+    - cron: "7 10 * * 2-6,0"
+      timezone: "Europe/Brussels"
+    - cron: "7 16 * * 5"
+      timezone: "Europe/Brussels"
+    - cron: "7,37 16-23 * * 0"
+      timezone: "Europe/Brussels"
+    - cron: "7,37 0-11 * * 1"
+      timezone: "Europe/Brussels"
+  workflow_dispatch:
+    inputs:
+      repos:
+        description: Repository names, separated by spaces or commas (empty means every listed repository)
+        type: string
+        default: ""
+      release:
+        description: Merge green release pull requests instead of Dependabot ones
+        type: boolean
+        default: false
+      dry_run:
+        description: Report what would be merged, merge nothing
+        type: boolean
+        default: true
+
+permissions: {}
+
+concurrency:
+  group: weekly-merge
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    name: merge green pull requests
+    # Only main's copy runs, on schedule or for the organisation owner.
+    if: >-
+      github.ref == 'refs/heads/main' && vars.WEEKLY_MERGE_REPOS != '' &&
+      (github.event_name == 'schedule' || github.actor == 'MotherSphere')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Get a colony-release-bot token
+        id: app
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          app-id: ${{ vars.COLONY_BOT_APP_ID }}
+          private-key: ${{ secrets.COLONY_BOT_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ vars.WEEKLY_MERGE_REPOS }}
+          permission-contents: write
+          permission-pull-requests: write
+          permission-actions: read
+          permission-checks: read
+          permission-statuses: read
+
+      - name: Merge and look for unfinished releases
+        id: merge
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          RESOURCES_TOKEN: ${{ github.token }}
+          MERGE_REPOS: ${{ vars.WEEKLY_MERGE_REPOS }}
+          RELEASE_REPOS: ${{ vars.WEEKLY_RELEASE_REPOS }}
+          HOLD: ${{ vars.WEEKLY_RELEASE_HOLD }}
+          CAP: ${{ vars.WEEKLY_RELEASE_CAP || '4' }}
+          ONLY: ${{ inputs.repos }}
+          SCHEDULE: ${{ github.event.schedule }}
+          # The schedule entry decides, not the clock, so a late run keeps its mode.
+          RELEASE: ${{ contains(github.event.schedule, '* * 0') || contains(github.event.schedule, '* * 1') || inputs.release == true }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+          # Lin releases Eidos, Resources has no crates.io trusted publishing,
+          # Overdrive has no release-please.
+          NEVER_RELEASE: Eidos Project-Colony-Resources Overdrive
+        run: |
+          # The default shell runs with -e; non-zero exits are handled below.
+          set +e
+          set -uo pipefail
+          org=$GITHUB_REPOSITORY_OWNER
+          attn=$RUNNER_TEMP/attention.txt
+          : > "$attn"
+          say()   { echo "$*"; echo "- $*" >> "$GITHUB_STEP_SUMMARY"; }
+          flag()  { say "ATTENTION: $*"; echo "- $*" >> "$attn"; }
+          words() { tr ',' ' ' <<<"$1"; }
+          has()   { [[ " $(words "$1") " == *" $2 "* ]]; }
+          pick()  { [ -z "$ONLY" ] || has "$ONLY" "$1"; }
+          # Monday 11:30 Brussels or later: no run of the release window is left.
+          late()  { local d; d=$(TZ=Europe/Brussels date +%u%H%M); [ "$d" -ge 11130 ] && [ "$d" -lt 70000 ]; }
+          wait_or_flag() { if late; then flag "$* The release window is over, so it waits a week."; else say "$*"; fi; }
+
+          busy() {  # a Release run is queued or running; an API error counts as busy
+            local n
+            n=$(gh run list -R "$org/$1" -w release.yml -L 10 --json status \
+                  --jq '[.[] | select(.status != "completed")] | length' 2>/dev/null </dev/null) || n=1
+            [ "${n:-1}" != 0 ]
+          }
+          guarded() {  # the default branch ruleset requires status checks
+            local base
+            base=$(gh api "repos/$org/$1" --jq .default_branch </dev/null) || return 1
+            [ "$(gh api "repos/$org/$1/rules/branches/$base" --jq 'any(.[]; .type == "required_status_checks")' </dev/null)" = true ]
+          }
+          green() {  # 0 mergeable, 1 wait, 2 needs a person; prints the reason
+            local s
+            gh pr checks "$2" -R "$org/$1" --required >/dev/null 2>&1 </dev/null
+            case $? in
+              0) ;;
+              8) echo "required checks still running"; return 1 ;;
+              *) echo "required checks failing or missing"; return 2 ;;
+            esac
+            for _ in 1 2 3; do
+              s=$(gh pr view "$2" -R "$org/$1" --json mergeStateStatus --jq .mergeStateStatus </dev/null) || s=ERROR
+              [ "$s" = UNKNOWN ] || break
+              sleep 10
+            done
+            case $s in
+              CLEAN|UNSTABLE|HAS_HOOKS) return 0 ;;
+              UNKNOWN) echo "merge state unknown"; return 1 ;;
+              *) echo "merge state $s"; return 2 ;;
+            esac
+          }
+          merge() {  # repo number head-sha [subject]
+            local args=(--squash --match-head-commit "$3")
+            [ -n "${4:-}" ] && args+=(--subject "$4")
+            if [ "$DRY_RUN" = true ]; then say "$1#$2: would merge"; return 0; fi
+            if gh pr merge "$2" -R "$org/$1" "${args[@]}" </dev/null; then say "$1#$2: merged"; return 0; fi
+            flag "$1#$2: GitHub refused the merge."
+            return 1
+          }
+          stuck() {  # flags unfinished releases; returns 0 when one exists
+            local r=$1 found=1 row tag n sha id
+            mapfile -t rows < <(gh release list -R "$org/$r" --limit 10 --json tagName,isDraft,createdAt \
+                --jq '.[] | select(.isDraft and (now - (.createdAt | fromdate)) > 10800) | .tagName' </dev/null)
+            for tag in "${rows[@]}"; do
+              found=0
+              flag "$r: release $tag is still a draft 3 hours after creation. Finish it: gh workflow run release.yml -R $org/$r --ref $tag -f tag=$tag"
+            done
+            mapfile -t rows < <(gh pr list -R "$org/$r" --state merged --label "autorelease: pending" --json number,mergedAt,mergeCommit \
+                --jq '.[] | select((now - (.mergedAt | fromdate)) > 14400 and (now - (.mergedAt | fromdate)) < 2592000) | "\(.number) \(.mergeCommit.oid)"' </dev/null)
+            for row in "${rows[@]}"; do
+              read -r n sha <<<"$row"
+              found=0
+              id=$(gh run list -R "$org/$r" -w release.yml -c "$sha" -L 1 --json databaseId --jq '.[0].databaseId // "RUN_ID"' </dev/null)
+              flag "$r#$n: release pull request merged over 4 hours ago and never tagged. Re-run the Release run of its merge commit: gh run rerun $id -R $org/$r (any later push to main also tags it)."
+            done
+            return $found
+          }
+
+          echo "event=$GITHUB_EVENT_NAME schedule='$SCHEDULE' release=$RELEASE dry_run=$DRY_RUN"
+          if [ "$GITHUB_EVENT_NAME" = schedule ]; then
+            case $SCHEDULE in
+              "7 10 * * 2-6,0"|"7 16 * * 5"|"7,37 16-23 * * 0"|"7,37 0-11 * * 1") ;;
+              *) flag "github.event.schedule is '$SCHEDULE', which matches no entry in weekly-merge.yml. Check the RELEASE test." ;;
+            esac
+            last=$(GH_TOKEN=$RESOURCES_TOKEN gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .commit.committer.date) || last=""
+            if [ -n "$last" ] && [ $(( ($(date +%s) - $(date -d "$last" +%s)) / 86400 )) -gt 45 ]; then
+              flag "Project-Colony-Resources has had no commit on main since $last. GitHub turns this schedule off after 60 days without activity."
+            fi
+          fi
+
+          release_repos=""
+          for r in $(words "$RELEASE_REPOS"); do
+            if has "$NEVER_RELEASE" "$r"; then flag "$r is in WEEKLY_RELEASE_REPOS but this workflow never releases it. Remove it."
+            elif ! has "$MERGE_REPOS" "$r"; then flag "$r is in WEEKLY_RELEASE_REPOS but not in WEEKLY_MERGE_REPOS, so the token cannot reach it."
+            else release_repos+=" $r"
+            fi
+          done
+          # Colony goes last: the other release builds download Colony's latest release.
+          if has "$release_repos" Colony; then
+            release_repos="$(printf '%s\n' $release_repos | grep -vx Colony | xargs) Colony"
+          fi
+
+          stuck_repos=""
+          for r in $release_repos; do
+            pick "$r" || continue
+            busy "$r" && continue
+            stuck "$r" && stuck_repos+=" $r"
+          done
+
+          # Dependabot: green minor, patch and security groups, outside the release window.
+          group_re='^dependabot/(cargo|npm_and_yarn)/(.+/)?(cargo-minor|cargo-dev|cargo-security|npm-minor|npm-security)-[0-9a-f]+$'
+          fix_re='^fix\(deps(-dev)?\): '
+          if [ "$RELEASE" != true ]; then
+            for r in $(words "$MERGE_REPOS"); do
+              pick "$r" || continue
+              if ! guarded "$r"; then say "$r: skipped, its default branch requires no status checks"; continue; fi
+              prs=$(gh pr list -R "$org/$r" --author app/dependabot --state open --limit 100 \
+                      --json number,headRefName,headRefOid,title,isDraft,isCrossRepository,createdAt </dev/null) \
+                || { flag "$r: could not list Dependabot pull requests."; continue; }
+              mapfile -t rows < <(jq -r '.[] | select((.isDraft | not) and (.isCrossRepository | not))
+                  | [.number, .headRefName, .headRefOid, ((now - (.createdAt | fromdate)) / 86400 | floor), .title] | @tsv' <<<"$prs")
+              for row in "${rows[@]}"; do
+                IFS=$'\t' read -r n ref sha age title <<<"$row"
+                if ! [[ $ref =~ $group_re ]]; then say "$r#$n: not a minor, patch or security group, left for a person: $title"; continue; fi
+                if ! [[ $title =~ $fix_re ]]; then say "$r#$n: title older than the template, comment @dependabot recreate: $title"; continue; fi
+                others=$(gh api "repos/$org/$r/pulls/$n/commits" \
+                           --jq '[.[] | select(.author.login != "dependabot[bot]" or (.commit.verification.verified | not))] | length' </dev/null) || others=1
+                if [ "$others" != 0 ]; then say "$r#$n: has commits not signed by Dependabot, left for a person"; continue; fi
+                why=$(green "$r" "$n"); rc=$?
+                if [ $rc = 0 ]; then
+                  subject=""
+                  # cargo-dev holds dev-only crates: chore(deps), so it never releases.
+                  [[ $ref == *cargo-dev-* ]] && subject="chore${title#fix} (#$n)"
+                  merge "$r" "$n" "$sha" "$subject"
+                elif [ $rc = 2 ] && [ "$age" -ge 4 ]; then
+                  flag "$r#$n: Dependabot group pull request not mergeable for 4 days or more ($why)."
+                else
+                  say "$r#$n: $why, next run"
+                fi
+              done
+            done
+          fi
+
+          # Release pull requests: inspected on every run, merged only in release mode.
+          if [ "$RELEASE" = true ]; then
+            in_flight=0
+            others_waiting=0
+            for r in $release_repos; do busy "$r" && in_flight=$((in_flight + 1)); done
+            say "Release builds running: $in_flight (cap $CAP)"
+          fi
+          for r in $release_repos; do
+            pick "$r" || continue
+            if has "$HOLD" "$r"; then say "$r: held by WEEKLY_RELEASE_HOLD"; continue; fi
+            if has "$stuck_repos" "$r"; then say "$r: last release unfinished, no new one"; continue; fi
+            if ! guarded "$r"; then flag "$r: in WEEKLY_RELEASE_REPOS but its default branch requires no status checks."; continue; fi
+            prs=$(gh pr list -R "$org/$r" --state open --label "autorelease: pending" \
+                    --json number,headRefName,headRefOid,author,isDraft,isCrossRepository,updatedAt </dev/null) \
+              || { flag "$r: could not list release pull requests."; continue; }
+            case $(jq length <<<"$prs") in
+              0) say "$r: nothing to release"; continue ;;
+              1) ;;
+              *) flag "$r: more than one open release pull request."; continue ;;
+            esac
+            IFS=$'\t' read -r n ref sha login draft cross fresh < <(jq -r '.[0] | [.number, .headRefName, .headRefOid,
+                .author.login, .isDraft, .isCrossRepository, ((now - (.updatedAt | fromdate)) < 7200)] | @tsv' <<<"$prs")
+            if [ "$login" != app/colony-release-bot ] || [[ $ref != release-please--branches--main* ]] || [ "$cross" != false ]; then
+              flag "$r#$n: release pull request by $login on $ref, not by colony-release-bot. Close it and remove its autorelease: pending label; release-please opens a new one on the next push to main."
+              continue
+            fi
+            if [ "$draft" = true ]; then say "$r#$n: draft, skipped"; continue; fi
+            others=$(gh api "repos/$org/$r/pulls/$n/commits" \
+                       --jq '[.[] | select(.author.login != "colony-release-bot[bot]" and .author.login != "github-actions[bot]")] | length' </dev/null) || others=1
+            if [ "$others" != 0 ]; then flag "$r#$n: release pull request has commits by someone else. Merge it by hand if they are expected."; continue; fi
+            why=$(green "$r" "$n"); rc=$?
+            # CI needs a few minutes to report after release-please refreshes the pull request.
+            if [ $rc = 2 ] && [ "$fresh" = true ]; then rc=1; fi
+            if [ $rc = 2 ]; then flag "$r#$n: release pull request not mergeable ($why)."; continue; fi
+            if [ "$RELEASE" != true ]; then say "$r#$n: release pull request ${why:-green}, merged in the Sunday window"; continue; fi
+            if busy "$r"; then others_waiting=1; wait_or_flag "$r#$n: a Release run is still going."; continue; fi
+            if [ $rc = 1 ]; then others_waiting=1; wait_or_flag "$r#$n: $why."; continue; fi
+            # Colony is last in the loop, so this sees every other program of this run.
+            if [ "$r" = Colony ] && { [ "$in_flight" -gt 0 ] || [ "$others_waiting" = 1 ]; }; then
+              wait_or_flag "$r#$n: green, waiting until no other release is building or waiting for checks."; continue
+            fi
+            if [ "$in_flight" -ge "$CAP" ]; then others_waiting=1; wait_or_flag "$r#$n: green, waiting for a release slot ($in_flight building)."; continue; fi
+            merge "$r" "$n" "$sha" && in_flight=$((in_flight + 1))
+          done
+          exit 0
+
+      - name: Update the attention issue
+        if: always() && github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MERGE_OUTCOME: ${{ steps.merge.outcome }}
+        run: |
+          set +e
+          set -uo pipefail
+          attn=$RUNNER_TEMP/attention.txt
+          touch "$attn"
+          if [ "$MERGE_OUTCOME" != success ]; then
+            echo "- The merge step ended as '$MERGE_OUTCOME': $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> "$attn"
+          fi
+          title="Weekly merge: needs attention"
+          items=$(sort -u "$attn")
+          digest=$(sha256sum <<<"$items" | cut -c1-16)
+          # Anyone can open an issue with this title; only this workflow's own counts.
+          json=$(gh issue list -R "$GITHUB_REPOSITORY" --state open --author "github-actions[bot]" --limit 200 --json number,title,body) || exit 1
+          n=$(jq -r --arg t "$title" 'map(select(.title == $t)) | .[0].number // empty' <<<"$json")
+          old=$(jq -r --arg t "$title" 'map(select(.title == $t)) | .[0].body // ""' <<<"$json")
+          body=$(printf '<!-- digest: %s -->\n%s\n\nUpdated by %s/%s/actions/runs/%s\n' \
+                   "$digest" "$items" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID")
+          if [ -z "$items" ]; then
+            if [ -n "$n" ]; then gh issue close "$n" -R "$GITHUB_REPOSITORY" --comment "Nothing needs attention any more."; fi
+          elif [ -z "$n" ]; then
+            gh issue create -R "$GITHUB_REPOSITORY" --title "$title" --assignee MotherSphere --body "$body"
+          elif [[ $old != *"digest: $digest"* ]]; then
+            gh issue edit "$n" -R "$GITHUB_REPOSITORY" --body "$body"
+            gh issue comment "$n" -R "$GITHUB_REPOSITORY" --body "$(printf 'The list changed:\n\n%s\n' "$items")"
+          fi

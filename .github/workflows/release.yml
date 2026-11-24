@@ -41,17 +41,30 @@ jobs:
   release-please:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    # release-please writes with the colony-release-bot token, not this job's.
     permissions:
-      contents: write
-      pull-requests: write
+      contents: read
     outputs:
       release_created: ${{ steps.release.outputs['crates/colony-ui--release_created'] }}
       tag_name: ${{ steps.release.outputs['crates/colony-ui--tag_name'] }}
     steps:
+      # release-please writes the release pull request with the App token:
+      # one written with GITHUB_TOKEN gets CI runs that wait for approval.
+      - name: Get a colony-release-bot token
+        id: app
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          app-id: ${{ vars.COLONY_BOT_APP_ID }}
+          private-key: ${{ secrets.COLONY_BOT_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+          permission-issues: write
+
       # No `release-type` input: when it is set, the action ignores both files.
       - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         id: release
         with:
+          token: ${{ steps.app.outputs.token }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
