@@ -76,7 +76,7 @@ version = "1.4.1"      # x-release-please-version
 license = "GPL-3.0-or-later"
 repository = "https://github.com/Project-Colony/<Repo>"
 edition = "2021"
-rust-version = "1.88"
+rust-version = "1.100"
 ```
 
 ```toml
