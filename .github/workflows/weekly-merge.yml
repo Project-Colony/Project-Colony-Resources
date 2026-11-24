@@ -1,14 +1,16 @@
 name: Weekly merge
 
-# Every day, squash-merges green Dependabot minor, patch and security group
-# pull requests. From Sunday 16:07 to Monday 11:37, squash-merges each
-# program's green release pull request, with at most WEEKLY_RELEASE_CAP
-# release builds at once. Merges use the colony-release-bot token so the
-# push to main starts release.yml. Rules: design/dependencies.md
+# Every day except Monday, squash-merges green Dependabot minor, patch and
+# security group pull requests. From Sunday 16:07 to Monday 11:37,
+# squash-merges each program's green release pull request, with at most
+# WEEKLY_RELEASE_CAP release builds at once. Merges use the colony-release-bot
+# token so the push to main starts release.yml. Rules: design/dependencies.md
 # "Automatic merges" and design/releases.md "The Sunday release".
 on:
   schedule:
-    - cron: "7 10 * * *"
+    # Not Monday, which is inside the release window. Sunday comes last in the
+    # list: "0,2-6" would contain "* * 0" and turn on RELEASE below.
+    - cron: "7 10 * * 2-6,0"
       timezone: "Europe/Brussels"
     - cron: "7 16 * * 5"
       timezone: "Europe/Brussels"
@@ -93,8 +95,8 @@ jobs:
           words() { tr ',' ' ' <<<"$1"; }
           has()   { [[ " $(words "$1") " == *" $2 "* ]]; }
           pick()  { [ -z "$ONLY" ] || has "$ONLY" "$1"; }
-          # Monday 11:00 Brussels or later: the release window is over.
-          late()  { local d; d=$(TZ=Europe/Brussels date +%u%H); [ "$d" -ge 111 ] && [ "$d" -lt 700 ]; }
+          # Monday 11:30 Brussels or later: no run of the release window is left.
+          late()  { local d; d=$(TZ=Europe/Brussels date +%u%H%M); [ "$d" -ge 11130 ] && [ "$d" -lt 70000 ]; }
           wait_or_flag() { if late; then flag "$* The release window is over, so it waits a week."; else say "$*"; fi; }
 
           busy() {  # a Release run is queued or running; an API error counts as busy
@@ -157,7 +159,7 @@ jobs:
           echo "event=$GITHUB_EVENT_NAME schedule='$SCHEDULE' release=$RELEASE dry_run=$DRY_RUN"
           if [ "$GITHUB_EVENT_NAME" = schedule ]; then
             case $SCHEDULE in
-              "7 10 * * *"|"7 16 * * 5"|"7,37 16-23 * * 0"|"7,37 0-11 * * 1") ;;
+              "7 10 * * 2-6,0"|"7 16 * * 5"|"7,37 16-23 * * 0"|"7,37 0-11 * * 1") ;;
               *) flag "github.event.schedule is '$SCHEDULE', which matches no entry in weekly-merge.yml. Check the RELEASE test." ;;
             esac
             last=$(GH_TOKEN=$RESOURCES_TOKEN gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .commit.committer.date) || last=""
@@ -222,6 +224,7 @@ jobs:
           # Release pull requests: inspected on every run, merged only in release mode.
           if [ "$RELEASE" = true ]; then
             in_flight=0
+            others_waiting=0
             for r in $release_repos; do busy "$r" && in_flight=$((in_flight + 1)); done
             say "Release builds running: $in_flight (cap $CAP)"
           fi
@@ -253,9 +256,13 @@ jobs:
             if [ $rc = 2 ] && [ "$fresh" = true ]; then rc=1; fi
             if [ $rc = 2 ]; then flag "$r#$n: release pull request not mergeable ($why)."; continue; fi
             if [ "$RELEASE" != true ]; then say "$r#$n: release pull request ${why:-green}, merged in the Sunday window"; continue; fi
-            if busy "$r"; then wait_or_flag "$r#$n: a Release run is still going."; continue; fi
-            if [ $rc = 1 ]; then wait_or_flag "$r#$n: $why."; continue; fi
-            if [ "$in_flight" -ge "$CAP" ]; then wait_or_flag "$r#$n: green, waiting for a release slot ($in_flight building)."; continue; fi
+            if busy "$r"; then others_waiting=1; wait_or_flag "$r#$n: a Release run is still going."; continue; fi
+            if [ $rc = 1 ]; then others_waiting=1; wait_or_flag "$r#$n: $why."; continue; fi
+            # Colony is last in the loop, so this sees every other program of this run.
+            if [ "$r" = Colony ] && { [ "$in_flight" -gt 0 ] || [ "$others_waiting" = 1 ]; }; then
+              wait_or_flag "$r#$n: green, waiting until no other release is building or waiting for checks."; continue
+            fi
+            if [ "$in_flight" -ge "$CAP" ]; then others_waiting=1; wait_or_flag "$r#$n: green, waiting for a release slot ($in_flight building)."; continue; fi
             merge "$r" "$n" "$sha" && in_flight=$((in_flight + 1))
           done
           exit 0
@@ -276,7 +283,8 @@ jobs:
           title="Weekly merge: needs attention"
           items=$(sort -u "$attn")
           digest=$(sha256sum <<<"$items" | cut -c1-16)
-          json=$(gh issue list -R "$GITHUB_REPOSITORY" --state open --limit 200 --json number,title,body) || exit 1
+          # Anyone can open an issue with this title; only this workflow's own counts.
+          json=$(gh issue list -R "$GITHUB_REPOSITORY" --state open --author "github-actions[bot]" --limit 200 --json number,title,body) || exit 1
           n=$(jq -r --arg t "$title" 'map(select(.title == $t)) | .[0].number // empty' <<<"$json")
           old=$(jq -r --arg t "$title" 'map(select(.title == $t)) | .[0].body // ""' <<<"$json")
           body=$(printf '<!-- digest: %s -->\n%s\n\nUpdated by %s/%s/actions/runs/%s\n' \

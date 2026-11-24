@@ -62,7 +62,10 @@ has to be merged, and the week it is ignored is the week the rule stopped
 applying.
 
 A repository without Cargo drops the `cargo` entry and adds the one for its own
-ecosystem instead (`npm`, and so on), with the same schedule.
+ecosystem instead (`npm`, and so on), with the same schedule, cooldown and
+`commit-message`, and with groups named after the ecosystem the way the Cargo
+ones are (`npm-minor`, `npm-security`). weekly-merge.yml merges only the Cargo
+and npm groups (see "Automatic merges" below).
 
 One exception, in Project-Colony/nix only. Its `.github/dependabot.yml` keeps
 the `github-actions` entry and has no `nix` entry, although Dependabot supports
@@ -80,38 +83,45 @@ repository expects the `github-actions` entry alone.
 Dependabot runs every Friday at 07:00, Brussels time, for Cargo, npm and
 GitHub Actions alike. Every entry sets `cooldown: default-days: 7`, so a
 version must have been public for a week before Dependabot proposes it.
-Security updates skip the cooldown.
+Security updates skip the cooldown. "Latest release" in the rule at the top of
+this page therefore means the latest one that is at least a week old, unless a
+security fix is waiting.
 
 The commit prefix decides whether an update ships. Cargo and npm entries use
 `prefix: fix` with `include: scope`, so their pull requests and squash commits
-read `fix(deps): ...`. release-please lists them under Fixes and cuts a patch
-release. The GitHub Actions entry uses `prefix: chore`, a hidden section, so
-action updates never cause a release. Dependabot counts every Cargo dependency
-as production, dev-dependencies included. A repository that wants dev-only
-crates kept out of releases lists them in a `cargo-dev` group and in the
-`exclude-patterns` of `cargo-minor`. SAM's npm devDependencies ship in the
-frontend bundle, so its npm updates are all `fix(deps)`.
+read `fix(deps): ...`, or `fix(deps-dev): ...` for npm devDependencies.
+release-please lists them under Fixes and cuts a patch release. Cargo entries
+keep `allow: dependency-type: all`, so transitive crates move too, and an
+update that only touches `Cargo.lock` still releases. The GitHub Actions entry
+uses `prefix: chore`, a hidden section, so action updates never cause a
+release. Dependabot counts every Cargo dependency as production,
+dev-dependencies included. A repository that wants dev-only crates kept out of
+releases lists them in a `cargo-dev` group and in the `exclude-patterns` of
+`cargo-minor`. SAM's npm devDependencies ship in the frontend bundle, so its
+npm updates are all `fix`, devDependencies included.
 
-Minor and patch updates arrive grouped: `cargo-minor`, `npm-minor` and
-`actions`. Security fixes that are minor or patch arrive in `cargo-security` or
-`npm-security`. Anything Dependabot treats as major comes as its own pull
-request, including a 0.x minor jump such as 0.41 to 0.43. A person decides on
-those.
+Minor and patch updates arrive grouped in `cargo-minor` and `npm-minor`.
+Security fixes that are minor or patch arrive in `cargo-security` or
+`npm-security`. Anything Dependabot treats as major for Cargo or npm comes as
+its own pull request, including a 0.x minor jump such as 0.41 to 0.43. A person
+decides on those. GitHub Actions updates, majors included, arrive together in
+the `actions` group.
 
 `.github/workflows/weekly-merge.yml` in this repository runs at 10:07 every day
-and at 16:07 on Friday, Brussels time. In each repository listed in
-`WEEKLY_MERGE_REPOS`, it squash-merges a Dependabot pull request when all of
+except Monday and at 16:07 on Friday, Brussels time. In each repository listed
+in `WEEKLY_MERGE_REPOS`, it squash-merges a Dependabot pull request when all of
 these hold:
 
 - it comes from a `cargo-minor`, `cargo-dev`, `cargo-security`, `npm-minor` or
   `npm-security` branch;
-- its title starts with `fix(deps)`;
+- its title starts with `fix(deps)` or `fix(deps-dev)`;
 - every commit on it is a verified Dependabot commit;
 - every required check passed.
 
 A `cargo-dev` pull request is squashed under a `chore(deps)` subject, so it
 never releases. The runs of the Sunday release window (design/releases.md, "The
-Sunday release") merge no Dependabot pull request.
+Sunday release") merge no Dependabot pull request, and the daily run skips
+Monday because Monday morning is part of that window.
 
 It merges with the colony-release-bot App on purpose. A merge made with
 GITHUB_TOKEN starts no workflow, so release.yml would not run and the release
@@ -127,14 +137,16 @@ leaked App key could add a workflow that reads COLONY_SIGNING_KEY_PEM. They are
 
 The workflow skips any repository whose "Protect default branch" ruleset
 requires no status checks. Without required checks, a pull request whose CI
-never ran looks mergeable. Each program requires the CI checks listed for it,
-with GitHub Actions (integration id 15368) as the source and "up to date" off.
+never ran looks mergeable. Each program's ruleset requires that program's own
+CI job names, with GitHub Actions (integration id 15368) as the source and "up
+to date" off.
 Never require the CodeQL default setup checks (`Analyze (...)`, `CodeQL`): they
 are absent or neutral on Dependabot pull requests. A check that is not required
 can fail without blocking a merge.
 
 Copy templates/dependabot.yml as is. Add only repository-specific ignores,
-directories or a `cargo-dev` group.
+directories, a `cargo-dev` group, or the entry for another ecosystem described
+under "Automation".
 
 ## Toolchain
 
@@ -209,10 +221,10 @@ cargo update
 cargo test
 ```
 
-If the tests pass, commit as `chore(deps): update dependencies`, with the
-notable jumps in the body. If they fail, fix them *now*: a failing upgrade you
-postpone is the exact thing this page exists to prevent, and it will not be
-smaller next week.
+If the tests pass, commit as `fix(deps): update dependencies`, with the
+notable jumps in the body, so the next release ships them. If they fail, fix
+them *now*: a failing upgrade you postpone is the exact thing this page exists
+to prevent, and it will not be smaller next week.
 
 For a major bump, read the changelog before the compiler tells you. `cargo test`
 proves the code still compiles and the tests still pass; it does not prove a

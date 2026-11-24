@@ -3,6 +3,10 @@
 # Copy to your repo as .github/workflows/release.yml and replace {{APP_NAME}}
 # with your binary name (lowercase, as it appears in Cargo.toml).
 #
+# The repository needs access to the COLONY_BOT_PRIVATE_KEY organisation
+# secret: release-please gets its token from it, and without it the
+# release-please job fails on every push to main.
+#
 # Assets follow the Colony naming convention, so Colony auto-detects which
 # platforms you ship and your colony.json only needs a name and a category:
 #

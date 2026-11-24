@@ -536,7 +536,9 @@ should be the thing that keeps you honest about it.
    `templates/`.
 3. `.github/workflows/release.yml` from `templates/sign-and-publish-caller.yml`,
    with `{{APP_NAME}}` replaced by the binary name. Keep every pin, the shared
-   workflow's included.
+   workflow's included. Give the repository access to the
+   `COLONY_BOT_PRIVATE_KEY` organisation secret: release-please gets its token
+   from it, and without it the release-please job fails on every push to main.
 4. Signing: nothing to copy. The shared workflow signs every release with
    `COLONY_SIGNING_KEY_PEM`, which the repository must be allowed to read (see
    §8, step 3). The README gets `## Code signing policy` and `## Privacy` from
@@ -564,9 +566,10 @@ repository at a time: nothing here requires coordinating a flag day.
 2. Delete `scripts/sign-release.sh`, and any other signing step outside the
    shared workflow: nothing runs them any more, and a stale copy invites
    someone to wire it back into a build job.
-3. Confirm the repository can read the `COLONY_SIGNING_KEY_PEM` organisation
-   secret. It is restricted to Project-Colony repositories, so a new or renamed
-   repository has to be added to that list.
+3. Confirm the repository can read the `COLONY_SIGNING_KEY_PEM` and
+   `COLONY_BOT_PRIVATE_KEY` organisation secrets. Each is restricted to a list
+   of Project-Colony repositories, so a new or renamed repository has to be
+   added to both lists.
 4. Release. The first signed release publishes `.sig`, `.meta` and `.meta.sig`
    for every asset.
 5. Only now, if it is not already set, add `"signed": true` to `colony.json`.
@@ -646,18 +649,20 @@ For each program in `WEEKLY_RELEASE_REPOS`, a run squash-merges the release
 pull request when all of these hold:
 
 - exactly one release pull request is open (label `autorelease: pending`);
-- colony-release-bot opened it from its own branch, and its commits come from
-  release-please or the Cargo.lock sync;
+- colony-release-bot opened it from its own branch, it is not a draft, and its
+  commits come from release-please or the Cargo.lock sync;
 - every required check passed;
 - the program has no Release run queued or running, and its last release
   finished;
 - fewer than `WEEKLY_RELEASE_CAP` programs (default 4) are building a release.
 
 A program skipped by one run is tried again 30 minutes later. Colony is merged
-last, because the other release builds download Colony's latest release.
-Colony's release also pushes colony-bin to the AUR, so that push runs
-unattended too. The cap keeps release builds from taking all 20 concurrent job
-slots and the macOS slots of the organisation.
+last, because the other release builds download Colony's latest release: a run
+merges it only when no other listed program has a Release run going or a
+release pull request waiting for its checks. Colony's release also pushes
+colony-bin to the AUR, so that push runs unattended too. The cap keeps release
+builds from taking all 20 concurrent job slots and the macOS slots of the
+organisation.
 
 No release pull request means no release. A week with only chore, test or ci
 commits opens none.
@@ -667,6 +672,11 @@ until crates.io Trusted Publishing is registered: merging its release pull
 request would create a tag and a GitHub release, then fail to publish.
 Overdrive has no release-please. The workflow refuses to release any of the
 three. To skip one program for a week, add it to `WEEKLY_RELEASE_HOLD`.
+
+A program with SignPath on needs someone to approve its signing request within
+5 hours ("Shared signing workflow", the manual approval), and the window runs
+overnight. Keep such a program out of `WEEKLY_RELEASE_REPOS`, or add it to
+`WEEKLY_RELEASE_HOLD` for a week when nobody can approve.
 
 The workflow reads four variables of this repository (Settings > Secrets and
 variables > Actions > Variables), each a comma-separated list with no spaces:

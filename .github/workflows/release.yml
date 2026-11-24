@@ -41,9 +41,9 @@ jobs:
   release-please:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    # release-please writes with the colony-release-bot token, not this job's.
     permissions:
-      contents: write
-      pull-requests: write
+      contents: read
     outputs:
       release_created: ${{ steps.release.outputs['crates/colony-ui--release_created'] }}
       tag_name: ${{ steps.release.outputs['crates/colony-ui--tag_name'] }}
