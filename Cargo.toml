@@ -10,18 +10,19 @@ members = ["crates/colony-ui", "crates/colony-tokens"]
 edition = "2021"
 license = "GPL-3.0-or-later"
 repository = "https://github.com/Project-Colony/Project-Colony-Resources"
-# iced 0.14 (and wgpu 27 under it) require 1.88, so nothing that depends on
-# colony-ui can build below it. The msrv job in CI holds this honest.
-rust-version = "1.88"
+# The organisation toolchain. iced 0.14 (and wgpu 27 under it) need at least
+# 1.88; every Colony program now builds on 1.100. The msrv job in CI holds this
+# honest.
+rust-version = "1.100"
 
 [workspace.dependencies]
 # Pinned to the current release, not a floating minor. Staleness has to be
 # visible here, in the manifest, rather than hidden in the lockfile: see
 # design/dependencies.md.
-anyhow = "1.0.104"
+anyhow = "1.0.105"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1.0.154", features = ["preserve_order"] }
-toml = "1.2.1"
+toml = "1.2.2"
 # Test-only: reads the embedded font files to check the names, weights and
 # glyphs colony-ui relies on. Already in the tree under iced.
 ttf-parser = "0.25.1"

@@ -137,9 +137,9 @@ also uses goes red until the template is bumped in the same PR.
 `colony-ui` is the shared floor. It declares iced once, in
 `[workspace.dependencies]`, so every program that depends on it builds against
 the same iced instead of each repository drifting on its own. Its `rust-version`
-is the oldest toolchain that iced accepts, and CI builds on exactly that
-toolchain, so a program that depends on `colony-ui` cannot usefully declare a
-lower one.
+is the organisation toolchain, 1.100 (iced alone would accept 1.88), and CI
+builds on exactly that toolchain, so a program that depends on `colony-ui`
+cannot usefully declare a lower one.
 
 ## Doing an upgrade
 
