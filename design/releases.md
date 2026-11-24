@@ -33,7 +33,7 @@ changelog from them.
 | `perf:` | patch bump | Performance |
 | `refactor:` | patch bump | Internals |
 | `docs:` | patch bump | Documentation |
-| `chore:`, `test:`, `ci:` | patch bump | hidden |
+| `chore:`, `test:`, `ci:` | no bump, and no release PR on their own | hidden |
 | `feat!:` or a `BREAKING CHANGE:` footer | major bump | Features |
 
 Write the body for the person reading `git log` in a year, not for the diff:
@@ -593,3 +593,100 @@ template naming a secret that does not exist and skipping Windows signing
 entirely, neither visible from either side. The in-build signing template that
 came next kept the key in the same job as the compiler, and was retired for
 that reason.
+
+## The Sunday release
+
+Programs release on Sunday afternoon when their release pull request is green.
+Merging the release pull request still tags the release. The program's
+release.yml still builds it, signs it through sign-and-publish at the
+organisation pin, and publishes it.
+
+release-please runs with a colony-release-bot token (snippet below), not
+GITHUB_TOKEN. A release pull request written with GITHUB_TOKEN gets CI runs
+that wait for approval and never report. One written by the App gets normal CI.
+The release workflow template carries the step, and so does this repository's
+own release.yml, although colony-ui's release pull request is still merged by
+hand. Artemis and Raven push their Cargo.lock sync commit with the same token
+for the same reason. Eidos keeps EIDOS_RELEASE_TOKEN.
+
+At the top of the `release-please` job, before the release-please step:
+
+```yaml
+      # release-please writes the release pull request with the App token:
+      # one written with GITHUB_TOKEN gets CI runs that wait for approval.
+      - name: Get a colony-release-bot token
+        id: app
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          app-id: ${{ vars.COLONY_BOT_APP_ID }}
+          private-key: ${{ secrets.COLONY_BOT_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+          permission-issues: write
+```
+
+and under `with:` of the `googleapis/release-please-action` step:
+
+```yaml
+          token: ${{ steps.app.outputs.token }}
+```
+
+"Hold the release as a draft" keeps `github.token`. The App id is the
+organisation variable `COLONY_BOT_APP_ID`. The `COLONY_BOT_PRIVATE_KEY`
+organisation secret is visible to this repository and the 20 programs only, so
+a new program has to be added to that list.
+
+weekly-merge.yml runs every 30 minutes from Sunday 16:07 to Monday 11:37,
+Brussels time. GitHub applies the time zone, so the hour follows summer time. A
+scheduled run can start hours late. The workflow takes its mode from the
+schedule entry that fired, not from the clock, so a late run still behaves as a
+Sunday run.
+
+For each program in `WEEKLY_RELEASE_REPOS`, a run squash-merges the release
+pull request when all of these hold:
+
+- exactly one release pull request is open (label `autorelease: pending`);
+- colony-release-bot opened it from its own branch, and its commits come from
+  release-please or the Cargo.lock sync;
+- every required check passed;
+- the program has no Release run queued or running, and its last release
+  finished;
+- fewer than `WEEKLY_RELEASE_CAP` programs (default 4) are building a release.
+
+A program skipped by one run is tried again 30 minutes later. Colony is merged
+last, because the other release builds download Colony's latest release.
+Colony's release also pushes colony-bin to the AUR, so that push runs
+unattended too. The cap keeps release builds from taking all 20 concurrent job
+slots and the macOS slots of the organisation.
+
+No release pull request means no release. A week with only chore, test or ci
+commits opens none.
+
+Lin releases Eidos by hand. Project-Colony-Resources releases colony-ui by hand
+until crates.io Trusted Publishing is registered: merging its release pull
+request would create a tag and a GitHub release, then fail to publish.
+Overdrive has no release-please. The workflow refuses to release any of the
+three. To skip one program for a week, add it to `WEEKLY_RELEASE_HOLD`.
+
+The workflow reads four variables of this repository (Settings > Secrets and
+variables > Actions > Variables), each a comma-separated list with no spaces:
+
+| Variable | Meaning |
+|---|---|
+| `WEEKLY_MERGE_REPOS` | Repositories where Dependabot groups merge. This is also the token scope. Empty means the job does nothing. |
+| `WEEKLY_RELEASE_REPOS` | Repositories whose release pull request merges on Sunday. Each one must also be in `WEEKLY_MERGE_REPOS`. |
+| `WEEKLY_RELEASE_HOLD` | Optional. Repositories to skip this week. |
+| `WEEKLY_RELEASE_CAP` | Optional. Default 4. |
+
+Problems go to the issue "Weekly merge: needs attention" in this repository,
+assigned to MotherSphere. A comment is posted when the list changes, and the
+issue closes when the list is empty. Typical items:
+
+- a red release pull request;
+- a release pull request not opened by the App;
+- a draft release older than three hours, with the recovery command
+  `gh workflow run release.yml -R Project-Colony/<repo> --ref vX.Y.Z -f tag=vX.Y.Z`;
+- a release pull request merged but never tagged, with the command to re-run
+  that Release run.
+
+Programs do not call weekly-merge.yml, so "The pin" does not apply to it.

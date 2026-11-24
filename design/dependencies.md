@@ -75,6 +75,67 @@ request. A `nix` entry would add a second writer of `flake.lock`, and every one
 of those commits would leave its open pull request stale. A check of that
 repository expects the `github-actions` entry alone.
 
+## Automatic merges
+
+Dependabot runs every Friday at 07:00, Brussels time, for Cargo, npm and
+GitHub Actions alike. Every entry sets `cooldown: default-days: 7`, so a
+version must have been public for a week before Dependabot proposes it.
+Security updates skip the cooldown.
+
+The commit prefix decides whether an update ships. Cargo and npm entries use
+`prefix: fix` with `include: scope`, so their pull requests and squash commits
+read `fix(deps): ...`. release-please lists them under Fixes and cuts a patch
+release. The GitHub Actions entry uses `prefix: chore`, a hidden section, so
+action updates never cause a release. Dependabot counts every Cargo dependency
+as production, dev-dependencies included. A repository that wants dev-only
+crates kept out of releases lists them in a `cargo-dev` group and in the
+`exclude-patterns` of `cargo-minor`. SAM's npm devDependencies ship in the
+frontend bundle, so its npm updates are all `fix(deps)`.
+
+Minor and patch updates arrive grouped: `cargo-minor`, `npm-minor` and
+`actions`. Security fixes that are minor or patch arrive in `cargo-security` or
+`npm-security`. Anything Dependabot treats as major comes as its own pull
+request, including a 0.x minor jump such as 0.41 to 0.43. A person decides on
+those.
+
+`.github/workflows/weekly-merge.yml` in this repository runs at 10:07 every day
+and at 16:07 on Friday, Brussels time. In each repository listed in
+`WEEKLY_MERGE_REPOS`, it squash-merges a Dependabot pull request when all of
+these hold:
+
+- it comes from a `cargo-minor`, `cargo-dev`, `cargo-security`, `npm-minor` or
+  `npm-security` branch;
+- its title starts with `fix(deps)`;
+- every commit on it is a verified Dependabot commit;
+- every required check passed.
+
+A `cargo-dev` pull request is squashed under a `chore(deps)` subject, so it
+never releases. The runs of the Sunday release window (design/releases.md, "The
+Sunday release") merge no Dependabot pull request.
+
+It merges with the colony-release-bot App on purpose. A merge made with
+GITHUB_TOKEN starts no workflow, so release.yml would not run and the release
+pull request would never include the update. Workflows started by Dependabot
+cannot read the App key, which is why the merges come from a scheduled job here
+and not from a workflow in each repository.
+
+GitHub Actions pull requests are never merged automatically, in any
+repository. They arrive with the Friday batch and a person merges them by hand.
+Merging them would need the `workflows` permission on the App, and with it a
+leaked App key could add a workflow that reads COLONY_SIGNING_KEY_PEM. They are
+`chore(deps)` and release nothing.
+
+The workflow skips any repository whose "Protect default branch" ruleset
+requires no status checks. Without required checks, a pull request whose CI
+never ran looks mergeable. Each program requires the CI checks listed for it,
+with GitHub Actions (integration id 15368) as the source and "up to date" off.
+Never require the CodeQL default setup checks (`Analyze (...)`, `CodeQL`): they
+are absent or neutral on Dependabot pull requests. A check that is not required
+can fail without blocking a merge.
+
+Copy templates/dependabot.yml as is. Add only repository-specific ignores,
+directories or a `cargo-dev` group.
+
 ## Toolchain
 
 Declare `rust-version` in `Cargo.toml` and mean it. It is a promise about who can
